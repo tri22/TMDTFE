@@ -1,10 +1,12 @@
-import { StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
-import Category from '@/components/category';
-
+import { BottomNavigation } from '../../components/BottomNavigation';
 export default function HomeScreen() {
   return (
-    <Category></Category>
+    <ScrollView>
+      
+      <BottomNavigation />
+    </ScrollView>
   );
 }
 
