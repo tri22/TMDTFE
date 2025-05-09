@@ -1,23 +1,23 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SettingsSection } from './Setting/SettingsSection';
-import { SettingsItem } from './Setting/SettingsItem';
+import React from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BottomNavigation } from '../../components/BottomNavigation';
+import { SettingsItem } from './Setting/SettingsItem';
+import { SettingsSection } from './Setting/SettingsSection';
 const Settings = () => {
   const router = useRouter();
 
 const personalInfo = [
   { label: 'Tài khoản', route: '' },
   { label: 'Địa chỉ', route: '/(tabs)/Setting/AddressSettings' },
-  { label: 'Phương thức thanh toán', route: '' },
+  { label: 'Phương thức thanh toán', route: '/(tabs)/Setting/PaymentSetting' },
 ] as { label: string; route: string }[];
 
 const appSettings = [
-  { label: 'Sản phẩm yêu thích', route: '' },
+  { label: 'Quản lý đơn hàng', route: '/(tabs)/Setting/OrderManagement' },
   { label: 'Lịch sử giao dịch', route: '/(tabs)/Setting/MyActivity' },
   { label: 'Hỗ trợ khách hàng', route: '' },
-  { label: 'Thông tin ứng dụng', route: '' },
+  { label: 'Thông tin ứng dụng', route: '/(tabs)/Setting/About' },
 ] as { label: string; route: string }[];
 
   const handleItemPress = (route: string) => {
