@@ -13,9 +13,10 @@ type Props = {
   onPress: () => void;
   status?: ButtonStatus;
   style?: StyleProp<ViewStyle>; // 👈 thêm prop style ngoài
+  textColor?: string;
 };
 
-export default function SimpleButton({ title, onPress, status, style }: Props) {
+export default function SimpleButton({ title, onPress, status, style, textColor }: Props) {
   const isDisabled = status === 'disabled';
 
   return (
@@ -30,7 +31,7 @@ export default function SimpleButton({ title, onPress, status, style }: Props) {
       onPress={onPress}
       disabled={isDisabled}
     >
-      <Text style={[styles.text, isDisabled && styles.disabledText]}>
+      <Text style={[styles.text, isDisabled && styles.disabledText, textColor && { color: textColor }]}>
         {title}
       </Text>
     </TouchableOpacity>

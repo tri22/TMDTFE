@@ -1,9 +1,9 @@
 import { StyleSheet } from "react-native";
 
-import Category from "../../components/category";
+import Search from "../../components/search";
 export default function HomeScreen() {
   return (
-    <Category></Category>
+    <Search></Search>
     // <ScrollView>
    
 
