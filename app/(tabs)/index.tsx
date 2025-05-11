@@ -1,9 +1,9 @@
 import { StyleSheet } from "react-native";
 
-import ProductDetail from "../../components/productDetail";
+import Home from "../../components/home";
 export default function HomeScreen() {
   return (
-    <ProductDetail></ProductDetail>
+    <Home></Home>
     // <ScrollView>
    
 

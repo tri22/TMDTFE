@@ -12,6 +12,10 @@ import {
 } from "react-native";
 
 import { formatMoney } from "@/util";
+import { Dimensions } from "react-native";
+
+const screenWidth = Dimensions.get("window").width;
+
 type Props = {
   name: string;
   // onPress: () => void;
@@ -35,24 +39,30 @@ export default function ProductItem({
   };
 
   return (
-    <TouchableOpacity style={[styles.container, style]} onPress={openURL}>
-      <View style={styles.imgContainer}>
-        {image && <Image source={image} style={styles.image} />}
-      </View>
-      <Text style={styles.title}>{name}</Text>
-      <Text style={styles.price}>{formatMoney(price ?? 0)}</Text>
-    </TouchableOpacity>
+    <View style={styles.wrapper}>
+      <TouchableOpacity style={[styles.container, style]} onPress={openURL}>
+        <View style={styles.imgContainer}>
+          {image && <Image source={image} style={styles.image} />}
+        </View>
+        <Text style={styles.title}>{name}</Text>
+        <Text style={styles.price}>{formatMoney(price ?? 0)}</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    width: screenWidth * 0.5,
+    padding: 7,
+  },
   container: {
     backgroundColor: "#fff",
     padding: 7,
     borderRadius: 6,
-    width: "45%",
-    marginHorizontal:5,
-    marginBottom: 5,
+    width: "100%",
+    // marginHorizontal:5,
+    // marginBottom: 5,
   },
   imgContainer: {
     width: "100%",
@@ -65,7 +75,7 @@ const styles = StyleSheet.create({
   title: {
     color: "gray",
     fontWeight: "400",
-    marginBottom: 5
+    marginBottom: 5,
   },
   price: {
     color: colors.primary,

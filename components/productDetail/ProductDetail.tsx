@@ -232,15 +232,25 @@ function ProductDetail() {
   }, []);
 
   const ClassificationSelection = () => {
-    const [qty, setQty] = useState(0);
+    const [remainQty, setRemainQty] = useState(0);
     const [price, setPrice] = useState(0);
     const [title, setTitle] = useState("title");
+    const [qty, setQty] = useState(1);
 
     const handleSelect = (item: ClassificationItem) => {
-      setQty(item.qty);
+      setRemainQty(item.qty);
       setPrice(item.price);
       setTitle(item.title);
+      setQty(1);
     };
+
+    const handlePlus=() => {
+      setQty(qty+1);
+    }
+
+    const handleMinus=() => {
+      if(qty>=2) setQty(qty-1);
+    }
 
     return (
       <BottomSheet
@@ -263,7 +273,7 @@ function ProductDetail() {
               <Text style={{ fontSize: 20, marginBottom: 20 }}>{title}</Text>
               <View style={styles.dFlex}>
                 <Text style={styles.price}>{formatMoney(price)}</Text>
-                <Text style={{ marginLeft: 20 }}>Số lượng: {qty}</Text>
+                <Text style={{ marginLeft: 20 }}>Còn lại: {remainQty}</Text>
               </View>
             </View>
           </View>
@@ -286,6 +296,44 @@ function ProductDetail() {
                 }}
               />
             ))}
+          </View>
+          <View style={[styles.dFlex,{marginLeft: 'auto'}]}>
+            <Text style={styles.label}>Số lượng</Text>
+            <View style={styles.dFlex}>
+              <IconButton
+                icon="add-circle-outline"
+                onPress={handlePlus}
+                iconColor={colors.primary}
+                iconSize={60}
+                style={{
+                  alignSelf: "stretch",
+                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: 0,
+                }}
+              />
+              <TextInput
+                style={[styles.inputQty]}
+                placeholderTextColor={"lightgray"}
+                placeholder="Nhập số lượng"
+                onChangeText={(text) => {
+                  const number = parseInt(text, 10);
+                  setQty(isNaN(number) ? 0 : number);
+                }}
+                value={qty.toString()}
+                keyboardType="numeric"
+              />
+              <IconButton
+                icon="remove-circle-outline"
+                onPress={handleMinus}
+                iconColor={colors.primary}
+                iconSize={60}
+                style={{
+                  alignSelf: "stretch",
+                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: 0,
+                }}
+              />
+            </View>
           </View>
         </BottomSheetView>
       </BottomSheet>
@@ -527,7 +575,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.primary,
     margin: 10,
-    backgroundColor:"#fff"
+    backgroundColor: "#fff",
   },
   shippingFeeItem: {
     paddingHorizontal: 10,
@@ -570,5 +618,16 @@ const styles = StyleSheet.create({
   btnText: {
     color: "white",
     fontWeight: "bold",
+  },
+  inputQty: {
+    padding: 10,
+    // borderWidth: 1,
+    borderRadius: 7,
+    fontSize: 35,
+    width: 80,
+    backgroundColor: colors.blurPrimary,
+    color: colors.darkPrimary,
+    textAlign: 'center'
+
   },
 });

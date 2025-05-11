@@ -80,19 +80,22 @@ function Search() {
     showAlert();
   };
 
-  const clearSearch=()=> {
+  const clearSearch = () => {
     setSearch("");
-  }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.dFlex}>
-        <IconButton
-          icon="arrow-back"
-          onPress={handlePress}
-          status="blur"
-          style={{ paddingLeft: 0 }}
-        />
+        {isFocused && (
+          <IconButton
+            icon="arrow-back"
+            onPress={()=> setIsFocused(false)}
+            status="blur"
+            style={{ paddingLeft: 0 }}
+          />
+        )}
+
         <View style={[styles.inputWrapper]}>
           <TextInput
             style={[styles.inputText, isFocused && styles.inputFocused]}
@@ -126,74 +129,76 @@ function Search() {
           />
         </View>
       </View>
-      <ScrollView>
-        <View style={{ marginTop: 20 }}>
-          <View style={styles.dFlexSpBetween}>
-            <Text style={styles.label}>Đã tìm gần đây</Text>
-            <IconButton
-              icon="trash-outline"
-              onPress={handlePress}
-              iconColor="red"
-              style={{}}
+      {isFocused && (
+        <ScrollView>
+          <View style={{ marginTop: 20 }}>
+            <View style={styles.dFlexSpBetween}>
+              <Text style={styles.label}>Đã tìm gần đây</Text>
+              <IconButton
+                icon="trash-outline"
+                onPress={handlePress}
+                iconColor="red"
+                style={{}}
+              />
+            </View>
+            <View
+              style={{ marginTop: 10, flexDirection: "row", flexWrap: "wrap" }}
+            >
+              {recentSearches.map((item, index) => (
+                <SimpleButton
+                  key={index}
+                  title={item}
+                  onPress={handlePress}
+                  textColor="black"
+                  style={{
+                    backgroundColor: "#ccc",
+                    margin: 4,
+                    paddingHorizontal: 10,
+                  }}
+                />
+              ))}
+            </View>
+          </View>
+          <View style={{ marginTop: 20 }}>
+            <View>
+              <Text style={styles.label}>Gợi ý</Text>
+            </View>
+            <View
+              style={{ marginTop: 10, flexDirection: "row", flexWrap: "wrap" }}
+            >
+              {suggestions.map((item, index) => (
+                <SimpleButton
+                  key={index}
+                  title={item}
+                  onPress={handlePress}
+                  textColor="black"
+                  style={{
+                    backgroundColor: "#ccc",
+                    margin: 4,
+                    paddingHorizontal: 10,
+                  }}
+                />
+              ))}
+            </View>
+          </View>
+          <View style={{ marginTop: 20 }}>
+            <Text style={styles.label}>Khám phá</Text>
+            <FlatList
+              data={products}
+              keyExtractor={(item) => item.link}
+              renderItem={({ item }: { item: ProductItem }) => (
+                <ProductItem
+                  name={item.name}
+                  image={item.image}
+                  price={item.price}
+                  link={item.link}
+                />
+              )}
+              numColumns={2}
             />
           </View>
-          <View
-            style={{ marginTop: 10, flexDirection: "row", flexWrap: "wrap" }}
-          >
-            {recentSearches.map((item, index) => (
-              <SimpleButton
-                key={index}
-                title={item}
-                onPress={handlePress}
-                textColor="black"
-                style={{
-                  backgroundColor: "#ccc",
-                  margin: 4,
-                  paddingHorizontal: 10,
-                }}
-              />
-            ))}
-          </View>
-        </View>
-        <View style={{ marginTop: 20 }}>
-          <View>
-            <Text style={styles.label}>Gợi ý</Text>
-          </View>
-          <View
-            style={{ marginTop: 10, flexDirection: "row", flexWrap: "wrap" }}
-          >
-            {suggestions.map((item, index) => (
-              <SimpleButton
-                key={index}
-                title={item}
-                onPress={handlePress}
-                textColor="black"
-                style={{
-                  backgroundColor: "#ccc",
-                  margin: 4,
-                  paddingHorizontal: 10,
-                }}
-              />
-            ))}
-          </View>
-        </View>
-        <View style={{ marginTop: 20 }}>
-          <Text style={styles.label}>Khám phá</Text>
-          <FlatList
-            data={products}
-            keyExtractor={(item) => item.link}
-            renderItem={({ item }: { item: ProductItem }) => (
-              <ProductItem
-                name={item.name}
-                image={item.image}
-                price={item.price}
-                link={item.link}
-              />
-            )}
-            numColumns={2}
-          />
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </View>
   );
 }
