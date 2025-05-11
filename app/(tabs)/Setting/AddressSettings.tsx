@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { BottomNavigation } from '../../../components/BottomNavigation';
 import { AddressForm } from './AddressForm';
 

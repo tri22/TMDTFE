@@ -1,70 +1,68 @@
+import { Feather, Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons, Feather, MaterialIcons, AntDesign } from '@expo/vector-icons';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export const Header: React.FC = () => {
+type HeaderProps = {
+  title: string;
+};
+
+export const Header: React.FC<HeaderProps> = ({ title }) => {
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Ionicons name="chevron-back" size={28} color="#202020" style={styles.backButton} />
-        <Text style={styles.title}>Quản lý đơn hàng</Text>
-        <View style={styles.rightIcons}>
-          <Feather name="search" size={24} color="#202020" />
-          <AntDesign name="bells" size={24} color="#202020" />
-        </View>
+      <View style={styles.leftContainer}>
+        <Image
+          source={{
+            uri: 'https://i.imgur.com/4ZQZ4YF.png',
+          }}
+          style={styles.avatar}
+        />
+        <Text style={styles.title}>{title}</Text>
       </View>
-      <View style={styles.divider} />
+
+      <View style={styles.rightContainer}>
+        <TouchableOpacity style={styles.iconButton}>
+          <Feather name="menu" size={16} color="#333" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton}>
+          <Ionicons name="settings-outline" size={16} color="#333" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
+
+
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 15,
-  },
-  statusBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginHorizontal: 13,
-  },
-  time: {
-    fontSize: 14,
-    fontFamily: 'Nunito Sans',
-    fontWeight: '600',
-    color: '#000000',
-  },
-  icons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8, // Lưu ý: gap có thể chưa hỗ trợ, dùng marginRight nếu cần
-  },
-  header: {
+    marginTop: 30,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 42,
-    paddingHorizontal: 21,
   },
-  backButton: {
-    padding: 6,
+  leftContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 8,
   },
   title: {
-    fontSize: 21,
-    fontFamily: 'Raleway',
-    fontWeight: '700',
-    letterSpacing: -0.21,
-    color: '#202020',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#222',
   },
-  rightIcons: {
+  rightContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10, // dùng margin nếu gap không hoạt động
+    gap: 10,
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#E0E0E0',
-    marginTop: 30,
-    marginHorizontal: 20,
+  iconButton: {
+    backgroundColor: '#f0f1ff',
+    padding: 8,
+    borderRadius: 24,
   },
 });
