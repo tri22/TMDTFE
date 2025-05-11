@@ -1,5 +1,5 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { BottomNavigation } from '../../components/BottomNavigation';
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { BottomNavigation } from "../../components/BottomNavigation";
 
 export default function HomeScreen() {
   return (
@@ -16,8 +16,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: '#fff', 
+    justifyContent: "flex-end",
+    backgroundColor: "#fff",
   },
   scrollContainer: {
     paddingBottom: 100, // Đảm bảo BottomNavigation không che khuất nội dung

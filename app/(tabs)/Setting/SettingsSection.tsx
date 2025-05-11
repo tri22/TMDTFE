@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { SettingsItem } from './SettingsItem';
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { SettingsItem } from "./SettingsItem";
 
 // Định nghĩa type cho props
 type SettingsSectionProps = {
@@ -35,8 +35,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#6b7280',
+    fontWeight: "600",
+    color: "#6b7280",
     marginBottom: 10,
   },
 });
+
+export default SettingsSection;
