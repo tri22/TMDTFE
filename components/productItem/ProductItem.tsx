@@ -53,14 +53,19 @@ export default function ProductItem({
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: screenWidth * 0.5,
-    padding: 7,
+    width: screenWidth * 0.5 - 6 -20,
+    margin: 3,
   },
   container: {
     backgroundColor: "#fff",
     padding: 7,
     borderRadius: 6,
     width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
     // marginHorizontal:5,
     // marginBottom: 5,
   },

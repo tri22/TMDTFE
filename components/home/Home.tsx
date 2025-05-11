@@ -63,6 +63,7 @@ const products: ProductItem[] = [
 ];
 
 function Home() {
+
   const showAlert = () => {
     console.log("show alert");
     Toast.show({
