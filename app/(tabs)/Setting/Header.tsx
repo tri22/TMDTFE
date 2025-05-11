@@ -1,6 +1,6 @@
-import { Feather, Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Feather, Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type HeaderProps = {
   title: string;
@@ -12,7 +12,7 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
       <View style={styles.leftContainer}>
         <Image
           source={{
-            uri: 'https://i.imgur.com/4ZQZ4YF.png',
+            uri: "https://i.imgur.com/4ZQZ4YF.png",
           }}
           style={styles.avatar}
         />
@@ -31,19 +31,17 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
   );
 };
 
-
-
 const styles = StyleSheet.create({
   container: {
     marginTop: 30,
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   leftContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   avatar: {
     width: 32,
@@ -53,16 +51,17 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#222',
+    fontWeight: "bold",
+    color: "#222",
   },
   rightContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
   },
   iconButton: {
-    backgroundColor: '#f0f1ff',
+    backgroundColor: "#f0f1ff",
     padding: 8,
     borderRadius: 24,
   },
 });
+export default Header;
