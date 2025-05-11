@@ -2,6 +2,7 @@
 export const colors = {
    blurPrimary: '#E5EBFC',
     primary: "#4472C4",
+    darkPrimary: '#323660',
     black: '#000000',
     white: '#FFFFFF',
     dangerous: '#D71313',
@@ -12,6 +13,21 @@ export const colors = {
     
    
   };
+
+  export const baseStyles = {
+    dFlex: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    dFlexSpBetween: {
+      flexDirection: "row", 
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+     
+    
+   };
+ 
 
   
   export const buttonStyles = {
