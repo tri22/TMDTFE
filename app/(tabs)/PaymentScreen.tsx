@@ -1,48 +1,194 @@
 import {
   AddressInfo,
+  CardItem,
   ContactInfo,
-  PaymentMethod,
+  PaymentMethodModal,
+  PaymentStatusModal,
   ProductItem,
   TotalAmount,
+  VoucherModal,
 } from "@/components";
-import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { CardData, VoucherData } from "@/data";
+import { Item } from "@/data/item";
+import { Voucher } from "@/data/voucher";
+import { useValidationPayment } from "@/hooks";
+import { useSearchParams } from "expo-router/build/hooks";
+import React, { useMemo, useState } from "react"; // Thêm import useMemo
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const PaymentScreen: React.FC = () => {
-  const products = [
-    {
-      id: 1,
-      image: "https://example.com/jacket.png",
-      name: "Jacket Champion - Hàng 2hand, legit",
-      color: "Pink",
-      size: "M",
-      price: "250.000vnd",
-      quantity: 1,
-    },
-    {
-      id: 2,
-      image: "https://example.com/hoodie.png",
-      name: "Áo hoodie supreme đen chữ đỏ",
-      color: "Pink",
-      size: "M",
-      price: "170.000vnd",
-      quantity: 1,
-    },
-  ];
+  const searchParams = useSearchParams(); // Sửa thành const
+  const list = searchParams.get("list");
+  const cartItems: Item[] = list ? JSON.parse(list) : [];
+  const [VoucherDisplay, setVoucherDisplay] = useState("Voucher");
+  const [totalAmount, setTotalAmout] = useState(
+    cartItems.reduce((total, item) => {
+      return total + item.price * item.quantity;
+    }, 0)
+  );
+  const [visibleVoucher, setVisibleVoucher] = useState(false);
+  const [voucher, setVoucher] = useState<Voucher | null>(null);
+  const vouchers: Voucher[] = VoucherData;
+
+  const handleAddVoucher = (id: number) => {
+    const selectedVoucher = vouchers.find((voucher) => voucher.id === id);
+    if (selectedVoucher) {
+      setVoucher(selectedVoucher);
+      setVoucherDisplay(`${selectedVoucher.discount}% Payoff`);
+      setTotalAmout(
+        (prevAmount) =>
+          prevAmount - (prevAmount * selectedVoucher.discount) / 100
+      );
+    }
+  };
+
+  const [visibleCard, setVisibleCard] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<any>(null);
+  const cards = CardData;
+  const handleAddCard = () => {
+    alert("Thêm thẻ mới");
+  };
+
+  const handleSelectCard = (card: any) => {
+    if (selectedCard !== card) {
+      setSelectedCard(card);
+    }
+  };
+
+  const [childData, setChildData] = useState<any>({ email: "", phone: "" });
+
+  const handleDataFromChild = (email: string, phone: string) => {
+    const data = { email, phone };
+    setChildData(data);
+    return data; // Ensure the function returns the object
+  };
+
+  // Sửa thành useMemo
+  const validateData = useMemo(
+    () => ({
+      carts: cartItems,
+      cards: selectedCard,
+      total: totalAmount,
+      voucher: voucher,
+      email: childData.email,
+      phone: childData.phone,
+    }),
+    [
+      cartItems,
+      selectedCard,
+      totalAmount,
+      voucher,
+      childData.email,
+      childData.phone,
+    ]
+  );
+
+  const isSubmitDisabled = useValidationPayment(validateData);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<"success" | "failure">(
+    "failure"
+  );
+
+  const handlePayment = () => {
+    setPaymentStatus(isSubmitDisabled ? "success" : "failure");
+    setModalVisible(true);
+  };
+
+  const handleRetry = () => {
+    setModalVisible(false);
+  };
 
   return (
-    <ScrollView style={styles.container}>
-      <AddressInfo />
-      <ContactInfo />
-      <View style={styles.sectionHeader}>
-        <h1>Sản phẩm</h1>
-      </View>
-      {products.map((item) => (
-        <ProductItem key={item.id} item={item} />
-      ))}
-      <PaymentMethod />
-      <TotalAmount total="340.000vnd" />
-    </ScrollView>
+    <>
+      <ScrollView style={styles.container}>
+        <AddressInfo />
+        <ContactInfo onSendData={handleDataFromChild} />
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionHeaderText}>Sản phẩm</Text>{" "}
+          {/* Sửa thành Text */}
+          <TouchableOpacity style={styles.button}>
+            <Text
+              style={styles.buttonText}
+              onPress={() => setVisibleVoucher(true)}
+            >
+              {VoucherDisplay}
+            </Text>
+          </TouchableOpacity>
+          <VoucherModal
+            visible={visibleVoucher}
+            onClose={() => setVisibleVoucher(false)}
+            vouchers={vouchers}
+            onAddVoucher={handleAddVoucher}
+          />
+        </View>
+        {cartItems.map((item: Item) => (
+          <ProductItem key={item.id} {...item} />
+        ))}
+        <View style={styles.container}>
+          <TouchableOpacity onPress={() => setVisibleCard(true)}>
+            {selectedCard ? (
+              <CardItem
+                cardType={selectedCard.cardType}
+                cardNumber={selectedCard.cardNumber}
+                ownerName={selectedCard.ownerName}
+                expiry={selectedCard.expiry}
+                onSettings={() => alert("Settings")}
+              />
+            ) : (
+              <View style={styles.placeholder}>
+                <Text style={styles.placeholderText}>
+                  Chọn phương thức thanh toán
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <PaymentMethodModal
+            visible={visibleCard}
+            onClose={() => setVisibleCard(false)}
+            cards={cards}
+            onAddCard={handleAddCard}
+            onSelectCard={handleSelectCard}
+          />
+        </View>
+        <TotalAmount total={`${totalAmount}.000 VND`} />
+        <TouchableOpacity style={styles.button} onPress={handlePayment}>
+          <Text style={styles.buttonText}>Thanh toán</Text>
+        </TouchableOpacity>
+      </ScrollView>
+      <PaymentStatusModal
+        visible={modalVisible}
+        status={paymentStatus}
+        message={
+          paymentStatus === "success"
+            ? "Thành công"
+            : "Chúng tôi không thể tiến hành thanh toán của bạn"
+        }
+        subMessage={
+          paymentStatus === "success"
+            ? "Thanh toán đơn hàng của bạn đã hoàn tất"
+            : "Vui lòng thay đổi phương thức thanh toán hoặc thử lại"
+        }
+        buttonPrimaryText={
+          paymentStatus === "success" ? "Xem đơn hàng" : "Thử lại"
+        }
+        buttonSecondaryText={
+          paymentStatus === "failure" ? "Thay đổi" : undefined
+        }
+        onPrimaryPress={() => {
+          setModalVisible(false);
+        }}
+        onSecondaryPress={paymentStatus === "failure" ? handleRetry : undefined}
+        onClose={() => setModalVisible(false)}
+      />
+    </>
   );
 };
 
@@ -56,6 +202,42 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     fontSize: 18,
     fontWeight: "bold",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  sectionHeaderText: {
+    // Thêm style mới
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  button: {
+    backgroundColor: "#4F8EF7",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    width: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  placeholder: {
+    height: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#CCCCCC",
+  },
+  placeholderText: {
+    color: "#888888",
   },
 });
 

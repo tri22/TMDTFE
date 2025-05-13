@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 interface TotalAmountProps {
   total: string;
@@ -12,9 +12,6 @@ const TotalAmount: React.FC<TotalAmountProps> = ({ total }) => {
         <Text style={styles.totalLabel}>Tổng cộng</Text>
         <Text style={styles.totalValue}>{total}</Text>
       </View>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Thanh toán</Text>
-      </TouchableOpacity>
     </View>
   );
 };

@@ -1,31 +1,20 @@
+import { Item } from "@/data/item";
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 
-interface ProductItemProps {
-  item: {
-    id: number;
-    image: string;
-    name: string;
-    color: string;
-    size: string;
-    price: string;
-    quantity: number;
-  };
-}
-
-const ProductItem: React.FC<ProductItemProps> = ({ item }) => {
+const ProductItem: React.FC<Item> = ({ ...data }) => {
   return (
     <View style={styles.container}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+      <Image source={{ uri: data.image }} style={styles.image} />
       <View style={styles.details}>
-        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.name}>{data.name}</Text>
         <Text style={styles.info}>
-          {item.color}, Size {item.size}
+          {data.color}, Size {data.size}
         </Text>
-        <Text style={styles.price}>{item.price}</Text>
+        <Text style={styles.price}>{data.price}.000 VND</Text>
       </View>
       <View style={styles.quantityContainer}>
-        <Text style={styles.quantity}>{item.quantity}</Text>
+        <Text style={styles.quantity}>{data.quantity}</Text>
       </View>
     </View>
   );

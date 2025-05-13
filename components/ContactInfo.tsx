@@ -7,8 +7,13 @@ type ContactInfo = {
   phone: string;
   email: string;
 };
-
-const ContactInfo: React.FC = () => {
+interface ContactInfoProps {
+  onSendData: (
+    email: string,
+    phone: string
+  ) => { email: string; phone: string };
+}
+const ContactInfo: React.FC<ContactInfoProps> = ({ onSendData }) => {
   // Sample data for contact information
 
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
@@ -20,6 +25,7 @@ const ContactInfo: React.FC = () => {
 
   const handleSave = (contactInfo: ContactInfo) => {
     setContactInfo(contactInfo);
+    onSendData(contactInfo.email, contactInfo.phone);
     setVisible(false);
   };
 

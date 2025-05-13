@@ -1,18 +1,36 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+type Card = {
+  id: number;
+  cardType: "mastercard" | "visa";
+  cardNumber: string;
+  ownerName: string;
+  expiry: string;
+};
+export type { Card };
 const PaymentMethod: React.FC = () => {
+  const [cardDisplay, setCardDisplay] = useState("Thẻ thanh toán"); // state to control the card display
+
+  const handleCardSelect = (card: Card) => {
+    setCardDisplay(
+      `${card.cardType === "mastercard" ? "MasterCard" : "Visa"} - ${
+        card.cardNumber
+      }`
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Phương thức thanh toán</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => true}>
           <MaterialIcons name="edit" size={20} color="#4F8EF7" />
         </TouchableOpacity>
       </View>
       <View style={styles.methodContainer}>
-        <Text style={styles.method}>Card</Text>
+        <Text>{cardDisplay}</Text>
       </View>
     </View>
   );
@@ -20,31 +38,21 @@ const PaymentMethod: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
     padding: 16,
-    borderRadius: 10,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: "#fff",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    alignItems: "center",
+    marginBottom: 16,
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
   },
   methodContainer: {
-    paddingVertical: 4,
-  },
-  method: {
-    fontSize: 14,
-    color: "#555",
+    marginTop: 16,
   },
 });
 
