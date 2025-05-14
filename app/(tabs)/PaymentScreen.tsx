@@ -11,8 +11,8 @@ import {
 import { CardData, VoucherData } from "@/data";
 import { Item } from "@/data/item";
 import { Voucher } from "@/data/voucher";
-import { useValidationPayment } from "@/hooks";
-import { useSearchParams } from "expo-router/build/hooks";
+import { FormValidation } from "@/validate";
+import { useRouter, useSearchParams } from "expo-router/build/hooks";
 import React, { useMemo, useState } from "react"; // Thêm import useMemo
 import {
   ScrollView,
@@ -45,6 +45,7 @@ const PaymentScreen: React.FC = () => {
         (prevAmount) =>
           prevAmount - (prevAmount * selectedVoucher.discount) / 100
       );
+      setVisibleVoucher(false);
     }
   };
 
@@ -89,13 +90,12 @@ const PaymentScreen: React.FC = () => {
     ]
   );
 
-  const isSubmitDisabled = useValidationPayment(validateData);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<"success" | "failure">(
     "failure"
   );
 
+  const isSubmitDisabled = FormValidation(validateData);
   const handlePayment = () => {
     setPaymentStatus(isSubmitDisabled ? "success" : "failure");
     setModalVisible(true);
@@ -104,6 +104,8 @@ const PaymentScreen: React.FC = () => {
   const handleRetry = () => {
     setModalVisible(false);
   };
+
+  const router = useRouter();
 
   return (
     <>
@@ -174,7 +176,7 @@ const PaymentScreen: React.FC = () => {
         subMessage={
           paymentStatus === "success"
             ? "Thanh toán đơn hàng của bạn đã hoàn tất"
-            : "Vui lòng thay đổi phương thức thanh toán hoặc thử lại"
+            : "Vui lòng kiểm tra thông tin hoặc thử lại"
         }
         buttonPrimaryText={
           paymentStatus === "success" ? "Xem đơn hàng" : "Thử lại"
@@ -184,6 +186,12 @@ const PaymentScreen: React.FC = () => {
         }
         onPrimaryPress={() => {
           setModalVisible(false);
+          if (paymentStatus === "success") {
+            router.push({
+              pathname: "/(tabs)/OrderScreen",
+              params: { dataOrder: JSON.stringify(validateData) },
+            });
+          }
         }}
         onSecondaryPress={paymentStatus === "failure" ? handleRetry : undefined}
         onClose={() => setModalVisible(false)}

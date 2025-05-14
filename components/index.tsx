@@ -1,5 +1,7 @@
 export { default as AddressInfo } from "./AddressInfo";
 export { default as AddressModal } from "./AddressModal";
+export { default as Card } from "./Card";
+export { default as CardContent } from "./CardContent";
 export { default as CardItem } from "./CardItem";
 export { default as CartItem } from "./CartItem";
 export { default as CheckoutScreen } from "./CheckoutComponent";
