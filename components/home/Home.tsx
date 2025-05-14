@@ -1,5 +1,5 @@
 import ProductItem from "@/components/productItem";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -18,6 +18,8 @@ import Toast from "react-native-toast-message";
 import { colors } from "@/baseStyle/Style";
 import { IconButton } from "@/components/button";
 // import { FlatList } from "react-native-gesture-handler";
+import { getCategoryCount } from '@/api/feApi';
+import { CategoryCount } from '@/models/CategoryCount';
 import Search from "../search";
 import { MyCarousel } from "./components";
 
@@ -63,6 +65,25 @@ const products: ProductItem[] = [
 ];
 
 function Home() {
+  const [categoryCounts, setCategoryCounts] = useState<CategoryCount[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+   useEffect(() => {
+    const fetchCategoryCounts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getCategoryCount();
+        setCategoryCounts(data); 
+      } catch (err) {
+        setError('Không thể tải danh mục');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategoryCounts();
+  }, []);
 
   const showAlert = () => {
     console.log("show alert");
@@ -108,7 +129,7 @@ function Home() {
       icon4: require(`${imgDirRoot}/category/category-quan-ao-4.jpg`),
       title: "Quần áo",
       qty: 109,
-      link: "/home",
+      link: "quan-ao",
     },
 
     {
@@ -118,7 +139,7 @@ function Home() {
       icon4: require(`${imgDirRoot}/category/category-giay-dep-4.png`),
       title: "Giày dép",
       qty: 70,
-      link: "/home",
+      link: "giay-dep",
     },
     {
       icon1: require(`${imgDirRoot}/category/category-tui-xach-1.png`),
@@ -127,7 +148,7 @@ function Home() {
       icon4: require(`${imgDirRoot}/category/category-tui-xach-4.jpg`),
       title: "Túi xách",
       qty: 200,
-      link: "/home",
+      link: "/tui-xach",
     },
     {
       icon1: require(`${imgDirRoot}/category/category-dong-ho-1.png`),
@@ -136,7 +157,7 @@ function Home() {
       icon4: require(`${imgDirRoot}/category/category-dong-ho-4.png`),
       title: "Đồng hồ",
       qty: 600,
-      link: "/home",
+      link: "dong-ho",
     },
   ];
 
@@ -148,6 +169,7 @@ function Home() {
     const spacing = 8;
     const imageSize = (containerSize - padding * 2 - spacing) / 2;
 
+    const categoryCount = categoryCounts.find(c => c.link === category.link)
     return (
       <TouchableOpacity
         onPress={() => Linking.openURL(category.link)}
@@ -209,7 +231,7 @@ function Home() {
               borderRadius: 4,
             }}
           >
-            {category.qty}
+            {categoryCount ? categoryCount.count : 0}
           </Text>
         </View>
       </TouchableOpacity>
