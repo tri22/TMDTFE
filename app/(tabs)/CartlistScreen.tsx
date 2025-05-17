@@ -1,5 +1,6 @@
 import { CartItem } from "@/components/";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { ItemData } from "@/data";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Button, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -9,26 +10,7 @@ const CartScreen = () => {
   const handleItemPress = (route: string) => {
     router.push(route as any);
   };
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      image: "https://example.com/jacket.png",
-      name: "Jacket Champion - Hàng 2hand, legit",
-      price: 250.0,
-      color: "Pink",
-      size: "M",
-      quantity: 1,
-    },
-    {
-      id: 2,
-      image: "https://example.com/glasses.png",
-      name: "Kính mát Chanel nữ authentic",
-      price: 170.0,
-      color: "Pink",
-      size: "M",
-      quantity: 1,
-    },
-  ]);
+  const [cartItems, setCartItems] = useState(ItemData);
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -71,13 +53,16 @@ const CartScreen = () => {
         ))}
       </ScrollView>
       <View style={styles.purchase}>
-        <h3>Tổng Cộng </h3>
+        <Text>Tổng Cộng </Text>
         <Text style={styles.subtitle}>Tổng tiền: {totalPrice}.000 VND</Text>
         <Button
           title="Thanh toán"
-          onPress={() => {
-            router.push("/(tabs)/PaymentScreen");
-          }}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/PaymentScreen",
+              params: { list: JSON.stringify(cartItems) },
+            })
+          }
         />
       </View>
       <BottomNavigation />

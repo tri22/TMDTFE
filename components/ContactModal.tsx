@@ -26,8 +26,8 @@ const ContactInfoModal: React.FC<ContactInfoModalProps> = ({
   onSave,
 }) => {
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
-    phone: "2932000000",
-    email: "amandamorgan@example.com",
+    phone: "",
+    email: "",
   });
 
   return (

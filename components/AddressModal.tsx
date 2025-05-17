@@ -28,10 +28,10 @@ const AddressModal: React.FC<AddressModalProps> = ({
   onSave,
 }) => {
   const [address, setAddress] = useState<Address>({
-    street: "26, Đường Số 2, P. Thảo Điền",
-    ward: "An Phú",
-    district: "Quận 2",
-    city: "TPHCM",
+    street: "",
+    ward: "",
+    district: "",
+    city: "",
   });
 
   const wards = ["An Phú", "Thảo Điền", "Bình An"];

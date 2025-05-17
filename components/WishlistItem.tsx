@@ -1,19 +1,10 @@
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // import icontrash and add
+import { Item } from "@/data/item";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
-type WishlistItemProps = {
-  item: {
-    id: number;
-    image: string;
-    name: string;
-    price: string;
-    color: string;
-    size: string;
-  };
-};
 
-const WishlistItem: React.FC<WishlistItemProps> = ({ item }) => {
+const WishlistItem: React.FC<Item> = ({ ...item }) => {
   return (
     <View style={styles.container}>
       <Image source={{ uri: item.image }} style={styles.image} />
