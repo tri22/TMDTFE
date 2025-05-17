@@ -1,5 +1,5 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import React from "react";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
 
 export type SettingsItemProps = {
   label: string;
@@ -7,7 +7,11 @@ export type SettingsItemProps = {
   onPress?: () => void;
 };
 
-export const SettingsItem = ({ label, isRed = false, onPress }: SettingsItemProps) => {
+export const SettingsItem = ({
+  label,
+  isRed = false,
+  onPress,
+}: SettingsItemProps) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.item}>
       <Text style={[styles.label, isRed && styles.red]}>{label}</Text>
@@ -21,9 +25,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#1f2937',
+    color: "#1f2937",
   },
   red: {
-    color: 'red',
+    color: "red",
   },
 });
+export default SettingsItem;
