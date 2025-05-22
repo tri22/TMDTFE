@@ -1,4 +1,5 @@
 import ProductItem from "@/components/productItem";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
@@ -18,9 +19,9 @@ import Toast from "react-native-toast-message";
 import { colors } from "@/baseStyle/Style";
 import { IconButton } from "@/components/button";
 // import { FlatList } from "react-native-gesture-handler";
-import { getCategoryCount } from '@/api/feApi';
-import { CategoryCount } from '@/models/CategoryCount';
-import Search from "../search";
+import { getCategoryCount } from "@/api/feApi";
+import Search from "@/components/search";
+import { CategoryCount } from "@/models/CategoryCount";
 import { MyCarousel } from "./components";
 
 const imgDirRoot = "@/assets/images";
@@ -68,15 +69,17 @@ function Home() {
   const [categoryCounts, setCategoryCounts] = useState<CategoryCount[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-   useEffect(() => {
+  const router = useRouter();
+
+  useEffect(() => {
     const fetchCategoryCounts = async () => {
       setLoading(true);
       setError(null);
       try {
         const data = await getCategoryCount();
-        setCategoryCounts(data); 
+        setCategoryCounts(data);
       } catch (err) {
-        setError('Không thể tải danh mục');
+        setError("Không thể tải danh mục");
       } finally {
         setLoading(false);
       }
@@ -84,6 +87,16 @@ function Home() {
 
     fetchCategoryCounts();
   }, []);
+
+  const handlePressCategory = (category: CategoryType) => {
+    router.push({
+      pathname: "/product",
+      params: {
+        link: category.link,
+        title: category.title,
+      },
+    });
+  };
 
   const showAlert = () => {
     console.log("show alert");
@@ -169,10 +182,11 @@ function Home() {
     const spacing = 8;
     const imageSize = (containerSize - padding * 2 - spacing) / 2;
 
-    const categoryCount = categoryCounts.find(c => c.link === category.link)
+    const categoryCount = categoryCounts.find((c) => c.link === category.link);
+
     return (
       <TouchableOpacity
-        onPress={() => Linking.openURL(category.link)}
+        onPress={() => handlePressCategory(category)}
         style={{
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 3 },
@@ -273,7 +287,7 @@ function Home() {
   const SalingItem = ({ product }: SalingItemProps) => {
     const screenWidth = Dimensions.get("window").width;
     const imgSize = screenWidth * 0.5 - 10;
-  
+
     return (
       <View style={{ width: imgSize, margin: 6 }}>
         <TouchableOpacity
@@ -286,7 +300,7 @@ function Home() {
             elevation: 5,
             margin: 4,
             borderRadius: 6,
-            overflow: "hidden", 
+            overflow: "hidden",
           }}
         >
           <View style={{ position: "relative" }}>
@@ -314,7 +328,7 @@ function Home() {
       </View>
     );
   };
-  
+
   return (
     <View style={{ flex: 1 }}>
       {/* <View style={styles.header}>
@@ -402,11 +416,7 @@ function Home() {
         <FlatList
           horizontal
           data={newestProducts}
-          renderItem={({ item }) => (
-            <SalingItem
-              product={item}
-            />
-          )}
+          renderItem={({ item }) => <SalingItem product={item} />}
           showsHorizontalScrollIndicator={false}
         />
         <Text style={[styles.heading, { marginTop: 10 }]}>Dành cho bạn</Text>
