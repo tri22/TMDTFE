@@ -2,7 +2,7 @@ import { Item } from "@/data/item";
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 
-const ProductItem: React.FC<Item> = ({ ...data }) => {
+const ProductItemSection: React.FC<Item> = ({ ...data }) => {
   return (
     <View style={styles.container}>
       <Image source={{ uri: data.image }} style={styles.image} />
@@ -66,4 +66,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProductItem;
+export default ProductItemSection;

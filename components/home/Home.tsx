@@ -19,9 +19,9 @@ import { IconButton } from "@/components/button";
 // import { FlatList } from "react-native-gesture-handler";
 import { getCategoryCount } from "@/api/feApi";
 import { CategoryCount } from "@/models/CategoryCount";
+import { productItem } from "../productItem/ProductItem";
 import Search from "../search";
 import { MyCarousel } from "./components";
-import { ProductItem } from "../productItem/ProductItem";
 
 const imgDirRoot = "@/assets/images";
 const imgDir = "@/assets/images/searchProduct";
@@ -318,8 +318,8 @@ function Home() {
   return (
     <View style={{ flex: 1 }}>
       {/* <View style={styles.header}>
-          
-      </View> */}
+    
+</View> */}
       <Search />
       <ScrollView style={styles.container}>
         <View style={{ borderRadius: 10, overflow: "hidden" }}>
@@ -370,7 +370,7 @@ function Home() {
           horizontal
           data={newestProducts}
           renderItem={({ item }) => (
-            <ProductItem2
+            <ProductItem
               name={item.name}
               price={item.price}
               image={item.image}
@@ -409,7 +409,7 @@ function Home() {
         <FlatList
           data={newestProducts}
           renderItem={({ item }) => (
-            <ProductItem2
+            <ProductItem
               name={item.name}
               price={item.price}
               image={item.image}
