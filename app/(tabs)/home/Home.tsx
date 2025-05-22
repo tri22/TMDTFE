@@ -1,4 +1,4 @@
-import ProductItem from "@/components/productItem";
+import ProductItem from "@/app/(tabs)/product/components/productItem";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -20,7 +20,7 @@ import { colors } from "@/baseStyle/Style";
 import { IconButton } from "@/components/button";
 // import { FlatList } from "react-native-gesture-handler";
 import { getCategoryCount } from "@/api/feApi";
-import Search from "@/components/search";
+import Search from "@/app/(tabs)/home/components/search";
 import { CategoryCount } from "@/models/CategoryCount";
 import { MyCarousel } from "./components";
 
@@ -379,7 +379,7 @@ function Home() {
             />
           </TouchableOpacity>
         </View>
-
+{/* 
         <FlatList
           horizontal
           data={newestProducts}
@@ -392,7 +392,7 @@ function Home() {
             />
           )}
           showsHorizontalScrollIndicator={false}
-        />
+        /> */}
         <View style={[styles.dFlexSpBetween, { marginTop: 10 }]}>
           <Text style={styles.heading}>Giảm giá sốc</Text>
           <TouchableOpacity
@@ -420,7 +420,7 @@ function Home() {
           showsHorizontalScrollIndicator={false}
         />
         <Text style={[styles.heading, { marginTop: 10 }]}>Dành cho bạn</Text>
-        <FlatList
+        {/* <FlatList
           data={newestProducts}
           renderItem={({ item }) => (
             <ProductItem
@@ -431,7 +431,7 @@ function Home() {
             />
           )}
           numColumns={2}
-        />
+        /> */}
       </ScrollView>
     </View>
   );

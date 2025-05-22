@@ -1,170 +1,127 @@
-import ProductItem from "@/components/productItem";
-import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from "react";
-import {
-  FlatList,
-  ImageSourcePropType,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from "react-native";
-import Toast from "react-native-toast-message";
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import ProductItem from "./components/productItem";
 
-import { getCategoryCount } from '@/api/feApi';
+import { getProductsByCategory } from "@/api/productApi";
+import Search from "@/app/(tabs)/home/components/search";
 import { colors } from "@/baseStyle/Style";
-import Search from "@/components/search";
-import { CategoryCount } from '@/models/CategoryCount';
+import {
+  PaginatedProductsResult,
+  ProductItemModel,
+} from "@/models/ProductItemModel";
+import { FlatList } from "react-native-gesture-handler";
+import { ActivityIndicator } from "react-native-paper";
 
 const imgDirRoot = "@/assets/images";
 const imgDir = "@/assets/images/searchProduct";
 
-
-
-type ProductItem = {
-  name: string;
-  image: ImageSourcePropType;
-  price: number;
-  link: string;
-  description?: string;
-};
-
-const product: ProductItem = {
-  name: "Quần jean",
-  image: require(`${imgDir}/quan-jean.png`),
-  price: 125000,
-  link: "jean",
-  description:
-    "Kính còn khoảng 95%, không trầy xước\nForm kính chuẩn, đeo nhẹ mặt.\nTròng tốt, không mờ hay loá.\nFull hộp + khăn lau kính đi kèm.",
-};
-
-const products: ProductItem[] = [
-  {
-    name: "Quần jean",
-    image: require(`${imgDir}/quan-jean.png`),
-    price: 125000,
-    link: "jean",
-  },
-  {
-    name: "Áo Champion",
-    image: require(`${imgDir}/ao-champion.jpg`),
-    price: 325000,
-    link: "superment",
-  },
-  {
-    name: "Kính mát Channel nữ Authentic",
-    image: require(`${imgDir}/kinh-channel.png`),
-    price: 725000,
-    link: "channel",
-  },
-];
-
 function Product() {
-  const [categoryCounts, setCategoryCounts] = useState<CategoryCount[]>([]);
+  const [products, setProducts] = useState<ProductItemModel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const { link, title } = useLocalSearchParams();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [hasNext, setHasNext] = useState<boolean>(true); // Đổi tên từ hasMore cho nhất quán
   const [error, setError] = useState<string | null>(null);
-    const { link, title } = useLocalSearchParams ();
+  const [nextPage, setNextPage] = useState<number>(0); // Trang hiện tại backend trả về (bắt đầu từ 0)
 
-   useEffect(() => {
-    const fetchCategoryCounts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getCategoryCount();
-        setCategoryCounts(data); 
-      } catch (err) {
-        setError('Không thể tải danh mục');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const categoryLink = useMemo(() => {
+    if (Array.isArray(link)) {
+      return link.length > 0 ? link[0] : "/home";
+    }
+    return link;
+  }, [link]);
 
-    fetchCategoryCounts();
-  }, []);
-
-
-  const showAlert = () => {
-    console.log("show alert");
-    Toast.show({
-      type: "success",
-      position: "bottom",
-      text1: "Đây là thông báo Toast",
-      text2: "Thông báo này sẽ biến mất sau vài giây",
-      visibilityTime: 3000, // Toast sẽ tự động ẩn sau 3 giây
-    });
+  const categoryTitle = useMemo(() => {
+    if (Array.isArray(title)) {
+      return title.length > 0 ? title[0] : "Sản phẩm";
+    }
+    return title || "Sản phẩm";
+  }, [title]);
+  const fetchProducts = async (page: number) => {
+    if (!hasNext) {
+      console.log("het san pham");
+      return;
+    }
+    try {
+      const result: PaginatedProductsResult = await getProductsByCategory(
+        categoryLink,
+        page
+      );
+      setProducts((prevProducts) => [...prevProducts, ...result.products]);
+      setHasNext(!result.isLast);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+      console.error("Failed to fetch products:", err);
+    } finally {
+    }
   };
 
-  const imageList = [
-    require(`${imgDir}/quan-jean.png`),
-    require(`${imgDir}/ao-champion.jpg`),
-    require(`${imgDir}/kinh-channel.png`),
-  ];
+ useEffect(() => {
+  setProducts([]); 
+  setNextPage(0);
+}, [categoryLink])
 
-  const handlePress = () => {
-    console.log("handlePress");
-    showAlert();
+  useEffect(() => {
+    if (nextPage != null) fetchProducts(nextPage);
+  }, [nextPage]);
+
+  const handleLoadMore = () => {
+    setNextPage((prev) => prev + 1);
   };
 
-  type CategoryType = {
-    icon1: ImageSourcePropType;
-    icon2: ImageSourcePropType;
-    icon3: ImageSourcePropType;
-    icon4: ImageSourcePropType;
-    title: string;
-    qty: number;
-    link: string;
+  const renderFooter = () => {
+    if (isLoadingMore) {
+      return <ActivityIndicator style={{ marginVertical: 20 }} size="large" />;
+    }
+    if (!hasNext && products.length > 0) {
+      return (
+        <Text
+          style={{ textAlign: "center", marginVertical: 20, color: "#888" }}
+        >
+          Đã tải hết sản phẩm.
+        </Text>
+      );
+    }
+    return null;
   };
-
-  type ProductType = {
-    name: string;
-    image: ImageSourcePropType;
-    price: number;
-    link: string;
-  };
-
-  const newestProducts: ProductType[] = [
-    {
-      name: "Quần jean",
-      image: require(`${imgDir}/quan-jean.png`),
-      price: 125000,
-      link: "jean",
-    },
-    {
-      name: "Áo Champion",
-      image: require(`${imgDir}/ao-champion.jpg`),
-      price: 325000,
-      link: "superment",
-    },
-    {
-      name: "Kính mát Channel nữ Authentic",
-      image: require(`${imgDir}/kinh-channel.png`),
-      price: 725000,
-      link: "channel",
-    },
-  ];
-
 
   return (
     <View style={{ flex: 1 }}>
-      {/* <View style={styles.header}>
-          
-      </View> */}
+     
       <Search />
-      <ScrollView style={styles.container}>
-        <Text style={[styles.heading, { marginTop: 10 }]}>{title}</Text>
-        <FlatList
-          data={newestProducts}
-          renderItem={({ item }) => (
-            <ProductItem
-              name={item.name}
-              price={item.price}
-              image={item.image}
-              link={item.link}
-            />
-          )}
-          numColumns={2}
-        />
-      </ScrollView>
+      <FlatList
+        style={styles.container}
+        ListHeaderComponent={
+          <Text
+            style={[
+              styles.heading,
+              {
+                marginTop: 10,
+                marginBottom: 10,
+              },
+            ]}
+          >
+            {categoryTitle}
+          </Text>
+        }
+        data={products}
+        renderItem={({ item }) => (
+          <ProductItem
+            id={item.id}
+            name={item.name}
+            price={item.price}
+            thumbnail={item.thumbnail}
+          />
+        )}
+        numColumns={2}
+        keyExtractor={(item) => item.id.toString()}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={renderFooter}
+      />
     </View>
   );
 }
@@ -174,8 +131,6 @@ export default Product;
 const styles = StyleSheet.create({
   container: {
     padding: 15,
-    // marginTop: 40,
-    // backgroundColor: '#fff'
   },
   dFlex: {
     flexDirection: "row",

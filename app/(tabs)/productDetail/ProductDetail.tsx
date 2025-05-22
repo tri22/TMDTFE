@@ -1,4 +1,4 @@
-import ProductItem from "@/components/productItem";
+import ProductItem from "@/app/(tabs)/product/components/productItem";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
@@ -22,6 +22,7 @@ import { colors } from "@/baseStyle/Style";
 import { IconButton, SimpleButton } from "@/components/button";
 import { formatMoney } from "@/util";
 // import { FlatList } from "react-native-gesture-handler";
+import { useLocalSearchParams } from "expo-router";
 import { CommentItem, MyCarousel, ShopInfo } from "./components";
 
 const imgDir = "@/assets/images/searchProduct";
@@ -192,6 +193,17 @@ const classificationItems: ClassificationItem[] = [
 ];
 
 function ProductDetail() {
+    const { id } = useLocalSearchParams();
+    const productId = useMemo(() => {
+      if (Array.isArray(id)) {
+        return id.length > 0 ? id[0] : "/0";
+      }
+      return id;
+    }, [id]);
+  
+    const fetchProductDetail = (id: number) => {
+
+    } 
   const showAlert = () => {
     console.log("show alert");
     Toast.show({
@@ -463,7 +475,7 @@ function ProductDetail() {
           <Text style={[styles.label, { marginBottom: 10 }]}>
             Có thể bạn quan tâm
           </Text>
-          <FlatList
+          {/* <FlatList
             data={products}
             nestedScrollEnabled={true}
             keyExtractor={(item) => item.link}
@@ -476,7 +488,7 @@ function ProductDetail() {
               />
             )}
             numColumns={2}
-          />
+          /> */}
         </View>
       </ScrollView>
       <View style={styles.bottomBarContainer}>
