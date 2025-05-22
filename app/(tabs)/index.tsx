@@ -1,11 +1,9 @@
-
 import { StyleSheet, View } from "react-native";
 import { BottomNavigation } from "../../components/BottomNavigation";
 
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import Home from "./home";
-
 
 export default function HomeScreen() {
     return (
