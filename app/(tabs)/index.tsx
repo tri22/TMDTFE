@@ -1,8 +1,9 @@
 import { StyleSheet, View } from "react-native";
 import { BottomNavigation } from "../../components/BottomNavigation";
 
-import Home from "@/components/home";
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
+import Home from "./home";
 
 export default function HomeScreen() {
     return (
@@ -11,9 +12,9 @@ export default function HomeScreen() {
                 <ScrollView contentContainerStyle={styles.scrollContainer}>
                     <Home></Home>
                 </ScrollView>
-
                 <BottomNavigation />
             </View>
+            <Toast />
         </GestureHandlerRootView>
     );
 }

@@ -1,3 +1,5 @@
+import ProductItem from "@/app/(tabs)/product/components/productItem";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
@@ -18,9 +20,8 @@ import { colors } from "@/baseStyle/Style";
 import { IconButton } from "@/components/button";
 // import { FlatList } from "react-native-gesture-handler";
 import { getCategoryCount } from "@/api/feApi";
+import Search from "@/app/(tabs)/home/components/search";
 import { CategoryCount } from "@/models/CategoryCount";
-import { productItem } from "../productItem/ProductItem";
-import Search from "../search";
 import { MyCarousel } from "./components";
 
 const imgDirRoot = "@/assets/images";
@@ -68,6 +69,8 @@ function Home() {
   const [categoryCounts, setCategoryCounts] = useState<CategoryCount[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
   useEffect(() => {
     const fetchCategoryCounts = async () => {
       setLoading(true);
@@ -84,6 +87,16 @@ function Home() {
 
     fetchCategoryCounts();
   }, []);
+
+  const handlePressCategory = (category: CategoryType) => {
+    router.push({
+      pathname: "/product",
+      params: {
+        link: category.link,
+        title: category.title,
+      },
+    });
+  };
 
   const showAlert = () => {
     console.log("show alert");
@@ -170,9 +183,10 @@ function Home() {
     const imageSize = (containerSize - padding * 2 - spacing) / 2;
 
     const categoryCount = categoryCounts.find((c) => c.link === category.link);
+
     return (
       <TouchableOpacity
-        onPress={() => Linking.openURL(category.link)}
+        onPress={() => handlePressCategory(category)}
         style={{
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 3 },
@@ -318,8 +332,8 @@ function Home() {
   return (
     <View style={{ flex: 1 }}>
       {/* <View style={styles.header}>
-    
-</View> */}
+          
+      </View> */}
       <Search />
       <ScrollView style={styles.container}>
         <View style={{ borderRadius: 10, overflow: "hidden" }}>
@@ -365,7 +379,7 @@ function Home() {
             />
           </TouchableOpacity>
         </View>
-
+{/* 
         <FlatList
           horizontal
           data={newestProducts}
@@ -378,7 +392,7 @@ function Home() {
             />
           )}
           showsHorizontalScrollIndicator={false}
-        />
+        /> */}
         <View style={[styles.dFlexSpBetween, { marginTop: 10 }]}>
           <Text style={styles.heading}>Giảm giá sốc</Text>
           <TouchableOpacity
@@ -406,7 +420,7 @@ function Home() {
           showsHorizontalScrollIndicator={false}
         />
         <Text style={[styles.heading, { marginTop: 10 }]}>Dành cho bạn</Text>
-        <FlatList
+        {/* <FlatList
           data={newestProducts}
           renderItem={({ item }) => (
             <ProductItem
@@ -417,7 +431,7 @@ function Home() {
             />
           )}
           numColumns={2}
-        />
+        /> */}
       </ScrollView>
     </View>
   );

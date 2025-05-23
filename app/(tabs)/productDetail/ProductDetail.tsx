@@ -1,9 +1,15 @@
-import ProductItem from "@/components/productItem";
+import ProductItem from "@/app/(tabs)/product/components/productItem";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   FlatList,
   Image,
@@ -16,12 +22,20 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Toast from "react-native-toast-message";
 
 import { colors } from "@/baseStyle/Style";
 import { IconButton, SimpleButton } from "@/components/button";
 import { formatMoney } from "@/util";
 // import { FlatList } from "react-native-gesture-handler";
+import { getProductDetail } from "@/api/productApi";
+import {
+  Category,
+  Comment,
+  Product,
+  ProductDetailModel,
+  User,
+} from "@/models/ProductDetailModel";
+import { useLocalSearchParams } from "expo-router";
 import { CommentItem, MyCarousel, ShopInfo } from "./components";
 
 const imgDir = "@/assets/images/searchProduct";
@@ -191,27 +205,77 @@ const classificationItems: ClassificationItem[] = [
   },
 ];
 
-function ProductDetail() {
-  const showAlert = () => {
-    console.log("show alert");
-    Toast.show({
-      type: "success",
-      position: "bottom",
-      text1: "Đây là thông báo Toast",
-      text2: "Thông báo này sẽ biến mất sau vài giây",
-      visibilityTime: 3000, // Toast sẽ tự động ẩn sau 3 giây
-    });
-  };
+const productDefault: Product = {
+  id: 0,
+  name: "",
+  price: 0,
+  description: "",
+  createAt: new Date(),
+};
 
-  const imageList = [
-    require(`${imgDir}/quan-jean.png`),
-    require(`${imgDir}/ao-champion.jpg`),
-    require(`${imgDir}/kinh-channel.png`),
-  ];
+const ownerDefault: User = {
+  id: 0,
+  name: "",
+  soldOrderQty: 0,
+  rating: 0,
+  avatar: "",
+};
+
+function ProductDetail() {
+  const { id } = useLocalSearchParams();
+  const productId = useMemo(() => {
+    if (!id) return 0;
+    if (Array.isArray(id)) {
+      return id.length > 0 ? Number(id[0]) : 0;
+    }
+    return Number(id);
+  }, [id]);
+  const [productDetail, setProductDetail] = useState<ProductDetailModel | null>(
+    null
+  );
+  const [product, setProduct] = useState<Product>(productDefault);
+  const [images, setImages] = useState<string[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [owner, setOwner] = useState<User>(ownerDefault);
+  const [category, setCategory] = useState<Category | null | undefined>(null);
+  const [sold, setSold] = useState<boolean>(false);
+  const [thumbnail, setThumbnail] = useState<string>("");
+
+  const fetchProductDetail = async (id: number) => {
+    try {
+      const result: ProductDetailModel = await getProductDetail(id);
+      setProductDetail(result);
+    } catch (err: any) {
+      console.error("Failed to fetch products:", err);
+    } finally {
+    }
+  };
+  useEffect(() => {
+    if (productDetail) {
+      console.log("product detail: " + JSON.stringify(productDetail, null, 2));
+      setProduct(productDetail.product ?? productDefault);
+      setImages(productDetail.images ?? []);
+      setComments(productDetail.comments ?? []);
+      setOwner(productDetail.owner ?? ownerDefault);
+      setCategory(productDetail.category ?? null);
+      setSold(productDetail.sold ?? false);
+    }
+  }, [productDetail]);
+
+  useEffect(() => {
+    if (productId) {
+      fetchProductDetail(productId);
+    }
+  }, [productId]);
+
+  useEffect(() => {
+    if (images.length > 0) {
+      setThumbnail(images[0]);
+    }
+  }, [images]);
 
   const handlePress = () => {
     console.log("handlePress");
-    showAlert();
   };
 
   const [search, setSearch] = useState("");
@@ -232,25 +296,20 @@ function ProductDetail() {
   }, []);
 
   const ClassificationSelection = () => {
-    const [remainQty, setRemainQty] = useState(0);
-    const [price, setPrice] = useState(0);
-    const [title, setTitle] = useState("title");
     const [qty, setQty] = useState(1);
 
     const handleSelect = (item: ClassificationItem) => {
-      setRemainQty(item.qty);
-      setPrice(item.price);
-      setTitle(item.title);
       setQty(1);
     };
 
-    const handlePlus=() => {
-      setQty(qty+1);
-    }
+    const handlePlus = () => {
+      if(qty<product.qty)
+        setQty(qty + 1);
+    };
 
-    const handleMinus=() => {
-      if(qty>=2) setQty(qty-1);
-    }
+    const handleMinus = () => {
+      if (qty >= 2) setQty(qty - 1);
+    };
 
     return (
       <BottomSheet
@@ -260,45 +319,25 @@ function ProductDetail() {
         backdropComponent={(props) => (
           <BottomSheetBackdrop
             {...props}
-            appearsOnIndex={0} // mờ khi index >= 0
-            disappearsOnIndex={-1} // ẩn khi index -1
-            opacity={0.5} // độ mờ nền
+            appearsOnIndex={0}
+            disappearsOnIndex={-1}
+            opacity={0.5}
           />
         )}
       >
         <BottomSheetView style={{}}>
           <View style={styles.dFlex}>
-            <Image source={product.image} style={styles.image} />
+            <Image source={{ uri: thumbnail }} style={styles.image} />
             <View>
-              <Text style={{ fontSize: 20, marginBottom: 20 }}>{title}</Text>
+              <Text style={{ fontSize: 20, marginBottom: 20 }}>{product.name}</Text>
               <View style={styles.dFlex}>
-                <Text style={styles.price}>{formatMoney(price)}</Text>
-                <Text style={{ marginLeft: 20 }}>Còn lại: {remainQty}</Text>
+                <Text style={styles.price}>{formatMoney(product.price)}</Text>
+                <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
               </View>
             </View>
           </View>
-          <Text style={[styles.label, { marginLeft: 10 }]}>
-            Chọn phân loại sản phẩm
-          </Text>
-          <View
-            style={{ marginTop: 10, flexDirection: "row", flexWrap: "wrap" }}
-          >
-            {classificationItems.map((item, index) => (
-              <SimpleButton
-                key={index}
-                title={item.title}
-                onPress={() => handleSelect(item)}
-                textColor="black"
-                style={{
-                  backgroundColor: "#ccc",
-                  margin: 4,
-                  paddingHorizontal: 10,
-                }}
-              />
-            ))}
-          </View>
-          <View style={[styles.dFlex,{marginLeft: 'auto'}]}>
-            <Text style={styles.label}>Số lượng</Text>
+          <Text style={[styles.label, { marginLeft: 10 }]}>Chọn số lượng</Text>
+          <View style={[styles.dFlex, { marginLeft: "auto" }]}>
             <View style={styles.dFlex}>
               <IconButton
                 icon="add-circle-outline"
@@ -335,6 +374,19 @@ function ProductDetail() {
               />
             </View>
           </View>
+          <View style={[styles.dFlex, {}]}>
+            <SimpleButton
+              title="Thêm vào giỏ hàng"
+              onPress={() => console.log("Add")}
+              style={{
+                flex: 1,
+                marginHorizontal: 5,
+                marginVertical: 10,
+                backgroundColor: colors.darkPrimary,
+              }}
+              textColor="white"
+            />
+          </View>
         </BottomSheetView>
       </BottomSheet>
     );
@@ -343,7 +395,7 @@ function ProductDetail() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
-        <MyCarousel images={imageList} />
+        <MyCarousel images={images} />
         <View
           style={[
             styles.dFlexSpBetween,
@@ -367,11 +419,11 @@ function ProductDetail() {
         </View>
         <View style={[{ padding: 10 }]}>
           <ShopInfo
-            name={shopInfo.name}
-            image={shopInfo.image}
-            avgRating={shopInfo.avgRating}
-            link={shopInfo.link}
-            saledQty={shopInfo.saledQty}
+            name={owner.name}
+            image={owner.avatar}
+            avgRating={owner.rating}
+            link={owner.id.toString()}
+            soldOrderQty={owner.soldOrderQty}
           />
           <View
             style={{
@@ -408,13 +460,25 @@ function ProductDetail() {
               />
             </View>
 
-            <CommentItem
-              name={comment.name}
-              content={comment.content}
-              time={comment.time}
-              image={comment.image}
-              replies={comment.replies}
-            />
+            {comments?.length > 0 &&
+              comments.map((comment: Comment, index) => (
+                <CommentItem
+                  key={index}
+                  name={comment.userName}
+                  content={comment.content}
+                  time={comment.createdAt}
+                  image={comment.userAvatar}
+                  level={comment.level}
+                  replies={(comment.replies ?? []).map((reply) => ({
+                    name: reply.userName,
+                    content: reply.content,
+                    time: reply.createdAt,
+                    image: reply.userAvatar,
+                    replies: [],
+                    level: reply.level,
+                  }))}
+                />
+              ))}
           </View>
         </View>
         <View style={[{ padding: 10 }]}>
@@ -463,7 +527,7 @@ function ProductDetail() {
           <Text style={[styles.label, { marginBottom: 10 }]}>
             Có thể bạn quan tâm
           </Text>
-          <FlatList
+          {/* <FlatList
             data={products}
             nestedScrollEnabled={true}
             keyExtractor={(item) => item.link}
@@ -476,7 +540,7 @@ function ProductDetail() {
               />
             )}
             numColumns={2}
-          />
+          /> */}
         </View>
       </ScrollView>
       <View style={styles.bottomBarContainer}>
@@ -627,7 +691,6 @@ const styles = StyleSheet.create({
     width: 80,
     backgroundColor: colors.blurPrimary,
     color: colors.darkPrimary,
-    textAlign: 'center'
-
+    textAlign: "center",
   },
 });
