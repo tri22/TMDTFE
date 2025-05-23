@@ -1,25 +1,48 @@
 import React, { useState } from 'react';
 import {
   Image,
-  ImageSourcePropType,
   StyleProp,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  ViewStyle,
+  ViewStyle
 } from 'react-native';
 
 type Props = {
   name?: string;
   style?: StyleProp<ViewStyle>;
-  image?: ImageSourcePropType;
+  image?: string;
   content?: string;
-  time?: string;
+  time?: Date;
   replies?: Props[];
   level?: number; // cấp độ comment
 };
+
+function getRelativeTime(date?: Date): string {
+  console.log('getRelativeTime: ' + date);
+  if (!date) return "";
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMinutes < 1) return "Vừa xong";
+  if (diffMinutes < 60) return `${diffMinutes} phút trước`;
+  if (diffHours < 24) return `${diffHours} giờ trước`;
+  if (diffDays < 7) return `${diffDays} ngày trước`;
+
+  // Nếu trên 7 ngày, trả về ngày định dạng dd/mm/yyyy
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
 
 function CommentItem({ name,
   style,
@@ -43,7 +66,7 @@ function CommentItem({ name,
   return (
     <View style={[styles.commentWrapper, { marginLeft: level * 20 }]}>
       <View style={styles.dFlex}>
-        <Image source={image} style={styles.image} />
+        <Image source={{uri:image}} style={styles.image} />
         <View style={{ flex: 1 }}>
           <View style={styles.contentContainer}>
             <Text style={styles.name}>{name}</Text>
@@ -51,7 +74,7 @@ function CommentItem({ name,
           </View>
 
           <View style={styles.footerRow}>
-            <Text style={styles.time}>{time}</Text>
+            <Text style={styles.time}>{getRelativeTime(time)}</Text>
             <TouchableOpacity onPress={() => setShowReplyInput(!showReplyInput)}>
               <Text style={styles.reply}>Phản hồi</Text>
             </TouchableOpacity>

@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import {
   Image,
-  ImageSourcePropType,
   Linking,
   StyleProp,
   StyleSheet,
   Text,
   View,
-  ViewStyle,
+  ViewStyle
 } from "react-native";
 import StarRating from "react-native-star-rating-widget";
 
@@ -15,18 +14,18 @@ type Props = {
   name?: string;
   // onPress: () => void;
   style?: StyleProp<ViewStyle>;
-  image?: ImageSourcePropType;
+  image?: string;
   avgRating?: number;
   link?: string;
-  saledQty?: number;
+  soldOrderQty?: number;
 };
 
-function ShopInfo({ name, style, avgRating, link, saledQty, image }: Props) {
+function ShopInfo({ name, style, avgRating, link, soldOrderQty, image }: Props) {
   const [rating, setRating] = useState(3);
   return (
     <View style={styles.dFlexSpBetween}>
       <View style={styles.dFlex}>
-        <Image source={image} style={styles.image} />
+        <Image source={{uri:image}} style={styles.image} />
         <View>
           <Text style={styles.name}>{name}</Text>
           <View style={styles.dFlex}>
@@ -43,7 +42,7 @@ function ShopInfo({ name, style, avgRating, link, saledQty, image }: Props) {
         >
           Xem đánh giá
         </Text>
-        <Text style={{}}>Đã bán {saledQty} sản phẩm</Text>
+        <Text style={{}}>Đã bán {soldOrderQty} sản phẩm</Text>
       </View>
     </View>
   );
