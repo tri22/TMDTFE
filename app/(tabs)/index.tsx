@@ -13,9 +13,8 @@ export default function HomeScreen() {
                 <ScrollView contentContainerStyle={styles.scrollContainer}>
                     <Home></Home>
                 </ScrollView>
-
-                <BottomNavigation />
             </View>
+            <BottomNavigation />
         </GestureHandlerRootView>
     );
 }
