@@ -1,48 +1,57 @@
 import { colors } from "@/baseStyle/Style";
 import {
   Image,
-  ImageSourcePropType,
-  Linking,
   StyleProp,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ViewStyle,
+  ViewStyle
 } from "react-native";
 
 import { formatMoney } from "@/util";
+import { useRouter } from "expo-router";
 import { Dimensions } from "react-native";
 
 const screenWidth = Dimensions.get("window").width;
 
 type Props = {
+    id?: number;
+
   name: string;
   // onPress: () => void;
   style?: StyleProp<ViewStyle>;
-  image?: ImageSourcePropType;
+  thumbnail?: string;
   price?: number;
-  link?: string;
 };
 
 export default function ProductItem({
+  id,
   name,
-  image,
+  thumbnail,
   // onPress,
   style,
   price,
-  link,
+  
 }: Props) {
-  const openURL = () => {
-    const url = link || "/home";
-    Linking.openURL(url);
+
+    const router = useRouter();
+
+  const handlePress = (item:  number) => {
+    console.log("press on productItem id: " + item)
+    router.push({
+      pathname: "/productDetail",
+      params: {
+        id: item,
+      },
+    });
   };
 
   return (
     <View style={styles.wrapper}>
-      <TouchableOpacity style={[styles.container, style]} onPress={openURL}>
+      <TouchableOpacity style={[styles.container, style]} onPress={() => handlePress(id!)} >
         <View style={styles.imgContainer}>
-          {image && <Image source={image} style={styles.image} />}
+          <Image source={{ uri: thumbnail }} style={styles.image} />
         </View>
         <Text style={styles.title}>{name}</Text>
         <Text style={styles.price}>{formatMoney(price ?? 0)}</Text>

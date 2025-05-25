@@ -9,7 +9,7 @@ export { default as ContactInfo } from "./ContactInfo";
 export { default as ContactInfoModal } from "./ContactModal";
 export { default as PaymentMethodModal } from "./PaymentMethodModal";
 export { default as PaymentStatusModal } from "./PaymentStatusModa";
-export { default as ProductItem } from "./ProductItem";
+export { default as ProductItemSection } from "./ProductItemSection";
 export { default as TotalAmount } from "./TotalAmount";
 export { default as VoucherItem } from "./VoucherItem";
 export { default as VoucherModal } from "./VoucherModal";

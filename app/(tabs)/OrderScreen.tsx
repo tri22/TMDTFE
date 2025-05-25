@@ -1,4 +1,4 @@
-import { Card, CardContent, ProductItem } from "@/components";
+import { Card, CardContent, ProductItemSection } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Item } from "@/data/item";
 import { useSearchParams } from "expo-router/build/hooks";
@@ -53,7 +53,7 @@ const OrderScreen = () => {
           <CardContent>
             {/* Show list item  */}
             {cartsList.map((item: Item) => (
-              <ProductItem key={item.id} {...item} />
+              <ProductItemSection key={item.id} {...item} />
             ))}
 
             {/* Total show  */}
