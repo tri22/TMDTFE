@@ -3748,8 +3748,7 @@ expo-web-browser@~14.1.6:
   resolved "https://registry.npmjs.org/expo-web-browser/-/expo-web-browser-14.1.6.tgz"
   integrity sha512-/4P8eWqRyfXIMZna3acg320LXNA+P2cwyEVbjDX8vHnWU+UnOtyRKWy3XaAIyMPQ9hVjBNUQTh4MPvtnPRzakw==
 
-
-expo@*, expo@~53.0.7:
+expo@*, expo@>=50.0.0, expo@~53.0.7:
   version "53.0.9"
   resolved "https://registry.npmjs.org/expo/-/expo-53.0.9.tgz"
   integrity sha512-UFG68aVOpccg3s++S3pbtI3YCQCnlu/TFvhnQ5vaD3vhOox1Uk/f2O2T95jmwA/EvKvetqGj34lys3DNXvPqgQ==
@@ -3821,10 +3820,8 @@ express-rate-limit@^7.5.0:
   dependencies:
     "@expo/vector-icons" "^14.1.0"
     "@gorhom/bottom-sheet" "^5.1.4"
-
     "@react-native-community/datetimepicker" "^8.3.0"
     "@react-native-picker/picker" "2.11.0"
-
     "@react-navigation/bottom-tabs" "^7.3.10"
     "@react-navigation/elements" "^2.3.8"
     "@react-navigation/native" "^7.1.6"

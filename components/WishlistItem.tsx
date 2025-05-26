@@ -1,13 +1,13 @@
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // import icontrash and add
+import imageMap from "@/data/imageMap";
 import { Item } from "@/data/item";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
-
 const WishlistItem: React.FC<Item> = ({ ...item }) => {
   return (
     <View style={styles.container}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+      <Image source={imageMap[item.image]} style={styles.image} />
       <TouchableOpacity style={styles.iconButton}>
         <AntDesign name="delete" size={24} color="#FF6347" />
       </TouchableOpacity>
