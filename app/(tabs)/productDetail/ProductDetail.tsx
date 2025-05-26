@@ -27,6 +27,7 @@ import { colors } from "@/baseStyle/Style";
 import { IconButton, SimpleButton } from "@/components/button";
 import { formatMoney } from "@/util";
 // import { FlatList } from "react-native-gesture-handler";
+import { submitComment } from "@/api/commentApi";
 import { getProductDetail } from "@/api/productApi";
 import {
   Category,
@@ -211,6 +212,7 @@ const productDefault: Product = {
   price: 0,
   description: "",
   createAt: new Date(),
+  qty: 0,
 };
 
 const ownerDefault: User = {
@@ -252,7 +254,6 @@ function ProductDetail() {
   };
   useEffect(() => {
     if (productDetail) {
-      console.log("product detail: " + JSON.stringify(productDetail, null, 2));
       setProduct(productDetail.product ?? productDefault);
       setImages(productDetail.images ?? []);
       setComments(productDetail.comments ?? []);
@@ -278,11 +279,31 @@ function ProductDetail() {
     console.log("handlePress");
   };
 
-  const [search, setSearch] = useState("");
+  const [commentInput, setCommentInput] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
-  const clearSearch = () => {
-    setSearch("");
+  const clearCommentInput = () => {
+    setCommentInput("");
+  };
+
+  const handleSubmitComment = async (
+    parentId: number,
+    level: number,
+    content: string
+  ) => {
+    try {
+      const result: Comment[] = await submitComment(
+        productId,
+        content,
+        parentId,
+        level
+      );
+      setComments(result ?? []);
+      clearCommentInput();
+    } catch (err: any) {
+      console.error("Failed to submit comments:", err);
+    } finally {
+    }
   };
 
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -291,7 +312,6 @@ function ProductDetail() {
   const snapPoints = useMemo(() => ["25%", "50%"], []);
 
   const handleOpenBottomSheet = useCallback(() => {
-    console.log("handleOpenBottomSheet");
     bottomSheetRef.current?.snapToIndex(1); // mở tới 50%
   }, []);
 
@@ -303,8 +323,7 @@ function ProductDetail() {
     };
 
     const handlePlus = () => {
-      if(qty<product.qty)
-        setQty(qty + 1);
+      if (qty < product.qty) setQty(qty + 1);
     };
 
     const handleMinus = () => {
@@ -329,7 +348,9 @@ function ProductDetail() {
           <View style={styles.dFlex}>
             <Image source={{ uri: thumbnail }} style={styles.image} />
             <View>
-              <Text style={{ fontSize: 20, marginBottom: 20 }}>{product.name}</Text>
+              <Text style={{ fontSize: 20, marginBottom: 20 }}>
+                {product.name}
+              </Text>
               <View style={styles.dFlex}>
                 <Text style={styles.price}>{formatMoney(product.price)}</Text>
                 <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
@@ -392,6 +413,41 @@ function ProductDetail() {
     );
   };
 
+  const [replyingCommentItemId, setReplyingCommentItemId] = useState<
+    number | null
+  >(null);
+  const [replyingParentId, setReplyingParentId] = useState<number>(0);
+
+
+  const handleReplyClick = (
+    id: number,
+
+    userName: string,
+    parentId: number
+  ) => {
+    setReplyingCommentItemId(id);
+    if(parentId===0) 
+      setReplyingParentId(id);
+    else 
+      setReplyingParentId(parentId);
+    console.log(
+      "handleReplyClick id: " +
+        id +
+        " | parentId:  " +
+        parentId +
+        " | name: " +
+        userName
+    );
+    
+  };
+
+  const handleSubmitReply = (content: string) => {
+
+    handleSubmitComment(replyingParentId, 1, content)
+      setReplyingCommentItemId(null);
+      setReplyingParentId(0);
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
@@ -442,13 +498,13 @@ function ProductDetail() {
                 style={[styles.inputText, isFocused && styles.inputFocused]}
                 placeholderTextColor={"lightgray"}
                 placeholder="Nhập bình luận"
-                onChangeText={setSearch}
-                value={search}
+                onChangeText={setCommentInput}
+                value={commentInput}
                 onFocus={() => setIsFocused(true)}
               />
               <IconButton
                 icon="send-sharp"
-                onPress={handlePress}
+                onPress={() => handleSubmitComment(0, 0, commentInput)}
                 iconColor="#fff"
                 iconSize={20}
                 style={{
@@ -461,24 +517,32 @@ function ProductDetail() {
             </View>
 
             {comments?.length > 0 &&
-              comments.map((comment: Comment, index) => (
+              comments.map((item: Comment, index) => (
                 <CommentItem
                   key={index}
-                  name={comment.userName}
-                  content={comment.content}
-                  time={comment.createdAt}
-                  image={comment.userAvatar}
-                  level={comment.level}
-                  replies={(comment.replies ?? []).map((reply) => ({
-                    name: reply.userName,
+                  id={item.id}
+                  userName={item.userName}
+                  userAvatar={item.userAvatar}
+                  content={item.content}
+                  time={item.createdAt}
+                  replies={(item.replies ?? []).map((reply) => ({
+                    id: reply.id,
+                    userName: reply.userName, 
+                    userAvatar: reply.userAvatar, 
                     content: reply.content,
                     time: reply.createdAt,
-                    image: reply.userAvatar,
-                    replies: [],
-                    level: reply.level,
+                    replies: [], 
+                    parentId: reply.parentId,
+                    onReplyClick: handleReplyClick,
+                    isReplying: reply.id === replyingCommentItemId,
+                    onSubmitReply: handleSubmitReply
                   }))}
+                  onReplyClick={handleReplyClick}
+                  isReplying={item.id === replyingCommentItemId}
+                  onSubmitReply={handleSubmitReply}
                 />
               ))}
+
           </View>
         </View>
         <View style={[{ padding: 10 }]}>

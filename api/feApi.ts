@@ -2,6 +2,10 @@ import { CategoryCount } from "@/models/CategoryCount";
 import axiosInstance from './axiosInstance';
 
 export async function getCategoryCount(): Promise<CategoryCount[]> {
+  
+  // test comment thi bat cai nay len
+  // await AsyncStorage.setItem('userId', '1');
+
   try {
     const response = await axiosInstance.post<CategoryCount[]>('/categories/count', {});
 

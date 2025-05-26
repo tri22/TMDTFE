@@ -35,7 +35,7 @@ export interface Comment {
   createdAt: Date;
   parentId: number;
   level: number;
-  replies: Comment[] | null;
+  replies: Comment[] | [];
 }
 
 
