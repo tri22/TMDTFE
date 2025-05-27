@@ -4,7 +4,7 @@ import {
   ContactInfo,
   PaymentMethodModal,
   PaymentStatusModal,
-  ProductItem,
+  ProductItemSection,
   TotalAmount,
   VoucherModal,
 } from "@/components";
@@ -131,7 +131,7 @@ const PaymentScreen: React.FC = () => {
           />
         </View>
         {cartItems.map((item: Item) => (
-          <ProductItem key={item.id} {...item} />
+          <ProductItemSection key={item.id} {...item} />
         ))}
         <View style={styles.container}>
           <TouchableOpacity onPress={() => setVisibleCard(true)}>

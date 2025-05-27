@@ -1,63 +1,103 @@
-import { AntDesign, Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import userApi from '../../../api/userApi';
 
-export const AddressForm: React.FC = () => {
+interface Address {
+  id: number;
+  province: string;
+  district: string;
+  ward: string;
+  detail: string;
+  phone: string;
+}
+
+interface AddressProps {
+  address?: Address;
+  refetchAddresses: () => void;
+}
+
+
+const AddressForm: React.FC<AddressProps> = ({ address,refetchAddresses }) => {
+  const [newProvince, setNewProvince] = useState("");
+  const [newDistrict, setNewDistrict] = useState("");
+  const [newWard, setNewWard] = useState("");
+  const [newDetail, setNewDetail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+
+  useEffect(() => {
+    if (address) {
+      setNewProvince(address.province);
+      setNewDistrict(address.district);
+      setNewWard(address.ward);
+      setNewDetail(address.detail);
+      setNewPhone(address.phone);
+    }
+  }, [address]);
+
+  const id = address?.id
+  const province = address?.province
+  const district = address?.district
+  const ward = address?.ward
+  const detail = address?.detail
+  const phone = address?.phone
+
+  const updateAddress = () => {
+    const updatedAddress = {
+      id: id,
+      province:  newProvince,
+      district:  newDistrict,
+      ward: newWard,
+      detail:  newDetail,
+      phone: newPhone,
+    }
+    console.log({ updatedAddress })
+    userApi.upadtetUserAddressById(updatedAddress)
+      .then(res => {
+        console.log("Cập nhật thành công", res.data);
+        Alert.alert("Thành công", "Cập nhật thông tin thành công!");
+        refetchAddresses();
+      })
+      .catch(err => {
+        console.error("Cập nhật thất bại", err);
+        Alert.alert("Lỗi", "Cập nhật thất bại. Vui lòng thử lại sau!");
+      });
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Cài đặt</Text>
-      <Text style={styles.subtitle}>Địa chỉ giao hàng</Text>
-
       <View style={styles.field}>
         <Text style={styles.label}>Tỉnh/thành</Text>
-        <TouchableOpacity style={styles.selectBox}>
-          <Text style={styles.placeholder}>Chọn tỉnh/thành phố</Text>
-          <AntDesign name="down" size={16} color="#9EB4E8" />
-        </TouchableOpacity>
+        <TextInput style={styles.input} placeholder="Tỉnh/thành" defaultValue={newProvince} onChangeText={setNewProvince} />
       </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>Quận/huyện</Text>
-        <TouchableOpacity style={styles.selectBox}>
-          <Text style={styles.placeholder}>Chọn quận/huyện</Text>
-          <Feather name="chevron-down" size={20} color="#9EB4E8" />
-        </TouchableOpacity>
+        <TextInput style={styles.input} placeholder="Quận/huyện" defaultValue={newDistrict} onChangeText={setNewDistrict} />
       </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>Xã/phường/thị trấn</Text>
-        <TouchableOpacity style={styles.selectBox}>
-          <Text style={styles.placeholder}>Chọn xã/phường/thị trấn</Text>
-          <Feather name="chevron-down" size={20} color="#9EB4E8" />
-        </TouchableOpacity>
+        <TextInput style={styles.input} placeholder="Xã/phường/thị trấn" defaultValue={newWard} onChangeText={setNewWard} />
       </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>Tên đường/số nhà</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Không để trống"
-          placeholderTextColor="#9EB4E8"
-        />
+        <TextInput style={styles.input} placeholder="Tên đường/số nhà" defaultValue={newDetail} onChangeText={setNewDetail} />
       </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>Số điện thoại</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Không để trống"
-          placeholderTextColor="#9EB4E8"
-          keyboardType="phone-pad"
-        />
+        <TextInput style={styles.input} placeholder="Số điện thoại" defaultValue={newPhone} onChangeText={setNewPhone} />
       </View>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={updateAddress}>
         <Text style={styles.buttonText}>Lưu thay đổi</Text>
       </TouchableOpacity>
     </View>
@@ -66,24 +106,13 @@ export const AddressForm: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 74,
+    paddingTop: 24,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#202020",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#000",
-    marginBottom: 45,
-  },
+
   field: {
     marginBottom: 20,
   },
+
   label: {
     marginBottom: 6,
     fontSize: 14,
@@ -123,6 +152,14 @@ const styles = StyleSheet.create({
     color: "#F3F3F3",
     fontSize: 16,
     fontWeight: "300",
+  },
+  input: {
+    backgroundColor: "#f1f5f9",
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
 });
 

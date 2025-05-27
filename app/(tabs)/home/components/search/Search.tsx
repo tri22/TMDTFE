@@ -10,9 +10,9 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
+import ProductItem from "@/app/(tabs)/product/components/productItem";
 import { colors } from "@/baseStyle/Style";
 import { IconButton, SimpleButton } from "@/components/button";
-import ProductItem from "@/components/productItem";
 
 const imgDir = "@/assets/images/searchProduct";
 

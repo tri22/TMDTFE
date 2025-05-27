@@ -26,7 +26,8 @@ export default function RootLayout() {
                 <Stack.Screen name="Setting/OrderHistory" options={{ headerShown: false }} />
                 <Stack.Screen name="Setting/PaymentSetting" options={{ headerShown: false }} />
                 <Stack.Screen name="Setting/About" options={{ headerShown: false }} />
-                <Stack.Screen name="Setting/OrderManagement" options={{ headerShown: false }} />\
+                <Stack.Screen name="Setting/OrderManagement" options={{ headerShown: false }} />
+                <Stack.Screen name="Setting/ProfileSetting" options={{ headerShown: false }} />
                 {/* Phần login */}
                 <Stack.Screen name="MainLogin" options={{ headerShown: false }} />
                 <Stack.Screen name="Login/register_form" options={{ headerShown: false }} />
