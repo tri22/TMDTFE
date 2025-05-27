@@ -45,12 +45,12 @@ export const BottomNavigation: React.FC = () => {
                 </Pressable>
             </Link>
 
-            <Link href="/(tabs)/Settings" asChild>
+            <Link href="/(tabs)/Profile" asChild>
                 <Pressable style={styles.iconWrapper}>
                     <FontAwesome5
                         name="user"
                         size={24}
-                        color={getIconColor("/(tabs)/Settings")}
+                        color={getIconColor("/(tabs)/Profile")}
                     />
                 </Pressable>
             </Link>
@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
     iconWrapper: {
         width: 24,
         height: 24,
+        bottom: 10,
         alignItems: "center",
         justifyContent: "center",
     },
