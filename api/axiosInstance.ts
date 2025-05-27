@@ -3,7 +3,7 @@ import Toast from "react-native-toast-message";
 
 const API_BASE = "http://localhost:8080/api/v1";
 export const SERVER_URL_BASE = "http://localhost:8080";
-//chinh ve dia chi cua spring boot neu chay fe tren dien thoai: 
+//chinh ve dia chi cua spring boot neu chay fe tren dien thoai:
 // vd: ip của spring boot: 192.168.1.100
 // thi chinh http://localhost:8080 thanh http://192.168.1.100:8080
 
