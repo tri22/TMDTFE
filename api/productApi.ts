@@ -164,3 +164,87 @@ const comments: Comment[] = responseData.comments.map(
     throw new Error("Không thể tải danh sách sản phẩm.");
   }
 }
+
+
+export async function searchProductByKeyword(
+  keyword: string,
+  page:number
+): Promise<PaginatedProductsResult> {
+  console.log("searchProductByKeyword:" + keyword);
+  try {
+    const response = await axiosInstance.post<ProductResponse<any>>(
+      `/products/search`,
+      {},
+      {
+        params: {
+          keyword,
+          page
+        },
+      }
+    );
+
+    const responseData = response.data;
+
+    const products: ProductItemModel[] = responseData.content.map(
+      (item: any): ProductItemModel => ({
+        id: item.id,
+        name: item.name + " id" + item.id,
+        price: item.price,
+        thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
+        isSold: item.sold,
+      })
+    );
+
+    return {
+      products: products,
+      isFirst: responseData.last,
+      isLast: responseData.last,
+      nextPage: !responseData.last ? responseData.number + 1 : 0,
+    };
+  } catch (error: any) {
+    throw new Error("Không thể tải danh sách sản phẩm.");
+  }
+}
+
+
+export async function getNewestProducts(
+  page: number
+): Promise<PaginatedProductsResult> {
+  console.log("getNewestProducts: page: " + page);
+  try {
+    const response = await axiosInstance.post<ProductResponse<any>>(
+      `/products/newest`,
+      {},
+      {
+        params: {
+          page,
+        },
+      }
+    );
+
+    const responseData = response.data;
+
+    const products: ProductItemModel[] = responseData.content.map(
+      (item: any): ProductItemModel => ({
+        id: item.id,
+        name: item.name + " id" + item.id,
+        price: item.price,
+        thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
+        isSold: item.sold,
+      })
+    );
+
+    return {
+      products: products,
+      isFirst: responseData.last,
+      isLast: responseData.last,
+      nextPage: !responseData.last ? responseData.number + 1 : 0,
+    };
+  } catch (error: any) {
+    console.error(
+      "Lỗi khi lấy sản phẩm mới nhất (paginated):",
+      error?.response?.data || error?.message || error
+    );
+    throw new Error("Không thể tải danh sách sản phẩm.");
+  }
+}

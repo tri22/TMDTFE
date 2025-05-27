@@ -6,7 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ViewStyle
+  ViewStyle,
 } from "react-native";
 
 import { formatMoney } from "@/util";
@@ -16,7 +16,7 @@ import { Dimensions } from "react-native";
 const screenWidth = Dimensions.get("window").width;
 
 type Props = {
-    id?: number;
+  id?: number;
 
   name: string;
   // onPress: () => void;
@@ -32,13 +32,11 @@ export default function ProductItem({
   // onPress,
   style,
   price,
-  
 }: Props) {
+  const router = useRouter();
 
-    const router = useRouter();
-
-  const handlePress = (item:  number) => {
-    console.log("press on productItem id: " + item)
+  const handlePress = (item: number) => {
+    console.log("press on productItem id: " + item);
     router.push({
       pathname: "/productDetail",
       params: {
@@ -49,11 +47,16 @@ export default function ProductItem({
 
   return (
     <View style={styles.wrapper}>
-      <TouchableOpacity style={[styles.container, style]} onPress={() => handlePress(id!)} >
+      <TouchableOpacity
+        style={[styles.container, style]}
+        onPress={() => handlePress(id!)}
+      >
         <View style={styles.imgContainer}>
           <Image source={{ uri: thumbnail }} style={styles.image} />
         </View>
-        <Text style={styles.title}>{name}</Text>
+        <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+          {name}
+        </Text>
         <Text style={styles.price}>{formatMoney(price ?? 0)}</Text>
       </TouchableOpacity>
     </View>
@@ -62,7 +65,7 @@ export default function ProductItem({
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: screenWidth * 0.5 - 6 -20,
+    width: screenWidth * 0.5 - 6 - 20,
     margin: 3,
   },
   container: {
