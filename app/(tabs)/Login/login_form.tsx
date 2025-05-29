@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -6,12 +7,36 @@ import InputField from './Components/InputField';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [pwd, setPwd] = useState('');
+    const [showPwd, setShowPwd] = useState(false);
 
     const handleRegister = () => router.replace('/(tabs)/Login/register_form');
     const handleForgetPass = () => router.replace('/(tabs)/Login/password_recovery');
     const handleHomePage = () => router.push('/');
+
+    const handleLogin = async () => {
+        if (!email || !pwd) {
+            alert('Vui lòng nhập đầy đủ email và mật khẩu');
+            return;
+        }
+        try {
+            const response = await axios.post("http://localhost:8080/api/v1/users/login", {
+                email,
+                pwd,
+            });
+            const user = response.data;
+            console.log("Đăng nhập thành công:", user);
+            handleHomePage();
+            // router.push({
+            //     pathname: '/(tabs)/User/profile',
+            //     params: { userId: user.id } // truyền id để hiển thị thông tin người dùng
+            // });
+        } catch (error) {
+            console.error("Đăng nhập thất bại", error);
+            alert("email hoặc mật khẩu không chính xác");
+
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -28,13 +53,13 @@ export default function LoginScreen() {
 
                 <InputField
                     placeholder="Mật khẩu"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
+                    value={pwd}
+                    onChangeText={setPwd}
+                    secureTextEntry={!showPwd}
                     rightIcon={
-                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <TouchableOpacity onPress={() => setShowPwd(!showPwd)}>
                             <Feather
-                                name={showPassword ? 'eye' : 'eye-off'}
+                                name={showPwd ? 'eye' : 'eye-off'}
                                 size={20}
                                 color="gray"
                             />
@@ -51,7 +76,7 @@ export default function LoginScreen() {
             </View>
             <View style={styles.formWrapper2}>
                 <TouchableOpacity
-                    style={styles.loginBtn} onPress={handleHomePage}>
+                    style={styles.loginBtn} onPress={handleLogin}>
                     <Text style={styles.loginBtnText}>Đăng nhập</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -161,7 +186,6 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         fontSize: 15,
         color: '#707070',
-        fontFamily: 'Nunito Sans'
     },
     fbLoginBtn: {
         width: '90%',
@@ -175,7 +199,6 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         fontSize: 15,
         color: '#707070',
-        fontFamily: 'Nunito Sans'
     },
     formWrapper3: {
         flex: 1,

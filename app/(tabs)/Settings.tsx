@@ -8,7 +8,7 @@ const Settings = () => {
     const router = useRouter();
 
     const personalInfo = [
-        { label: 'Tài khoản', route: '/(tabs)/Setting/ProfileSetting' },
+        { label: 'Tài khoản', route: '/(tabs)/Profile' },
         { label: 'Địa chỉ', route: '/(tabs)/Setting/AddressSettings' },
         { label: 'Phương thức thanh toán', route: '/(tabs)/Setting/PaymentSetting' },
     ] as { label: string; route: string }[];
