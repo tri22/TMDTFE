@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -19,7 +19,7 @@ import {
   getSearchHistory,
   saveSearchHistory,
 } from "@/util/historySeach";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 const suggestions: string[] = [
   "Váy",
@@ -40,6 +40,14 @@ function Search({ isBack }: Props) {
   const [recentViewedProducts, setRecentViewedProducts] = useState<
     ProductItemModel[]
   >([]);
+  const { search: searchingParam } = useLocalSearchParams();
+  const searchParam = useMemo(() => {
+    if (Array.isArray(searchingParam)) {
+      return searchingParam.length > 0 ? searchingParam[0] : "";
+    }
+    return searchingParam || "";
+  }, [searchingParam]);
+
   const { height: screenHeight } = Dimensions.get("window");
   const inputRef = useRef<TextInput>(null);
   const handleSearch = () => {
@@ -50,7 +58,7 @@ function Search({ isBack }: Props) {
       },
     });
     saveSearchHistory(search);
-    clearSearch();
+    fetchHistory();
   };
 
   const handlePressRecentSeachItem = (keyword: string) => {
@@ -60,23 +68,23 @@ function Search({ isBack }: Props) {
         search: keyword,
       },
     });
-    saveSearchHistory(search);
-    clearSearch();
+    saveSearchHistory(keyword);
+  };
+  const fetchHistory = async () => {
+    const searches = await getSearchHistory(); // await ở đây
+    setRecentSearches(searches ?? []);
+  };
+
+  const fetchRecentViewedProducts = async () => {
+    const products = await getRecentViewedProduct();
+    setRecentViewedProducts(products ?? []);
   };
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      const searches = await getSearchHistory(); // await ở đây
-      setRecentSearches(searches ?? []);
-    };
-
-    const fetchRecentViewedProducts = async () => {
-      const products = await getRecentViewedProduct();
-      setRecentViewedProducts(products ?? []);
-    };
-
     fetchHistory(); // gọi hàm async
     fetchRecentViewedProducts();
+    if (searchParam !== "") setSearch(searchParam);
+    setIsFocused(false);
   }, []);
 
   const clearSearch = () => {
@@ -85,13 +93,18 @@ function Search({ isBack }: Props) {
 
   useEffect(() => {
     if (!isFocused && inputRef.current) {
+      console.log("chuan bi blur");
       inputRef.current.blur();
     }
+    fetchHistory(); // gọi hàm async
+    fetchRecentViewedProducts();
   }, [isFocused]);
 
   const router = useRouter();
 
   const handleGoBack = () => {
+    // back?.();
+    setIsFocused(false);
     router.back();
   };
 
@@ -124,6 +137,10 @@ function Search({ isBack }: Props) {
             onChangeText={setSearch}
             value={search}
             onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            // onBlur={() => {
+            //   setTimeout(() => setIsFocused(false), 100); // delay nhẹ
+            // }}
           />
           {search !== "" && (
             <IconButton
@@ -149,7 +166,7 @@ function Search({ isBack }: Props) {
           />
         </View>
       </View>
-      {isFocused && (
+      {isFocused  && (
         <View style={{ height: screenHeight }}>
           {recentSearches.length > 0 && (
             <View style={{ marginTop: 20 }}>

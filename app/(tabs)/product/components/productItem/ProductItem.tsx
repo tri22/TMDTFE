@@ -29,18 +29,17 @@ export default function ProductItem({
   id,
   name,
   thumbnail,
-  // onPress,
   style,
   price,
 }: Props) {
   const router = useRouter();
 
-  const handlePress = (item: number) => {
+  const handlePress = (item: Props) => {
     console.log("press on productItem id: " + item);
     router.push({
       pathname: "/productDetail",
       params: {
-        id: item,
+        id: item.id,
       },
     });
   };
@@ -49,7 +48,7 @@ export default function ProductItem({
     <View style={styles.wrapper}>
       <TouchableOpacity
         style={[styles.container, style]}
-        onPress={() => handlePress(id!)}
+        onPress={() => handlePress({ id, name, thumbnail, price })}
       >
         <View style={styles.imgContainer}>
           <Image source={{ uri: thumbnail }} style={styles.image} />

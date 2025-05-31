@@ -48,7 +48,7 @@ export const saveRecentViewedProduct = async (
       id: productDetail.product?.id || 0,
       name: productDetail.product?.name || "",
       price: productDetail.product?.price || 0,
-      thumbnail: productDetail.images.length>0 ? productDetail.images[0] : "",
+      thumbnail: productDetail.images.length > 0 ? productDetail.images[0] : "",
       isSold: productDetail.sold,
     };
 
@@ -57,7 +57,7 @@ export const saveRecentViewedProduct = async (
 
     const updated = [
       product,
-      ...history.filter((item) => item !== product),
+      ...history.filter((item) => item.id !== product.id),
     ].slice(0, 10);
     await AsyncStorage.setItem(
       RECENT_VIEWED_PRODUCT_KEY,

@@ -5,12 +5,11 @@ import {
   FlatList,
   Image,
   ImageSourcePropType,
-  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
   useWindowDimensions,
-  View,
+  View
 } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -162,6 +161,15 @@ function Home() {
     showAlert();
   };
 
+  const handleCategoryPress = () => {
+    router.push({
+      pathname: "/category",
+      params: {
+       
+      },
+    });
+  }
+
   const Category = ({ category }: CategoryProps) => {
     const { width } = useWindowDimensions();
     const containerSize = width / 2 - 24; // hoặc điều chỉnh cho vừa ý
@@ -301,19 +309,19 @@ function Home() {
             </View>
             <View style={[styles.dFlexSpBetween, { marginTop: 10 }]}>
               <Text style={styles.heading}>Danh mục</Text>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={[styles.dFlex]}
-                onPress={() => Linking.openURL("https://example.com")}
+                onPress={handleCategoryPress}
               >
                 <Text style={{ color: "black", fontSize: 20 }}>Xem thêm</Text>
                 <IconButton
                   icon="arrow-forward-circle"
-                  onPress={handlePress}
+                  onPress={handleCategoryPress}
                   iconColor={colors.darkPrimary}
                   iconSize={40}
                   style={{ padding: 0, marginLeft: 2 }}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             <View style={styles.dFlex}>
               <Category category={categories[0]} />

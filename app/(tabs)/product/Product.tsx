@@ -31,6 +31,8 @@ function Product() {
   const [error, setError] = useState<string | null>(null);
   const [nextPage, setNextPage] = useState<number>(0); // Trang hiện tại backend trả về (bắt đầu từ 0)
   const [pageTitle, setPageTitle] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
 
   const categoryLink = useMemo(() => {
     if (Array.isArray(link)) {
@@ -129,7 +131,8 @@ function Product() {
 
   return (
     <DefaultLayout>
-       <Search isBack={true}/>
+      {/* <Search isBack={true} back={handleGoBack} isFocusing={isSearchFocused}/> */}
+      <Search isBack={true}/>
       <FlatList
         style={styles.container}
         ListHeaderComponent={
@@ -160,6 +163,7 @@ function Product() {
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
       />
+     
     </DefaultLayout>
   );
 }
