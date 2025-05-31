@@ -411,7 +411,6 @@ function Home() {
             />
           </TouchableOpacity>
         </View>
-
         <FlatList
           horizontal
           data={newestProducts}

@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -8,13 +9,33 @@ import LogoSection from './Components/LogoSection';
 
 export default function RegisterForm() {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [pwd, setPwd] = useState('');
     const [phone, setPhone] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPwd, setShowPwd] = useState(false);
 
-    const handleTogglePassword = () => setShowPassword(prev => !prev);
-    const handleRegister = () => router.replace('/Login/account_auth');
+    const handleTogglePwd = () => setShowPwd(prev => !prev);
     const handleLogin = () => router.replace('/Login/login_form');
+
+    const handleRegister = async () => {
+        if (!email || !pwd || !phone) {
+            alert('Vui lòng nhập đầy đủ email, mật khẩu và số điện thoại');
+            return;
+        }
+        try {
+            await axios.post('http://localhost:8080/api/v1/users/register', {
+                email,
+                pwd,
+                phone
+            });
+
+            alert("Đăng ký thành công!");
+            router.replace('/Login/login_form');
+        } catch (error) {
+            console.error("Đăng ký thất bại:", error);
+            alert('Email đã tồn tại hoặc dữ liệu không hợp lệ');
+        }
+    };
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -31,12 +52,12 @@ export default function RegisterForm() {
 
                 <InputField
                     placeholder="Mật khẩu"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
+                    value={pwd}
+                    onChangeText={setPwd}
+                    secureTextEntry={!showPwd}
                     rightIcon={
-                        <TouchableOpacity onPress={handleTogglePassword}>
-                            <Feather name={showPassword ? 'eye' : 'eye-off'} size={20} color="gray" />
+                        <TouchableOpacity onPress={handleTogglePwd}>
+                            <Feather name={showPwd ? 'eye' : 'eye-off'} size={20} color="gray" />
                         </TouchableOpacity>
                     }
                 />
