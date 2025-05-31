@@ -1,4 +1,3 @@
-import ProductItem from "@/app/(tabs)/product/components/productItem";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
@@ -23,12 +22,10 @@ import {
   View,
 } from "react-native";
 
-import { colors } from "@/baseStyle/Style";
-import { IconButton, SimpleButton } from "@/components/button";
-import { formatMoney } from "@/util";
-// import { FlatList } from "react-native-gesture-handler";
 import { submitComment } from "@/api/commentApi";
 import { getProductDetail } from "@/api/productApi";
+import { colors } from "@/baseStyle/Style";
+import { IconButton, SimpleButton } from "@/components/button";
 import {
   Category,
   Comment,
@@ -36,27 +33,13 @@ import {
   ProductDetailModel,
   User,
 } from "@/models/ProductDetailModel";
-import { useLocalSearchParams } from "expo-router";
+import { formatMoney } from "@/util";
+import { saveRecentViewedProduct } from "@/util/historySeach";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import DefaultLayout from "../DefaultLayout";
 import { CommentItem, MyCarousel, ShopInfo } from "./components";
 
 const imgDir = "@/assets/images/searchProduct";
-
-type ProductItem = {
-  name: string;
-  image: ImageSourcePropType;
-  price: number;
-  link: string;
-  description?: string;
-};
-
-const product: ProductItem = {
-  name: "Quần jean",
-  image: require(`${imgDir}/quan-jean.png`),
-  price: 125000,
-  link: "jean",
-  description:
-    "Kính còn khoảng 95%, không trầy xước\nForm kính chuẩn, đeo nhẹ mặt.\nTròng tốt, không mờ hay loá.\nFull hộp + khăn lau kính đi kèm.",
-};
 
 type ShopInfo = {
   name: string;
@@ -66,13 +49,6 @@ type ShopInfo = {
   saledQty: number;
 };
 
-const shopInfo: ShopInfo = {
-  name: "To Minh Nhat",
-  image: require("@/assets/images/avatar.jpg"),
-  avgRating: 4,
-  link: "jean",
-  saledQty: 10,
-};
 
 type CommentItem = {
   name: string;
@@ -80,22 +56,6 @@ type CommentItem = {
   content: string;
   time: string;
   replies: CommentItem[];
-};
-
-const comment: CommentItem = {
-  name: "To Nhat",
-  image: require("@/assets/images/avatar.jpg"),
-  content: "Chất liệu là gì v",
-  time: "11 giờ trước",
-  replies: [
-    {
-      name: "Nhan vien",
-      image: require("@/assets/images/avatar.jpg"),
-      content: "Bằng carbon",
-      time: "11 giờ trước",
-      replies: [],
-    },
-  ],
 };
 
 type ProductOfSaler = {
@@ -154,27 +114,6 @@ const shippingFeeItems: ShippingFeeItem[] = [
     title: "Nhanh",
     time: "1 - 3 ngày",
     price: 25000,
-  },
-];
-
-const products: ProductItem[] = [
-  {
-    name: "Quần jean",
-    image: require(`${imgDir}/quan-jean.png`),
-    price: 125000,
-    link: "jean",
-  },
-  {
-    name: "Áo Champion",
-    image: require(`${imgDir}/ao-champion.jpg`),
-    price: 325000,
-    link: "superment",
-  },
-  {
-    name: "Kính mát Channel nữ Authentic",
-    image: require(`${imgDir}/kinh-channel.png`),
-    price: 725000,
-    link: "channel",
   },
 ];
 
@@ -247,6 +186,7 @@ function ProductDetail() {
     try {
       const result: ProductDetailModel = await getProductDetail(id);
       setProductDetail(result);
+      saveRecentViewedProduct(result);
     } catch (err: any) {
       console.error("Failed to fetch products:", err);
     } finally {
@@ -301,7 +241,7 @@ function ProductDetail() {
       setComments(result ?? []);
       clearCommentInput();
     } catch (err: any) {
-      console.error("Failed to submit comments:", err);
+      // console.error("Failed to submit comments:", err);
     } finally {
     }
   };
@@ -418,7 +358,6 @@ function ProductDetail() {
   >(null);
   const [replyingParentId, setReplyingParentId] = useState<number>(0);
 
-
   const handleReplyClick = (
     id: number,
 
@@ -426,10 +365,8 @@ function ProductDetail() {
     parentId: number
   ) => {
     setReplyingCommentItemId(id);
-    if(parentId===0) 
-      setReplyingParentId(id);
-    else 
-      setReplyingParentId(parentId);
+    if (parentId === 0) setReplyingParentId(id);
+    else setReplyingParentId(parentId);
     console.log(
       "handleReplyClick id: " +
         id +
@@ -438,19 +375,30 @@ function ProductDetail() {
         " | name: " +
         userName
     );
-    
   };
 
   const handleSubmitReply = (content: string) => {
+    handleSubmitComment(replyingParentId, 1, content);
+    setReplyingCommentItemId(null);
+    setReplyingParentId(0);
+  };
 
-    handleSubmitComment(replyingParentId, 1, content)
-      setReplyingCommentItemId(null);
-      setReplyingParentId(0);
-  }
+  
+    const router = useRouter();
+  
+    const handleGoBack = () => {
+      router.back();
+    };
 
   return (
-    <View style={{ flex: 1 }}>
+    <DefaultLayout>
       <ScrollView style={styles.container}>
+            <TouchableOpacity
+            onPress={handleGoBack}
+            style={styles.goBackBtn}
+          >
+            <Text style={{ color: colors.primary }}>Quay lại</Text>
+          </TouchableOpacity>
         <MyCarousel images={images} />
         <View
           style={[
@@ -527,27 +475,47 @@ function ProductDetail() {
                   time={item.createdAt}
                   replies={(item.replies ?? []).map((reply) => ({
                     id: reply.id,
-                    userName: reply.userName, 
-                    userAvatar: reply.userAvatar, 
+                    userName: reply.userName,
+                    userAvatar: reply.userAvatar,
                     content: reply.content,
                     time: reply.createdAt,
-                    replies: [], 
+                    replies: [],
                     parentId: reply.parentId,
                     onReplyClick: handleReplyClick,
                     isReplying: reply.id === replyingCommentItemId,
-                    onSubmitReply: handleSubmitReply
+                    onSubmitReply: handleSubmitReply,
                   }))}
                   onReplyClick={handleReplyClick}
                   isReplying={item.id === replyingCommentItemId}
                   onSubmitReply={handleSubmitReply}
                 />
               ))}
-
           </View>
         </View>
         <View style={[{ padding: 10 }]}>
           <Text style={styles.label}>Phí vận chuyển</Text>
-          <FlatList
+          <View>
+            {shippingFeeItems.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[styles.dFlexSpBetween, styles.shippingFeeItem]}
+              >
+                <Text style={{ fontSize: 17 }}>{item.title}</Text>
+                <Text style={{ fontSize: 14, color: "blue" }}>{item.time}</Text>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    color: colors.primary,
+                    fontWeight: "500",
+                  }}
+                >
+                  {formatMoney(item.price)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* <FlatList
             data={shippingFeeItems}
             showsHorizontalScrollIndicator={false}
             nestedScrollEnabled={true}
@@ -568,7 +536,7 @@ function ProductDetail() {
                 </Text>
               </TouchableOpacity>
             )}
-          />
+          /> */}
         </View>
         <View style={[{ padding: 10 }]}>
           <Text style={styles.label}>Xem thêm sản phẩm từ người bán</Text>
@@ -630,7 +598,7 @@ function ProductDetail() {
         />
       </View>
       <ClassificationSelection />
-    </View>
+    </DefaultLayout>
   );
 }
 
@@ -641,6 +609,7 @@ const styles = StyleSheet.create({
     // padding: 15,
     // marginTop: 40,
     // backgroundColor: '#fff'
+    position: "relative"
   },
   dFlex: {
     flexDirection: "row",
@@ -756,5 +725,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blurPrimary,
     color: colors.darkPrimary,
     textAlign: "center",
+  },
+  goBackBtn: {
+    padding: 10,
+    paddingLeft: 0,
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 1
   },
 });

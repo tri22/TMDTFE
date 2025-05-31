@@ -150,7 +150,7 @@ export default Category;
 const styles = StyleSheet.create({
   container: {
     padding: 15,
-    // marginTop: 40,
+    marginTop: 40,
     // backgroundColor: '#fff'
   },
   dFlexSpBetween: {
