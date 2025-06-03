@@ -1,56 +1,66 @@
 import { CartItem } from "@/components/";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { ItemData } from "@/data";
+import { Item } from "@/data/item";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useSearchParams } from "expo-router/build/hooks";
+import React from "react";
 import { Button, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const CartScreen = () => {
+  const searchParams = useSearchParams();
+  const data = searchParams.get("data");
+
+  const initialItem: Item = data
+    ? JSON.parse(data)
+    : {
+        id: 0,
+        name: "",
+        price: 0,
+        imageUrl: "",
+        quantity: 1,
+      };
+
+  const [cartItem, setCartItem] = React.useState<Item>(initialItem);
+
+  const totalPrice = cartItem.price * cartItem.quantity;
+
   const router = useRouter();
-  const handleItemPress = (route: string) => {
-    router.push(route as any);
-  };
-  const [cartItems, setCartItems] = useState(ItemData);
-  const totalPrice = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
 
-  const handleIncrease = (id: number) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+  const handleIncrease = () => {
+    setCartItem((prev) => ({
+      ...prev,
+      quantity: prev.quantity + 1,
+    }));
   };
 
-  const handleDecrease = (id: number) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
+  const handleDecrease = () => {
+    setCartItem((prev) => ({
+      ...prev,
+      quantity: prev.quantity > 1 ? prev.quantity - 1 : 1,
+    }));
   };
 
-  const handleRemove = (id: number) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  const handleRemove = () => {
+    setCartItem({
+      id: 0,
+      name: "",
+      price: 0,
+      imageUrl: "",
+      quantity: 0,
+    });
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Giỏ hàng</Text>
       <ScrollView style={styles.scroll}>
-        {cartItems.map((item) => (
-          <CartItem
-            key={item.id}
-            item={item}
-            onIncrease={() => handleIncrease(item.id)}
-            onDecrease={() => handleDecrease(item.id)}
-            onRemove={() => handleRemove(item.id)}
-          />
-        ))}
+        <CartItem
+          item={initialItem}
+          key={initialItem.id}
+          onIncrease={() => handleIncrease()}
+          onDecrease={() => handleDecrease()}
+          onRemove={() => handleRemove()}
+        />
       </ScrollView>
       <View style={styles.purchase}>
         <Text>Tổng Cộng </Text>
@@ -60,7 +70,7 @@ const CartScreen = () => {
           onPress={() =>
             router.push({
               pathname: "/(tabs)/PaymentScreen",
-              params: { list: JSON.stringify(cartItems) },
+              params: { list: JSON.stringify(cartItem) },
             })
           }
         />

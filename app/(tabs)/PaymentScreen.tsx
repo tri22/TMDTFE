@@ -24,13 +24,20 @@ import {
 
 const PaymentScreen: React.FC = () => {
   const searchParams = useSearchParams(); // Sửa thành const
-  const list = searchParams.get("list");
-  const cartItems: Item[] = list ? JSON.parse(list) : [];
+  const data = searchParams.get("data");
+  const cartItems: Item = data
+    ? JSON.parse(data)
+    : {
+        id: 0,
+        name: "",
+        price: 0,
+        imageUrl: "",
+        quantity: 1,
+      };
+
   const [VoucherDisplay, setVoucherDisplay] = useState("Voucher");
   const [totalAmount, setTotalAmout] = useState(
-    cartItems.reduce((total, item) => {
-      return total + item.price * item.quantity;
-    }, 0)
+    cartItems.price * cartItems.quantity
   );
   const [visibleVoucher, setVisibleVoucher] = useState(false);
   const [voucher, setVoucher] = useState<Voucher | null>(null);
@@ -130,9 +137,7 @@ const PaymentScreen: React.FC = () => {
             onAddVoucher={handleAddVoucher}
           />
         </View>
-        {cartItems.map((item: Item) => (
-          <ProductItemSection key={item.id} {...item} />
-        ))}
+        <ProductItemSection key={cartItems.id} {...cartItems} />
         <View style={styles.container}>
           <TouchableOpacity onPress={() => setVisibleCard(true)}>
             {selectedCard ? (
