@@ -1,6 +1,6 @@
 
 
-export const IP_ADDRESS = "192.168.100.2";
+export const IP_ADDRESS = "localhost";
 
 export const SERVER_URL_BASE = `http://${IP_ADDRESS}:8080`;
 

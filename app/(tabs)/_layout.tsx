@@ -37,6 +37,8 @@ export default function RootLayout() {
                 <Stack.Screen name="Login/email_recovery" options={{ headerShown: false }} />
                 <Stack.Screen name="Login/password_recovery" options={{ headerShown: false }} />
                 <Stack.Screen name="Login/new_pass_form" options={{ headerShown: false }} />
+
+                <Stack.Screen name="Profile" options={{ headerShown: false }} />
             </Stack>
             <StatusBar style="auto" />
         </ThemeProvider>

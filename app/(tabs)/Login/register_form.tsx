@@ -1,11 +1,11 @@
 import { Feather } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import axios from 'axios';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import InputField from './Components/InputField';
 import LogoSection from './Components/LogoSection';
+import axiosInstance from '@/api/axiosInstance';
 
 export default function RegisterForm() {
     const [email, setEmail] = useState('');
@@ -22,17 +22,14 @@ export default function RegisterForm() {
             return;
         }
         try {
-            await axios.post('http://localhost:8080/api/v1/users/register', {
-                email,
-                pwd,
-                phone
-            });
 
-            alert("Đăng ký thành công!");
+            await axiosInstance.post('/users/register', { email, pwd, phone, });
+
+            alert("Đăng ký thành công!");   
             router.replace('/Login/login_form');
         } catch (error) {
-            console.error("Đăng ký thất bại:", error);
-            alert('Email đã tồn tại hoặc dữ liệu không hợp lệ');
+            // Lỗi đã được xử lý bởi interceptor trong axiosInstance
+            // Không cần thêm logic xử lý lỗi ở đây
         }
     };
 
