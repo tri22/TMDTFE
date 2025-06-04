@@ -233,6 +233,8 @@ const PaymentScreen: React.FC = () => {
         onPrimaryPress={() => {
           setModalVisible(false);
           if (paymentStatus === "success") {
+            // call api post to BE
+
             router.push({
               pathname: "/(tabs)/OrderScreen",
               params: { dataOrder: JSON.stringify(validateData) },

@@ -1,3 +1,4 @@
+import createOrder from "@/api/orderApi";
 import { Card, CardContent, ProductItemSection } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { useSearchParams } from "expo-router/build/hooks";
@@ -7,6 +8,8 @@ import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 const OrderScreen = () => {
   const list = useSearchParams().get("dataOrder");
   const data = list ? JSON.parse(list) : null;
+
+  createOrder(data);
 
   if (!data) return null;
 
