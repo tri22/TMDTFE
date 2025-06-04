@@ -9,11 +9,22 @@ const OrderScreen = () => {
   const list = useSearchParams().get("dataOrder");
   const data = list ? JSON.parse(list) : null;
 
-  createOrder(data);
-
   if (!data) return null;
 
   const { carts, cards, voucher, total, email, phone, address } = data;
+
+  if (data) {
+    createOrder({
+      idUser: 3, // Giả sử userId là 3
+      carts: carts,
+      cards: cards,
+      voucher: voucher,
+      total: total,
+      email: email,
+      phone: phone,
+      address: address,
+    });
+  }
 
   const currentDate = new Date();
   const date = currentDate.toLocaleDateString("vi-VN", {
