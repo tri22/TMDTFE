@@ -8,7 +8,7 @@ interface Item {
 }
 
 const cartItems: Item[] = [];
-async function fetchData(id: number) {
+export default async function fetchDataWishlist(id: number) {
   try {
     const data = await getWishlistByUserId(id);
     for (const item of data) {
@@ -20,14 +20,15 @@ async function fetchData(id: number) {
         imageUrl: imageUrl, // <-- use image here
         quantity: qty,
       });
+      console.log("Item added to cartItems:");
     }
+
+    return cartItems; // trả về mảng cartItems sau khi đã xử lý
     // xử lý data ở đây
   } catch (error) {
     console.error("Lỗi khi lấy data:", error);
+    return []; // trả về mảng rỗng nếu có lỗi
   }
 }
 
-fetchData(3);
-
-export default cartItems;
 export type { Item };
