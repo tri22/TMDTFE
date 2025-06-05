@@ -8,17 +8,11 @@ const createOrder = async (orderData: any): Promise<any> => {
       phone: orderData.phone,
       total: orderData.total,
       addressOrder: {
-        street: orderData.address.street || "",
-        ward: orderData.address.ward || "",
-        district: orderData.address.district || "",
-        city: orderData.address.city || "",
+        address: `${orderData.address.street} - ${orderData.address.ward} - ${orderData.address.district} - ${orderData.address.city}`,
       },
       cardOrder: {
         // id: orderData.cards.id, // ✅ đúng key: id
-        cardType: orderData.cards.cardType,
-        cardNumber: orderData.cards.cardNumber,
-        ownerName: orderData.cards.ownerName,
-        expiryDate: orderData.cards.expiry || "", // ✅ tránh undefined
+        cardInfor: `${orderData.cards.cardType} - ${orderData.cards.cardNumber} - ${orderData.cards.ownerName}`,
       },
       productOrder: {
         // id: orderData.carts.id,
@@ -35,8 +29,6 @@ const createOrder = async (orderData: any): Promise<any> => {
         expiry: orderData.voucher?.expiry,
       },
     };
-
-    console.log("Order Request Data 111111111111111111:", orderRequest);
 
     const response = await axiosInstance.post("/orders", orderRequest);
     return response.data;
