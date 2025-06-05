@@ -10,7 +10,8 @@ import {
   ProductItemModel,
   ProductResponse,
 } from "@/models/ProductItemModel";
-import axiosInstance, { SERVER_URL_BASE } from "./axiosInstance";
+import axiosInstance from "./axiosInstance";
+import { SERVER_URL_BASE } from "./ipConstant";
 
 export async function getProductsByCategory(
   categoryLink: string,

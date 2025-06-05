@@ -3,100 +3,96 @@ import * as React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { BottomNavigation } from '../../../components/BottomNavigation';
-import { Header } from './Header';
 const MyActivity: React.FC = () => {
     const router = useRouter();
 
     const handleViewOrderHistory = () => {
         router.push('/(tabs)/Setting/OrderHistory');
     };
+    const sampleData = [
+        { label: "Quần", value: 400000, color: "#007bff" },
+        { label: "Áo", value: 350000, color: "#FF9800" },
+        { label: "Giày", value: 300000, color: "#4CAF50" },
+        { label: "Túi", value: 300000, color: "#E91E63" },
+    ];
+
+    const statusData: { label: string, value: number }[] = [
+        { label: "Đơn đã đặt", value: 12 },
+        { label: "Đã Nhận", value: 10 },
+        { label: "Đang vận chuyển", value: 52 },
+    ];
+
+    const total = sampleData.reduce((sum, item) => sum + item.value, 0);
+    const CIRCLE_RADIUS = 90;
+    const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
+    const CustomPieChart = () => {
+        let cumulativeOffset = 0;
+
+        return (
+            <View style={styles.circleContainer}>
+                <Svg height="200" width="200" viewBox="0 0 200 200">
+                    {/* Background Circle */}
+                    <Circle
+                        cx="100"
+                        cy="100"
+                        r={CIRCLE_RADIUS}
+                        stroke="#e0e0e0"
+                        strokeWidth="20"
+                        fill="none"
+                    />
+                    {/* Foreground Segments */}
+                    {sampleData.map((item, index) => {
+                        const percentage = item.value / total;
+                        const dashLength = percentage * CIRCLE_CIRCUMFERENCE;
+                        const circle = (
+                            <Circle
+                                key={index}
+                                cx="100"
+                                cy="100"
+                                r={CIRCLE_RADIUS}
+                                stroke={item.color}
+                                strokeWidth="20"
+                                strokeDasharray={`${dashLength} ${CIRCLE_CIRCUMFERENCE}`}
+                                strokeDashoffset={-cumulativeOffset}
+                                strokeLinecap="round"
+                                fill="none"
+                            />
+                        );
+                        cumulativeOffset += dashLength;
+                        return circle;
+                    })}
+                </Svg>
+                <Text style={styles.totalText}>Tổng{"\n"}{total.toLocaleString()}₫</Text>
+            </View>
+        );
+    };
 
     return (
         <View style={styles.wrapper}>
-            <ScrollView style={styles.container}>
-                <Header title="Hoạt động" />
+            <ScrollView contentContainerStyle={{ paddingBottom: 80 }}
+                style={{ paddingTop: 30, paddingLeft: 20, paddingRight: 20 }}>
+                <Text style={styles.title}>Hoạt động</Text>
+                <Text style={styles.subtitle}>Thống kê chi tiêu</Text>
                 {/* Month Selector */}
                 <View style={styles.monthContainer}>
                     <Text style={styles.monthText}>Tháng 4</Text>
                 </View>
 
-                {/* Custom Circle Chart */}
-                <View style={styles.circleContainer}>
-                    <Svg height="200" width="200" viewBox="0 0 200 200">
-                        {/* Background Circle */}
-                        <Circle
-                            cx="100"
-                            cy="100"
-                            r="90"
-                            stroke="#e0e0e0"
-                            strokeWidth="20"
-                            fill="none"
-                        />
-                        {/* Quần */}
-                        <Circle
-                            cx="100"
-                            cy="100"
-                            r="90"
-                            stroke="#007bff"
-                            strokeWidth="20"
-                            strokeDasharray="565.48"
-                            strokeDashoffset="0"
-                            strokeLinecap="round"
-                            fill="none"
-                        />
-                        {/* Giày */}
-                        <Circle
-                            cx="100"
-                            cy="100"
-                            r="90"
-                            stroke="#4CAF50"
-                            strokeWidth="20"
-                            strokeDasharray="565.48"
-                            strokeDashoffset="-150"
-                            strokeLinecap="round"
-                            fill="none"
-                        />
-                        {/* Áo */}
-                        <Circle
-                            cx="100"
-                            cy="100"
-                            r="90"
-                            stroke="#FF9800"
-                            strokeWidth="20"
-                            strokeDasharray="565.48"
-                            strokeDashoffset="-300"
-                            strokeLinecap="round"
-                            fill="none"
-                        />
-                        {/* Túi */}
-                        <Circle
-                            cx="100"
-                            cy="100"
-                            r="90"
-                            stroke="#E91E63"
-                            strokeWidth="20"
-                            strokeDasharray="565.48"
-                            strokeDashoffset="-450"
-                            strokeLinecap="round"
-                            fill="none"
-                        />
-                    </Svg>
-                    <Text style={styles.totalText}>Tổng{"\n"}1.350.000vnd</Text>
-                </View>
+                <CustomPieChart></CustomPieChart>
 
                 {/* Categories */}
                 <View style={styles.categoriesContainer}>
-                    {renderCategory('Quần 183.000đ', '#007bff')}
-                    {renderCategory('Giày 92.000đ', '#4CAF50')}
-                    {renderCategory('Áo 47.000đ', '#FF9800')}
-                    {renderCategory('Túi 43.000đ', '#E91E63')}
+                    {sampleData.map((item, index) => (
+                        renderCategory(item.label + ": " + item.value, item.color)
+                    ))}
                 </View>
+
 
                 {/* Order Status */}
                 <View style={styles.statusContainer}>
-                    {renderStatus('12', 'Đơn đã đặt')}
-                    {renderStatus('7', 'Đã Nhận')}
-                    {renderStatus('5', 'Đang vận chuyển')}
+                    {statusData.map((item, index) => (
+                        renderStatus(item.value, item.label)
+                    ))}
                 </View>
 
                 {/* History Button */}
@@ -117,7 +113,7 @@ const renderCategory = (label: string, color: string) => (
     </View>
 );
 
-const renderStatus = (number: string, label: string) => (
+const renderStatus = (number: number, label: string) => (
     <View style={styles.statusItem}>
         <Text style={styles.statusNumber}>{number}</Text>
         <Text style={styles.statusLabel}>{label}</Text>
@@ -125,17 +121,20 @@ const renderStatus = (number: string, label: string) => (
 );
 
 const styles = StyleSheet.create({
+    title: {
+        fontSize: 22,
+        fontWeight: "bold",
+        color: "#000",
+    },
+    subtitle: {
+        fontSize: 14,
+        color: "#555",
+        marginTop: 4,
+        marginBottom: 20,
+    },
     wrapper: {
         flex: 1,
         backgroundColor: '#fff',
-    },
-    container: {
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        maxWidth: 480,
-        width: '100%',
-        paddingTop: 15,
-        overflow: 'hidden',
     },
     header: {
         marginTop: 30,

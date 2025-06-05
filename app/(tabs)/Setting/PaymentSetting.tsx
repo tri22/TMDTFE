@@ -1,45 +1,169 @@
+import creditCardApi, { CardData } from "@/api/creditCardApi";
+import { CardItem } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import CardFormModal from "@/components/CardFormModal";
+import React, { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
 
 const PaymentSetting = () => {
+  const bankLogos: { [key: string]: { name: string; logo: string } } = {
+    "970436": {
+      name: "Vietcombank",
+      logo: "https://i.pinimg.com/736x/80/1d/11/801d116027d9523390684fdb860f4199.jpg"
+    },
+    "970418": {
+      name: "BIDV",
+      logo: "https://i.pinimg.com/736x/af/48/e8/af48e85232fe63f9b6d064548df6c44e.jpg"
+    },
+    "970422": {
+      name: "Agribank",
+      logo: "https://i.pinimg.com/736x/a3/d4/b5/a3d4b5a4fd8f32db689ab50e777025df.jpg"
+    },
+    "970405": {
+      name: "VietinBank",
+      logo: "https://i.pinimg.com/736x/1f/b7/d0/1fb7d0cae3f7149d4fc7ffb61fa095e5.jpg"
+    },
+    "970423": {
+      name: "ACB",
+      logo: "https://i.pinimg.com/736x/4e/7f/b5/4e7fb57891725caa8347ed29ec0bc993.jpg"
+    },
+    "970407": {
+      name: "Techcombank",
+      logo: "https://i.pinimg.com/736x/a2/9a/a8/a29aa86bdaad3c3bdfef3b52064dd390.jpg"
+    },
+    "970403": {
+      name: "Sacombank",
+      logo: "https://i.pinimg.com/736x/23/04/2a/23042af6f4c9588163a5d99083f08cf3.jpg"
+    },
+    "970432": {
+      name: "TPBank",
+      logo: "https://i.pinimg.com/736x/a8/e9/31/a8e931d65a17267bed9642dfc2f65e8b.jpg"
+    },
+    "970441": {
+      name: "VPBank",
+      logo: "https://i.pinimg.com/736x/55/0c/5e/550c5e38096bca994f857e766cc865ca.jpg"
+    },
+    "970419": {
+      name: "MB Bank",
+      logo: "https://i.pinimg.com/736x/18/b4/57/18b457a25f54edb34eaf33a38c78d920.jpg"
+    },
+    "970409": {
+      name: "HDBank",
+      logo: "https://i.pinimg.com/736x/c0/4a/d9/c04ad9ba1448d6bb75b01c15c530af57.jpg"
+    },
+    "970428": {
+      name: "VIB",
+      logo: "https://i.pinimg.com/736x/92/32/bf/9232bfeec3a935b9649d158c89d23d96.jpg"
+    },
+    "970454": {
+      name: "MSB",
+      logo: "https://i.pinimg.com/736x/92/dd/9d/92dd9ddf90fef6277a3109f51b03dcbd.jpg"
+    },
+  };
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [cardList, setCardList] = useState<CardData[]>([]);
+  const [editCard, setEditCard] = useState<CardData>({
+    id: 0,
+    number: "String",
+    ownerName: "String",
+    expiryDate: "String",
+    ccv: 0,
+  });
+
+
+  useEffect(() => {
+    const fetchCardData = async () => {
+      try {
+        const response = await creditCardApi.getAllByUserId(6)
+        const data = response.data;
+        console.log(data)
+        setCardList(data)
+      } catch {
+
+      }
+    }
+    fetchCardData();
+  }, [])
+
+  const handleCardSetting = (card: CardData) => {
+    setEditCard(card);
+    setModalVisible(true);
+  };
+
+
+  const handleSaveCard = () => {
+    console.log("settings")
+    console.log(bankLogos["970436"].logo);
+
+  }
+
+  const handleAddCard = () => {
+    console.log("settings")
+    console.log(bankLogos["970436"].logo);
+
+    setEditCard({
+      id: 0,
+      number: "",
+      ownerName: "",
+      expiryDate: "",
+      ccv: 0,
+      userId: 0, // nếu CardData yêu cầu
+    });
+    setModalVisible(true);
+
+
+  }
+
+  const formatExpiryDate = (rawDate: string): string => {
+    const [year, month] = rawDate.split("/");
+    const yy = year.slice(-2);
+    return `${month}/${yy}`;
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <Text style={styles.title}>Cài đặt</Text>
-      <Text style={styles.subtitle}>Phương thức thanh toán</Text>
 
-      {/* Card */}
-      <View style={styles.cardContainer}>
-        <View style={styles.cardContent}>
-          {/* Logo Mastercard */}
-          <Image
-            source={{
-              uri: "https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png",
-            }}
-            style={styles.logo}
-          />
-          {/* Icon bên phải */}
-          <TouchableOpacity style={styles.secureIcon}>
-            <Ionicons name="shield-checkmark-outline" size={16} color="#444" />
-          </TouchableOpacity>
+      <ScrollView contentContainerStyle={{ paddingBottom: 80 }}
+        style={{ paddingTop: 30, paddingLeft: 20, paddingRight: 20 }}>
+        {/* Header */}
+        <Text style={styles.title}>Cài đặt</Text>
+        <Text style={styles.subtitle}>Phương thức thanh toán</Text>
+        {/* Card */}
+        {cardList.map((item, index) => {
+          const cardNumber = item.number;
+          const bankCode = cardNumber?.slice(0, 6); // lấy 6 số đầu
+          const logo = bankLogos[bankCode]?.logo || "https://via.placeholder.com/40"; // fallback logo nếu không tìm được
 
-          {/* Card Number */}
-          <Text style={styles.cardNumber}>•••• •••• •••• 1579</Text>
+          return (
+            <TouchableOpacity onPress={() => handleCardSetting(item)}>
+              <CardItem
+                key={index}
+                cardNumber={cardNumber}
+                img={{ uri: logo }}
+                expiry={formatExpiryDate(item.expiryDate)}
+                ownerName={item.ownerName}
+              />
+            </TouchableOpacity>
 
-          {/* Card Info */}
-          <View style={styles.cardFooter}>
-            <Text style={styles.name}>AMANDA MORGAN</Text>
-            <Text style={styles.expiry}>12/22</Text>
-          </View>
-        </View>
+          );
+        })}
 
-        {/* Nút + */}
-        <TouchableOpacity style={styles.addButton}>
-          <Text style={styles.plus}>+</Text>
-        </TouchableOpacity>
-      </View>
+
+
+      </ScrollView>
+      <CardFormModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={handleSaveCard}
+        initialData={editCard}
+
+      />
+
+      <TouchableOpacity style={styles.addButton} onPress={handleAddCard}>
+        <Text style={styles.plus}>Thêm Thẻ</Text>
+      </TouchableOpacity>
       <BottomNavigation></BottomNavigation>
     </View>
   );
@@ -48,8 +172,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 50,
-    paddingHorizontal: 20,
   },
   title: {
     fontSize: 22,
@@ -63,6 +185,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   cardContainer: {
+    marginTop: 12,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -107,16 +230,19 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   addButton: {
+    position: "absolute",
+    bottom: 100,
+    left: 20,
+    right: 20,
     backgroundColor: "#2b2d64",
-    width: 44,
-    height: 120,
+    height: 40,
     borderRadius: 12,
-    marginLeft: 12,
     justifyContent: "center",
     alignItems: "center",
   },
+
   plus: {
-    fontSize: 24,
+    fontSize: 16,
     color: "#fff",
   },
 });

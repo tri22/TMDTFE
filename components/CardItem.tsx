@@ -1,71 +1,96 @@
-import { FontAwesome } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type CardItemProps = {
-  cardType: "mastercard" | "visa";
+  img: ImageSourcePropType;
   cardNumber: string;
   ownerName: string;
   expiry: string;
-  onSettings: () => void;
 };
 export type { CardItemProps };
 const CardItem: React.FC<CardItemProps> = ({
-  cardType,
+  img,
   cardNumber,
   ownerName,
   expiry,
-  onSettings,
 }) => {
   return (
     <View style={styles.cardContainer}>
-      <View style={styles.leftContainer}>
-        <FontAwesome
-          name={cardType === "mastercard" ? "cc-mastercard" : "cc-visa"}
-          size={32}
-          color={cardType === "mastercard" ? "#FF5F00" : "#1A1F71"}
+      <View style={styles.cardContent}>
+        {/* Logo Mastercard */}
+        <Image
+          source={img}
+          style={styles.logo}
         />
-        <Text style={styles.cardNumber}>**** **** **** {cardNumber}</Text>
-        <Text style={styles.ownerName}>{ownerName.toUpperCase()}</Text>
-        <Text style={styles.expiry}>Exp: {expiry}</Text>
+
+        {/* Icon bên phải */}
+        <TouchableOpacity style={styles.secureIcon}>
+          <Ionicons name="shield-checkmark-outline" size={16} color="#444" />
+        </TouchableOpacity>
+
+        {/* Card Number */}
+        <Text style={styles.cardNumber}>
+          {cardNumber.replace(/\d(?=\d{4})/g, "•")}
+        </Text>
+
+        {/* Card Info */}
+        <View style={styles.cardFooter}>
+          <Text style={styles.name}>{ownerName.toUpperCase()}</Text>
+          <Text style={styles.expiry}>{expiry}</Text>
+        </View>
       </View>
-      <TouchableOpacity style={styles.settingsIcon} onPress={onSettings}>
-        <FontAwesome name="gear" size={20} color="#333" />
-      </TouchableOpacity>
     </View>
   );
 };
 
+
 const styles = StyleSheet.create({
   cardContainer: {
+    marginTop: 12,
     flexDirection: "row",
-    backgroundColor: "#F9F9F9",
-    padding: 16,
-    marginVertical: 8,
-    borderRadius: 12,
-    justifyContent: "space-between",
     alignItems: "center",
-    borderColor: "#D9D9D9",
-    borderWidth: 1,
   },
-  leftContainer: {
-    flexDirection: "column",
+  cardContent: {
+    flex: 1,
+    backgroundColor: "#f5f7ff",
+    borderRadius: 16,
+    padding: 16,
+    position: "relative",
+  },
+  logo: {
+    width: 40,
+    height: 24,
+    resizeMode: "contain",
+    marginBottom: 16,
+  },
+  secureIcon: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: "#e0e7ff",
+    padding: 6,
+    borderRadius: 999,
   },
   cardNumber: {
     fontSize: 16,
-    color: "#333",
-    marginVertical: 4,
+    letterSpacing: 2,
+    marginBottom: 12,
+    color: "#000",
   },
-  ownerName: {
-    fontSize: 14,
-    color: "#888",
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  name: {
+    fontSize: 12,
+    color: "#333",
+    fontWeight: "bold",
+
   },
   expiry: {
     fontSize: 12,
-    color: "#666",
-  },
-  settingsIcon: {
-    padding: 6,
+    color: "#333",
   },
 });
 
