@@ -1,8 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import Toast from "react-native-toast-message";
-
-const API_BASE = "http://10.0.2.2:8080/api/v1";
-export const SERVER_URL_BASE = "http://10.0.2.2:8080";
+import { API_BASE_URL } from "./ipConstant";
 
 //chinh ve dia chi cua spring boot neu chay fe tren dien thoai: 
 
@@ -14,7 +13,7 @@ export const SERVER_URL_BASE = "http://10.0.2.2:8080";
 // export const SERVER_URL_BASE = "http://localhost:8080";
 
 const axiosInstance: AxiosInstance = axios.create({
-    baseURL: API_BASE,
+    baseURL: API_BASE_URL,
     withCredentials: true,
     headers: {
         "Content-Type": "application/json",
@@ -34,6 +33,17 @@ export const showToast = (
         visibilityTime: 2000,
     });
 };
+
+axiosInstance.interceptors.request.use(
+    async (config) => {
+        const token = await AsyncStorage.getItem("token"); // Lấy token từ AsyncStorage
+        if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
 
 axiosInstance.interceptors.response.use(

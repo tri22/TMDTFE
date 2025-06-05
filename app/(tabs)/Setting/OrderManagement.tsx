@@ -1,7 +1,6 @@
 import React from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
-import { Header } from './Header';
 
 const orders = [
   {
@@ -31,7 +30,7 @@ const orders = [
 ];
 
 const OrderManagement: React.FC = () => {
-  const renderItem =({ item }: { item: typeof orders[0] }) => (
+  const renderItem = ({ item }: { item: typeof orders[0] }) => (
     <View style={styles.card}>
       <View style={styles.info}>
         <Text style={styles.name}>{item.name}</Text>
@@ -49,43 +48,41 @@ const OrderManagement: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Header title="Quản lý đơn hàng" />
-      </View>
-      <FlatList
-        data={orders}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-      />
+
+      <ScrollView contentContainerStyle={{ paddingBottom: 80 }}
+        style={{ paddingTop: 30, paddingLeft: 20, paddingRight: 20 }}>
+        <Text style={styles.title}>Cài đặt</Text>
+        <Text style={styles.subtitle}>Quản lý đơn hàng</Text>
+        {orders.map((item, index) => renderItem({ item }))}
+
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
-    marginBottom: 20, // Cách dưới 16 điểm (bạn có thể tăng lên 20-24 cho thoáng hơn)
-  },
+
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 12,
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#000",
   },
   subtitle: {
     fontSize: 14,
-    color: '#888',
-    marginLeft: 12,
+    color: "#555",
+    marginTop: 4,
+    marginBottom: 20,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F9F9F9',
     borderRadius: 12,
-    padding: 12,
+    padding: 8,
     marginBottom: 12,
   },
   productImage: {

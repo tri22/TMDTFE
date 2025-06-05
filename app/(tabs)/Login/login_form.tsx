@@ -1,4 +1,4 @@
-import axiosInstance from '@/api/axiosInstance.js';
+import axiosInstance from '@/api/axiosInstance';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
