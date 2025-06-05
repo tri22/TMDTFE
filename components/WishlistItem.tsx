@@ -4,10 +4,23 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import imageMap from "@/data/imageMap";
 import { Item } from "@/data/item";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 const WishlistItem: React.FC<Item> = ({ ...item }) => {
+  // get data
+  // const { id, imageUrl, name, price, quantity } = item;
+  // transport to another component
+  const router = useRouter();
+  const data = item;
+  const handleItemPress = () => {
+    router.push({
+      pathname: "/(tabs)/PaymentScreen",
+      params: { data: JSON.stringify(data) },
+    });
+  };
+
   return (
     <View style={styles.container}>
-      <Image source={imageMap[item.image]} style={styles.image} />
+      <Image source={imageMap[item.imageUrl]} style={styles.image} />
       <TouchableOpacity style={styles.iconButton}>
         <AntDesign name="delete" size={24} color="#FF6347" />
       </TouchableOpacity>
@@ -15,12 +28,12 @@ const WishlistItem: React.FC<Item> = ({ ...item }) => {
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.price}>{item.price} vnd</Text>
         <View style={styles.tagsContainer}>
-          <Text style={styles.tag}>{item.color}</Text>
-          <Text style={styles.tag}>{item.size}</Text>
+          {/* <Text style={styles.tag}>{item.color}</Text> */}
+          {/* <Text style={styles.tag}>{item.size}</Text> */}
         </View>
       </View>
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.iconButton}>
+        <TouchableOpacity onPress={handleItemPress} style={styles.iconButton}>
           <FontAwesome5 name="plus" size={24} color="#4472C4" />
         </TouchableOpacity>
       </View>

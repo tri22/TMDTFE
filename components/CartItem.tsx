@@ -4,11 +4,11 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 type CartItemProps = {
   item: {
     id: number;
-    image: string;
+    imageUrl: string;
     name: string;
     price: number;
-    color: string;
-    size: string;
+    // color: string;
+    // size: string;
     quantity: number;
   };
   onIncrease: () => void;
@@ -24,13 +24,13 @@ const CartItem: React.FC<CartItemProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+      <Image source={{ uri: item.imageUrl }} style={styles.image} />
       <View style={styles.details}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.price}>{item.price}.000 vnd</Text>
-        <Text style={styles.sizeColor}>
+        {/* <Text style={styles.sizeColor}>
           {item.color}, Size {item.size}
-        </Text>
+        </Text> */}
         <View style={styles.actions}>
           <TouchableOpacity onPress={onDecrease} style={styles.button}>
             <Text>-</Text>
