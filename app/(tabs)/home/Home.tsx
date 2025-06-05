@@ -1,4 +1,3 @@
-import ProductItem from "@/app/(tabs)/product/components/productItem";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -6,67 +5,88 @@ import {
   FlatList,
   Image,
   ImageSourcePropType,
-  Linking,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   useWindowDimensions,
-  View,
+  View
 } from "react-native";
 import Toast from "react-native-toast-message";
 
+import { getCategoryCount } from "@/api/feApi";
+import { getNewestProducts } from "@/api/productApi";
+import Search from "@/app/(tabs)/home/components/search";
 import { colors } from "@/baseStyle/Style";
 import { IconButton } from "@/components/button";
-// import { FlatList } from "react-native-gesture-handler";
-import { getCategoryCount } from "@/api/feApi";
-import Search from "@/app/(tabs)/home/components/search";
 import { CategoryCount } from "@/models/CategoryCount";
+import {
+  PaginatedProductsResult,
+  ProductItemModel,
+} from "@/models/ProductItemModel";
+import DefaultLayout from "../DefaultLayout";
+import ProductItem from "../product/components/productItem";
 import { MyCarousel } from "./components";
 
 const imgDirRoot = "@/assets/images";
 const imgDir = "@/assets/images/searchProduct";
 
-type ProductItem = {
-  name: string;
-  image: ImageSourcePropType;
-  price: number;
+type CategoryType = {
+  icon1: ImageSourcePropType;
+  icon2: ImageSourcePropType;
+  icon3: ImageSourcePropType;
+  icon4: ImageSourcePropType;
+  title: string;
+  qty: number;
   link: string;
-  description?: string;
 };
 
-const product: ProductItem = {
-  name: "Quần jean",
-  image: require(`${imgDir}/quan-jean.png`),
-  price: 125000,
-  link: "jean",
-  description:
-    "Kính còn khoảng 95%, không trầy xước\nForm kính chuẩn, đeo nhẹ mặt.\nTròng tốt, không mờ hay loá.\nFull hộp + khăn lau kính đi kèm.",
+type CategoryProps = {
+  category: CategoryType;
 };
 
-const products: ProductItem[] = [
+const categories: CategoryType[] = [
   {
-    name: "Quần jean",
-    image: require(`${imgDir}/quan-jean.png`),
-    price: 125000,
-    link: "jean",
+    icon1: require(`${imgDirRoot}/category/category-quan-ao-1.jpg`),
+    icon2: require(`${imgDirRoot}/category/category-quan-ao-2.png`),
+    icon3: require(`${imgDirRoot}/category/category-quan-ao-3.jpg`),
+    icon4: require(`${imgDirRoot}/category/category-quan-ao-4.jpg`),
+    title: "Quần áo",
+    qty: 109,
+    link: "quan-ao",
+  },
+
+  {
+    icon1: require(`${imgDirRoot}/category/category-giay-dep-1.jpg`),
+    icon2: require(`${imgDirRoot}/category/category-giay-dep-2.png`),
+    icon3: require(`${imgDirRoot}/category/category-giay-dep-3.png`),
+    icon4: require(`${imgDirRoot}/category/category-giay-dep-4.png`),
+    title: "Giày dép",
+    qty: 70,
+    link: "giay-dep",
   },
   {
-    name: "Áo Champion",
-    image: require(`${imgDir}/ao-champion.jpg`),
-    price: 325000,
-    link: "superment",
+    icon1: require(`${imgDirRoot}/category/category-tui-xach-1.png`),
+    icon2: require(`${imgDirRoot}/category/category-tui-xach-2.png`),
+    icon3: require(`${imgDirRoot}/category/category-tui-xach-3.png`),
+    icon4: require(`${imgDirRoot}/category/category-tui-xach-4.jpg`),
+    title: "Túi xách",
+    qty: 200,
+    link: "/tui-xach",
   },
   {
-    name: "Kính mát Channel nữ Authentic",
-    image: require(`${imgDir}/kinh-channel.png`),
-    price: 725000,
-    link: "channel",
+    icon1: require(`${imgDirRoot}/category/category-dong-ho-1.png`),
+    icon2: require(`${imgDirRoot}/category/category-dong-ho-2.png`),
+    icon3: require(`${imgDirRoot}/category/category-dong-ho-3.png`),
+    icon4: require(`${imgDirRoot}/category/category-dong-ho-4.png`),
+    title: "Đồng hồ",
+    qty: 600,
+    link: "dong-ho",
   },
 ];
 
 function Home() {
   const [categoryCounts, setCategoryCounts] = useState<CategoryCount[]>([]);
+  const [newestProducts, setNewestProducts] = useState<ProductItemModel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -85,7 +105,19 @@ function Home() {
       }
     };
 
+    const fetchProducts = async (page: number) => {
+      try {
+        const result: PaginatedProductsResult = await getNewestProducts(page);
+        setNewestProducts(result.products);
+      } catch (err: any) {
+        setError(err.message || "Something went wrong");
+        console.error("Failed to fetch newest products:", err);
+      } finally {
+      }
+    };
+
     fetchCategoryCounts();
+    fetchProducts(0);
   }, []);
 
   const handlePressCategory = (category: CategoryType) => {
@@ -94,6 +126,15 @@ function Home() {
       params: {
         link: category.link,
         title: category.title,
+      },
+    });
+  };
+
+  const handleNewestProduct = (keyword: string) => {
+    router.push({
+      pathname: "/product",
+      params: {
+        search: keyword,
       },
     });
   };
@@ -120,59 +161,14 @@ function Home() {
     showAlert();
   };
 
-  type CategoryType = {
-    icon1: ImageSourcePropType;
-    icon2: ImageSourcePropType;
-    icon3: ImageSourcePropType;
-    icon4: ImageSourcePropType;
-    title: string;
-    qty: number;
-    link: string;
-  };
-
-  type CategoryProps = {
-    category: CategoryType;
-  };
-
-  const categories: CategoryType[] = [
-    {
-      icon1: require(`${imgDirRoot}/category/category-quan-ao-1.jpg`),
-      icon2: require(`${imgDirRoot}/category/category-quan-ao-2.png`),
-      icon3: require(`${imgDirRoot}/category/category-quan-ao-3.jpg`),
-      icon4: require(`${imgDirRoot}/category/category-quan-ao-4.jpg`),
-      title: "Quần áo",
-      qty: 109,
-      link: "quan-ao",
-    },
-
-    {
-      icon1: require(`${imgDirRoot}/category/category-giay-dep-1.jpg`),
-      icon2: require(`${imgDirRoot}/category/category-giay-dep-2.png`),
-      icon3: require(`${imgDirRoot}/category/category-giay-dep-3.png`),
-      icon4: require(`${imgDirRoot}/category/category-giay-dep-4.png`),
-      title: "Giày dép",
-      qty: 70,
-      link: "giay-dep",
-    },
-    {
-      icon1: require(`${imgDirRoot}/category/category-tui-xach-1.png`),
-      icon2: require(`${imgDirRoot}/category/category-tui-xach-2.png`),
-      icon3: require(`${imgDirRoot}/category/category-tui-xach-3.png`),
-      icon4: require(`${imgDirRoot}/category/category-tui-xach-4.jpg`),
-      title: "Túi xách",
-      qty: 200,
-      link: "/tui-xach",
-    },
-    {
-      icon1: require(`${imgDirRoot}/category/category-dong-ho-1.png`),
-      icon2: require(`${imgDirRoot}/category/category-dong-ho-2.png`),
-      icon3: require(`${imgDirRoot}/category/category-dong-ho-3.png`),
-      icon4: require(`${imgDirRoot}/category/category-dong-ho-4.png`),
-      title: "Đồng hồ",
-      qty: 600,
-      link: "dong-ho",
-    },
-  ];
+  const handleCategoryPress = () => {
+    router.push({
+      pathname: "/category",
+      params: {
+       
+      },
+    });
+  }
 
   const Category = ({ category }: CategoryProps) => {
     const { width } = useWindowDimensions();
@@ -252,36 +248,8 @@ function Home() {
     );
   };
 
-  type ProductType = {
-    name: string;
-    image: ImageSourcePropType;
-    price: number;
-    link: string;
-  };
-
-  const newestProducts: ProductType[] = [
-    {
-      name: "Quần jean",
-      image: require(`${imgDir}/quan-jean.png`),
-      price: 125000,
-      link: "jean",
-    },
-    {
-      name: "Áo Champion",
-      image: require(`${imgDir}/ao-champion.jpg`),
-      price: 325000,
-      link: "superment",
-    },
-    {
-      name: "Kính mát Channel nữ Authentic",
-      image: require(`${imgDir}/kinh-channel.png`),
-      price: 725000,
-      link: "channel",
-    },
-  ];
-
   type SalingItemProps = {
-    product: ProductItem;
+    product: ProductItemModel;
   };
 
   const SalingItem = ({ product }: SalingItemProps) => {
@@ -291,7 +259,7 @@ function Home() {
     return (
       <View style={{ width: imgSize, margin: 6 }}>
         <TouchableOpacity
-          onPress={() => Linking.openURL(product.link)}
+          // onPress={() => Linking.openURL(product.link)}
           style={{
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 3 },
@@ -305,7 +273,7 @@ function Home() {
         >
           <View style={{ position: "relative" }}>
             <Image
-              source={product.image}
+              // source={product.image}
               style={{ width: imgSize - 6, height: imgSize - 6 }}
             />
             <View
@@ -330,11 +298,75 @@ function Home() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* <View style={styles.header}>
-          
-      </View> */}
+    <DefaultLayout >
       <Search />
+      <FlatList
+        style={{paddingHorizontal: 20}}
+        ListHeaderComponent={
+          <>
+            <View style={{ borderRadius: 10, overflow: "hidden" }}>
+              <MyCarousel images={imageList} carouselHeight={200} />
+            </View>
+            <View style={[styles.dFlexSpBetween, { marginTop: 10 }]}>
+              <Text style={styles.heading}>Danh mục</Text>
+              {/* <TouchableOpacity
+                style={[styles.dFlex]}
+                onPress={handleCategoryPress}
+              >
+                <Text style={{ color: "black", fontSize: 20 }}>Xem thêm</Text>
+                <IconButton
+                  icon="arrow-forward-circle"
+                  onPress={handleCategoryPress}
+                  iconColor={colors.darkPrimary}
+                  iconSize={40}
+                  style={{ padding: 0, marginLeft: 2 }}
+                />
+              </TouchableOpacity> */}
+            </View>
+            <View style={styles.dFlex}>
+              <Category category={categories[0]} />
+              <Category category={categories[1]} />
+            </View>
+            <View style={styles.dFlex}>
+              <Category category={categories[2]} />
+              <Category category={categories[3]} />
+            </View>
+            <View style={[styles.dFlexSpBetween, { marginTop: 10 }]}>
+              <Text style={styles.heading}>Mới nhất</Text>
+              <TouchableOpacity
+                style={[styles.dFlex]}
+                onPress={() => handleNewestProduct("newest")}
+              >
+                <Text style={{ color: "black", fontSize: 20 }}>Xem thêm</Text>
+                <IconButton
+                  icon="arrow-forward-circle"
+                  onPress={() => handleNewestProduct("newest")}
+                  iconColor={colors.darkPrimary}
+                  iconSize={40}
+                  style={{ padding: 0, marginLeft: 2 }}
+                />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={newestProducts}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <ProductItem
+                  id={item.id}
+                  name={item.name}
+                  price={item.price}
+                  thumbnail={item.thumbnail}
+                />
+              )}
+            />
+          </>
+        }
+        data={[]}
+        renderItem={null}
+      />
+      {/* <Search />
       <ScrollView style={styles.container}>
         <View style={{ borderRadius: 10, overflow: "hidden" }}>
           <MyCarousel images={imageList} carouselHeight={200} />
@@ -367,33 +399,33 @@ function Home() {
           <Text style={styles.heading}>Mới nhất</Text>
           <TouchableOpacity
             style={[styles.dFlex]}
-            onPress={() => Linking.openURL("https://example.com")}
+            onPress={() => handleNewestProduct("newest")}
           >
             <Text style={{ color: "black", fontSize: 20 }}>Xem thêm</Text>
             <IconButton
               icon="arrow-forward-circle"
-              onPress={handlePress}
+              onPress={() => handleNewestProduct("newest")}
               iconColor={colors.darkPrimary}
               iconSize={40}
               style={{ padding: 0, marginLeft: 2 }}
             />
           </TouchableOpacity>
         </View>
-        {/* 
         <FlatList
           horizontal
           data={newestProducts}
           renderItem={({ item }) => (
             <ProductItem
+              id={item.id}
               name={item.name}
               price={item.price}
-              image={item.image}
-              link={item.link}
+              thumbnail={item.thumbnail}
             />
           )}
           showsHorizontalScrollIndicator={false}
-        /> */}
-        <View style={[styles.dFlexSpBetween, { marginTop: 10 }]}>
+        />
+        </ScrollView> */}
+      {/* <View style={[styles.dFlexSpBetween, { marginTop: 10 }]}>
           <Text style={styles.heading}>Giảm giá sốc</Text>
           <TouchableOpacity
             style={[styles.dFlex]}
@@ -418,9 +450,9 @@ function Home() {
           data={newestProducts}
           renderItem={({ item }) => <SalingItem product={item} />}
           showsHorizontalScrollIndicator={false}
-        />
-        <Text style={[styles.heading, { marginTop: 10 }]}>Dành cho bạn</Text>
-        {/* <FlatList
+        /> */}
+      {/* <Text style={[styles.heading, { marginTop: 10 }]}>Dành cho bạn</Text> */}
+      {/* <FlatList
           data={newestProducts}
           renderItem={({ item }) => (
             <ProductItem
@@ -432,8 +464,7 @@ function Home() {
           )}
           numColumns={2}
         /> */}
-      </ScrollView>
-    </View>
+    </DefaultLayout>
   );
 }
 

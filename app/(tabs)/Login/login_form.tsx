@@ -1,5 +1,6 @@
+import axiosInstance from '@/api/axiosInstance';
 import { Feather } from '@expo/vector-icons';
-import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -9,7 +10,7 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [pwd, setPwd] = useState('');
     const [showPwd, setShowPwd] = useState(false);
-
+    const [isLoading, setIsLoading] = useState(false);
     const handleRegister = () => router.replace('/(tabs)/Login/register_form');
     const handleForgetPass = () => router.replace('/(tabs)/Login/password_recovery');
     const handleHomePage = () => router.push('/');
@@ -19,22 +20,19 @@ export default function LoginScreen() {
             alert('Vui lòng nhập đầy đủ email và mật khẩu');
             return;
         }
+        setIsLoading(true);
         try {
-            const response = await axios.post("http://localhost:8080/api/v1/users/login", {
-                email,
-                pwd,
-            });
-            const user = response.data;
-            console.log("Đăng nhập thành công:", user);
-            handleHomePage();
-            // router.push({
-            //     pathname: '/(tabs)/User/profile',
-            //     params: { userId: user.id } // truyền id để hiển thị thông tin người dùng
-            // });
-        } catch (error) {
-            console.error("Đăng nhập thất bại", error);
-            alert("email hoặc mật khẩu không chính xác");
+            const response = await axiosInstance.post("/users/login", { email, pwd });
+            const userData = response.data; // Giả sử API trả về thông tin user
+            console.log("Đăng nhập thành công:", userData);
 
+            // Lưu thông tin user vào AsyncStorage
+            await AsyncStorage.setItem('user', JSON.stringify(userData))
+            handleHomePage();
+        } catch (error) {
+            console.error('Đăng nhập thất bại:', error);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -77,7 +75,7 @@ export default function LoginScreen() {
             <View style={styles.formWrapper2}>
                 <TouchableOpacity
                     style={styles.loginBtn} onPress={handleLogin}>
-                    <Text style={styles.loginBtnText}>Đăng nhập</Text>
+                    <Text style={styles.loginBtnText}>{isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.ggLoginBtn} onPress={handleHomePage}>

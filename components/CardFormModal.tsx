@@ -1,12 +1,16 @@
+import { CardData } from '@/api/creditCardApi';
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-
+import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 interface CardFormModalProps {
   visible: boolean;
-  onClose: () => void;
+  onClose: () => void
+  onSave: () => void
+  initialData: CardData;
 }
 
-const CardFormModal: React.FC<CardFormModalProps> = ({ visible, onClose }) => {
+const CardFormModal: React.FC<CardFormModalProps> = ({ visible, onClose, onSave, initialData }) => {
+  const [formData, setFormData] = useState<CardData>(initialData);
+
   return (
     <Modal
       animationType="slide"
@@ -16,7 +20,13 @@ const CardFormModal: React.FC<CardFormModalProps> = ({ visible, onClose }) => {
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Thêm thẻ</Text>
+          <View>
+             <Text style={styles.modalTitle}>Thêm thẻ</Text>
+             <TouchableOpacity>
+              <Text>X</Text>
+             </TouchableOpacity>
+          </View>
+          
 
           {/* Cardholder input */}
           <View style={styles.inputWrapper}>
@@ -59,7 +69,7 @@ const CardFormModal: React.FC<CardFormModalProps> = ({ visible, onClose }) => {
           </View>
 
           {/* Save button */}
-          <TouchableOpacity onPress={onClose} style={styles.saveButton}>
+          <TouchableOpacity onPress={onSave} style={styles.saveButton}>
             <Text style={styles.saveButtonText}>Lưu</Text>
           </TouchableOpacity>
         </View>

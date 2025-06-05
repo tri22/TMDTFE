@@ -1,3 +1,4 @@
+
 import { StyleSheet, View } from "react-native";
 import { BottomNavigation } from "../../components/BottomNavigation";
 
@@ -50,3 +51,4 @@ const styles = StyleSheet.create({
     paddingBottom: 100, // Đảm bảo BottomNavigation không che khuất nội dung
   },
 });
+

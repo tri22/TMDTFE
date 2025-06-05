@@ -11,7 +11,8 @@
 // });
 import { Comment } from "@/models/ProductDetailModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axiosInstance, { SERVER_URL_BASE } from "./axiosInstance";
+import axiosInstance, { showToast } from "./axiosInstance";
+import { SERVER_URL_BASE } from "./ipConstant";
 
 export async function submitComment(
   productId: number,
@@ -24,8 +25,9 @@ export async function submitComment(
   const userId = userIdStr ? parseInt(userIdStr) : null;
 
   if (userId === null) {
-    console.error("submitComment: User ID not found");
+      showToast("error", "Bạn cần đăng nhập để bình luận.");
      throw new Error("Bạn cần đăng nhập để bình luận.");
+    
   }
   try {
     const response = await axiosInstance.post<Comment[]>(
@@ -72,10 +74,10 @@ export async function submitComment(
 
     return comments;
   } catch (error: any) {
-    console.error(
-      "Lỗi khi lấy sản phẩm theo category (paginated):",
-      error?.response?.data || error?.message || error
-    );
+    // console.error(
+    //   "Lỗi khi lấy sản phẩm theo category (paginated):",
+    //   error?.response?.data || error?.message || error
+    // );
     throw new Error("Không thể tải danh sách sản phẩm.");
   }
 }

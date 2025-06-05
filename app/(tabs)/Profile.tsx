@@ -1,11 +1,28 @@
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { Feather, Ionicons } from '@expo/vector-icons'; // icon thư viện phổ biến
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProfileScreen() {
     const navigateSetting = () => router.push('/(tabs)/Settings');
     const navigateEdit = () => router.push('/(tabs)/Setting/ProfileSetting')
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const userData = await AsyncStorage.getItem('user');
+                if (userData) {
+                    setUser(JSON.parse(userData));
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy thông tin user:', error);
+            }
+        };
+        fetchUser();
+    }, []);
     const images = [
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 1
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 2
@@ -20,11 +37,11 @@ export default function ProfileScreen() {
             <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
                 <View style={styles.profileHeader}>
                     <Image
-                        source={{ uri: 'https://img.freepik.com/premium-vector/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806.jpg?semt=ais_hybrid&w=740' }}
+                        source={{ uri: user?.avatar || 'https://img.freepik.com/premium-vector/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806.jpg?semt=ais_hybrid&w=740' }}
                         style={styles.avatar}
                     />
                     <View style={styles.nameContainer}>
-                        <Text style={styles.name}>Anh Trí</Text>
+                        <Text style={styles.name}>{user?.name || 'Ẩn danh'}</Text>
                         <View style={styles.verifiedContainer}>
                             <View style={styles.verifiedIcon}>
                                 <Ionicons name="checkmark" size={12} color="#fff" />
@@ -33,16 +50,13 @@ export default function ProfileScreen() {
                         </View>
                     </View>
                     <View style={styles.actionGroup}>
-                        {/* Nút Edit */}
                         <TouchableOpacity onPress={navigateEdit} style={[styles.actionButton, { backgroundColor: '#4472c4' }]}>
                             <Feather name="edit-3" size={18} color="#fff" />
                         </TouchableOpacity>
-                        {/* Nút Thông báo */}
                         <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#f8f8f8' }]}>
                             <View style={styles.notificationDot} />
                             <Ionicons name="notifications-outline" size={20} color="#4472c4" />
                         </TouchableOpacity>
-                        {/* Nút Settings */}
                         <TouchableOpacity onPress={navigateSetting} style={[styles.actionButton, { backgroundColor: '#f8f8f8' }]}>
                             <Ionicons name="settings-outline" size={20} color="#4472c4" />
                         </TouchableOpacity>
@@ -110,6 +124,7 @@ export default function ProfileScreen() {
             <BottomNavigation></BottomNavigation>
         </SafeAreaView>
     );
+
 };
 
 const styles = StyleSheet.create({
