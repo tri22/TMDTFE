@@ -30,6 +30,7 @@ const Settings = () => {
         try {
             // Xóa thông tin user khỏi AsyncStorage
             await AsyncStorage.removeItem('user');
+            await AsyncStorage.removeItem('token');
             console.log('Đã xóa thông tin user, đăng xuất thành công');
 
             // Hiển thị thông báo đăng xuất thành công
