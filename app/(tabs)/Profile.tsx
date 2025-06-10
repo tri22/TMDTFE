@@ -32,6 +32,10 @@ export default function ProfileScreen() {
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 4
         '', // phần tử cuối là nút next
     ];
+
+    const navigatePostProduct = () => {
+        router.push('/(tabs)/Profile/PostProduct')
+    }
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -69,11 +73,14 @@ export default function ProfileScreen() {
                             <Text style={styles.cardTitle}>Đăng bán sản phẩm của bạn!</Text>
                             <Text style={styles.cardDescription}>Sản phẩm của bạn đang chờ người mua, hãy mô tả ngay!</Text>
                         </View>
-                        <View style={styles.cardIcon}>
-                            <Ionicons name="images" size={20} color="#fff" />
-                        </View>
+                        <TouchableOpacity onPress={navigatePostProduct}>
+                            <View style={styles.cardIcon}>
+                                <Ionicons name="images" size={20} color="#fff" />
+                            </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
+
                 <View style={styles.orderTrackingSection}>
                     <Text style={styles.orderTrackingTitle}>Theo dõi đơn hàng</Text>
                     <View style={styles.orderButtonGroup}>

@@ -2,10 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { BottomNavigation } from '../../components/BottomNavigation';
 import { SettingsItem } from './Setting/SettingsItem';
 import { SettingsSection } from './Setting/SettingsSection';
-import Toast from 'react-native-toast-message';
 const Settings = () => {
     const router = useRouter();
 
@@ -17,7 +17,7 @@ const Settings = () => {
 
     const appSettings = [
         { label: 'Quản lý đơn hàng', route: '/(tabs)/Setting/OrderManagement' },
-        { label: 'Lịch sử giao dịch', route: '/(tabs)/Setting/MyActivity' },
+        { label: 'Lịch sử mua hàng', route: '/(tabs)/Setting/MyActivity' },
         { label: 'Hỗ trợ khách hàng', route: '' },
         { label: 'Thông tin ứng dụng', route: '/(tabs)/Setting/About' },
     ] as { label: string; route: string }[];
@@ -30,6 +30,7 @@ const Settings = () => {
         try {
             // Xóa thông tin user khỏi AsyncStorage
             await AsyncStorage.removeItem('user');
+            await AsyncStorage.removeItem('token');
             console.log('Đã xóa thông tin user, đăng xuất thành công');
 
             // Hiển thị thông báo đăng xuất thành công

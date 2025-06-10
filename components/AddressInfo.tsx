@@ -3,14 +3,18 @@ import React, { useState } from "react";
 
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AddressModal from "./AddressModal";
-type Address = {
+export type Address = {
   street: string;
   ward: string;
   district: string;
   city: string;
 };
 
-const AddressInfo: React.FC = () => {
+interface AddressInfoProps {
+  onSave: (address: Address) => void;
+}
+
+const AddressInfo: React.FC<AddressInfoProps> = ({ onSave }) => {
   const [visible, setVisible] = useState(false);
   const [address, setAddress] = useState<Address>({
     street: "",
@@ -20,6 +24,7 @@ const AddressInfo: React.FC = () => {
   });
   const handleSave = (address: Address) => {
     setAddress(address);
+    onSave(address);
   };
 
   return (

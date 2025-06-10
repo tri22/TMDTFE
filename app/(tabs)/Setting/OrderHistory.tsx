@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { Header } from './Header';
+
 
 const orders = [
     { id: '1', date: '19/04/2020 12:31', code: '#92287157', amount: 140000 },
@@ -33,7 +33,6 @@ export default function OrderHistory() {
     return (
         <View style={styles.wrapper}>
             <Text></Text>
-            <Header title="Lịch sử giao dịch" />
             <View style={styles.container}>
                 <FlatList data={orders} renderItem={renderItem} keyExtractor={(item) => item.id} />
             </View>

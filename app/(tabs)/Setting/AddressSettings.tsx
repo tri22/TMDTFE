@@ -3,22 +3,14 @@ import { Picker } from '@react-native-picker/picker';
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import userApi from '../../../api/userApi';
+import userApi, { AddressRequest } from '../../../api/userApi';
 import { BottomNavigation } from '../../../components/BottomNavigation';
 import AddressForm from './AddressForm';
 
-interface Address {
-  id:number;
-  province: string;
-  district: string;
-  ward: string;
-  detail: string;
-  phone: string;
-}
 
 const AddressSettings = () => {
-  const [addressList, setAddressList] = useState<Address[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<Address>();
+  const [addressList, setAddressList] = useState<AddressRequest[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<AddressRequest>();
   const [selectedAddressIndex, setSelectedAddressIndex] = useState<number>();
   const [showPicker, setShowPicker] = useState(false);
 
@@ -87,16 +79,15 @@ export default AddressSettings;
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: "bold",
-    color: "#202020",
-    marginBottom: 10,
+    color: "#000",
   },
   subtitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#000",
-    marginBottom: 45,
+    fontSize: 14,
+    color: "#555",
+    marginTop: 4,
+    marginBottom: 20,
   },
   selectText: {
     fontSize: 16,

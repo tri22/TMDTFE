@@ -8,6 +8,7 @@ import {
   TotalAmount,
   VoucherModal,
 } from "@/components";
+import { Address } from "@/components/AddressInfo";
 import { CardData, VoucherData } from "@/data";
 import { Item } from "@/data/item";
 import { Voucher } from "@/data/voucher";
@@ -24,13 +25,22 @@ import {
 
 const PaymentScreen: React.FC = () => {
   const searchParams = useSearchParams(); // Sửa thành const
-  const list = searchParams.get("list");
-  const cartItems: Item[] = list ? JSON.parse(list) : [];
+  const data = searchParams.get("data");
+  const temp: Item = data
+    ? JSON.parse(data)
+    : {
+        id: 0,
+        name: "",
+        price: 0,
+        imageUrl: "",
+        quantity: 1,
+      };
+  // create useState for cartItems
+  const [cartItems, setCartItems] = useState<Item>(temp);
+
   const [VoucherDisplay, setVoucherDisplay] = useState("Voucher");
   const [totalAmount, setTotalAmout] = useState(
-    cartItems.reduce((total, item) => {
-      return total + item.price * item.quantity;
-    }, 0)
+    cartItems.price * cartItems.quantity
   );
   const [visibleVoucher, setVisibleVoucher] = useState(false);
   const [voucher, setVoucher] = useState<Voucher | null>(null);
@@ -62,14 +72,27 @@ const PaymentScreen: React.FC = () => {
     }
   };
 
+  // create useState for child data
   const [childData, setChildData] = useState<any>({ email: "", phone: "" });
 
+  // create childData for AddressInfo
+  const [addressData, setAddressData] = useState<Address>({
+    street: "",
+    ward: "",
+    district: "",
+    city: "",
+  });
+
+  // get data from child component for contact info
   const handleDataFromChild = (email: string, phone: string) => {
     const data = { email, phone };
     setChildData(data);
-    return data; // Ensure the function returns the object
+    return data;
   };
 
+  const handleDataFromChildForAddress = (address: Address) => {
+    setAddressData(address);
+  };
   // Sửa thành useMemo
   const validateData = useMemo(
     () => ({
@@ -79,6 +102,7 @@ const PaymentScreen: React.FC = () => {
       voucher: voucher,
       email: childData.email,
       phone: childData.phone,
+      address: addressData,
     }),
     [
       cartItems,
@@ -87,6 +111,7 @@ const PaymentScreen: React.FC = () => {
       voucher,
       childData.email,
       childData.phone,
+      addressData,
     ]
   );
 
@@ -96,8 +121,10 @@ const PaymentScreen: React.FC = () => {
   );
 
   const isSubmitDisabled = FormValidation(validateData);
+
   const handlePayment = () => {
-    setPaymentStatus(isSubmitDisabled ? "success" : "failure");
+    setPaymentStatus(1 ? "success" : "failure");
+    console.log("Payment Data:", isSubmitDisabled);
     setModalVisible(true);
   };
 
@@ -110,7 +137,7 @@ const PaymentScreen: React.FC = () => {
   return (
     <>
       <ScrollView style={styles.container}>
-        <AddressInfo />
+        <AddressInfo onSave={handleDataFromChildForAddress} />
         <ContactInfo onSendData={handleDataFromChild} />
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionHeaderText}>Sản phẩm</Text>{" "}
@@ -130,9 +157,28 @@ const PaymentScreen: React.FC = () => {
             onAddVoucher={handleAddVoucher}
           />
         </View>
-        {cartItems.map((item: Item) => (
-          <ProductItemSection key={item.id} {...item} />
-        ))}
+        <ProductItemSection
+          key={cartItems.id}
+          {...cartItems}
+          onIncrease={() => {
+            const newQuantity = cartItems.quantity + 1;
+            setTotalAmout(cartItems.price * newQuantity);
+            setCartItems({
+              ...cartItems,
+              quantity: newQuantity,
+            }); // Cập nhật state nếu cần
+          }}
+          onDecrease={() => {
+            const newQuantity =
+              cartItems.quantity > 1 ? cartItems.quantity - 1 : 1;
+            setTotalAmout(cartItems.price * newQuantity);
+            setCartItems({
+              ...cartItems,
+              quantity: newQuantity,
+            }); // Cập nhật state nếu cần
+          }}
+        />
+
         <View style={styles.container}>
           <TouchableOpacity onPress={() => setVisibleCard(true)}>
             {selectedCard ? (
@@ -187,6 +233,8 @@ const PaymentScreen: React.FC = () => {
         onPrimaryPress={() => {
           setModalVisible(false);
           if (paymentStatus === "success") {
+            // call api post to BE
+
             router.push({
               pathname: "/(tabs)/OrderScreen",
               params: { dataOrder: JSON.stringify(validateData) },

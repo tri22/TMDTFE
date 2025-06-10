@@ -1,27 +1,31 @@
+import createOrder from "@/api/orderApi";
 import { Card, CardContent, ProductItemSection } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { Item } from "@/data/item";
 import { useSearchParams } from "expo-router/build/hooks";
-import { Clipboard } from "lucide-react";
 import React from "react";
-import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const OrderScreen = () => {
   const list = useSearchParams().get("dataOrder");
-  const data = list ? JSON.parse(list) : [];
-  const cartsList = data.carts;
-  const email = data.email;
-  const phone = data.phone;
-  const total = data.total;
-  const voucher = data.voucher;
-  // get the current date and time
+  const data = list ? JSON.parse(list) : null;
+
+  if (!data) return null;
+
+  const { carts, cards, voucher, total, email, phone, address } = data;
+
+  if (data) {
+    createOrder({
+      idUser: 3, // Giả sử userId là 3
+      carts: carts,
+      cards: cards,
+      voucher: voucher,
+      total: total,
+      email: email,
+      phone: phone,
+      address: address,
+    });
+  }
+
   const currentDate = new Date();
   const date = currentDate.toLocaleDateString("vi-VN", {
     year: "numeric",
@@ -37,100 +41,152 @@ const OrderScreen = () => {
     <View style={styles.wrapper}>
       <ScrollView style={styles.container}>
         {/* Header */}
-        <View style={styles.headerContainer}>
-          <Image
-            source={{ uri: "https://via.placeholder.com/100" }}
-            style={styles.avatar}
-          />
-          <View>
-            <Text style={styles.title}>Đơn hàng</Text>
-            <Text style={styles.subtitle}>Trạng thái đơn hàng</Text>
-          </View>
-        </View>
-
-        {/* Order Card */}
-        <Card style={styles.card}>
-          <CardContent>
-            {/* Show list item  */}
-            {cartsList.map((item: Item) => (
-              <ProductItemSection key={item.id} {...item} />
-            ))}
-
-            {/* Total show  */}
-            <View style={styles.totalContainer}>
-              <Text style={styles.deliveryText}>Tổng tiền:</Text>
-              <Text style={styles.priceText}>{total}.000 VND</Text>
-            </View>
-
-            {/* Tracking Information */}
-            <View style={styles.trackingContainer}>
-              <Text style={styles.trackingLabel}>Mã vận đơn</Text>
-              <View style={styles.trackingRow}>
-                <Text style={styles.trackingCode}>LGS-i92927839300763731</Text>
-                <TouchableOpacity>
-                  <Clipboard size={18} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Status Information */}
-            <View style={styles.statusContainer}>
-              <Text style={styles.statusHeader}>Đã đặt hàng</Text>
-              <Text style={styles.statusDate}>
-                {date} – {time}
-              </Text>
-              <Text style={styles.statusDescription}>
-                Bạn xác nhận mua hàng và đang chờ người bán xác nhận
+        <Card style={styles.headerCard}>
+          <CardContent style={styles.headerContent}>
+            <Image
+              source={{ uri: "https://via.placeholder.com/100" }}
+              style={styles.avatar}
+            />
+            <View>
+              <Text style={styles.title}>Đơn hàng của bạn</Text>
+              <Text style={styles.subtitle}>
+                Trạng thái: <Text style={styles.paid}>Đã thanh toán</Text>
               </Text>
             </View>
           </CardContent>
         </Card>
+
+        {/* Product Card */}
+        <Card style={styles.card}>
+          <CardContent>
+            <ProductItemSection key={carts.id} {...carts} />
+          </CardContent>
+        </Card>
+
+        {/* Voucher */}
+        {voucher && (
+          <Card style={styles.card}>
+            <CardContent style={styles.rowBetween}>
+              <Text style={styles.label}>Khuyến mãi:</Text>
+              <Text style={styles.voucherText}>
+                {voucher.discount}% ({voucher.title})
+              </Text>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Tổng tiền */}
+        <Card style={styles.card}>
+          <CardContent style={styles.rowBetween}>
+            <Text style={styles.label}>Tổng tiền:</Text>
+            <Text style={styles.totalPrice}>{total.toLocaleString()} VND</Text>
+          </CardContent>
+        </Card>
+
+        {/* Email và SĐT */}
+        <Card style={styles.card}>
+          <CardContent>
+            <Text style={styles.label}>Email:</Text>
+            <Text style={styles.value}>{email}</Text>
+
+            <Text style={[styles.label, { marginTop: 12 }]}>
+              Số điện thoại:
+            </Text>
+            <Text style={styles.value}>{phone}</Text>
+          </CardContent>
+        </Card>
+
+        {/* Địa chỉ nếu có */}
+        {address && (
+          <Card style={styles.card}>
+            <CardContent>
+              <Text style={styles.label}>Địa chỉ:</Text>
+              <Text style={styles.value}>
+                {address.street}, {address.ward}, {address.district},{" "}
+                {address.city}
+              </Text>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Ngày giờ */}
+        <Card style={styles.card}>
+          <CardContent style={styles.rowBetween}>
+            <Text style={styles.label}>Ngày đặt:</Text>
+            <Text style={styles.value}>
+              {date} {time}
+            </Text>
+          </CardContent>
+        </Card>
       </ScrollView>
+
       <BottomNavigation />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  wrapper: { flex: 1 },
-  container: {
+  wrapper: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    paddingBottom: 0,
-    marginBottom: 80,
+    backgroundColor: "#FAFAFA",
   },
-  headerContainer: {
+  container: {
+    padding: 16,
+  },
+  headerCard: {
+    marginBottom: 12,
+  },
+  headerContent: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
   },
-  avatar: { width: 64, height: 64, borderRadius: 32 },
-  title: { fontSize: 20, fontWeight: "600" },
-  subtitle: { color: "#6b7280" },
-  card: { marginVertical: 8 },
-  totalContainer: {
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 12,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#111",
+  },
+  subtitle: {
+    fontSize: 14,
+    marginTop: 4,
+    color: "#555",
+  },
+  paid: {
+    color: "green",
+    fontWeight: "600",
+  },
+  card: {
+    marginBottom: 12,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#333",
+  },
+  value: {
+    fontSize: 15,
+    color: "#444",
+    marginTop: 4,
+  },
+  voucherText: {
+    color: "green",
+    fontWeight: "600",
+  },
+  totalPrice: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#DAA520", // gold
+  },
+  rowBetween: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
+    alignItems: "center",
   },
-  deliveryText: { color: "#6b7280" },
-  priceText: { fontSize: 18, fontWeight: "700", color: "#3b82f6" },
-  trackingContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#f3f4f6",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  trackingLabel: { color: "#6b7280" },
-  trackingRow: { flexDirection: "row", alignItems: "center" },
-  trackingCode: { fontWeight: "600", marginRight: 8 },
-  statusContainer: { marginTop: 16 },
-  statusHeader: { fontWeight: "600" },
-  statusDate: { color: "#6b7280" },
-  statusDescription: { color: "#6b7280" },
 });
 
 export default OrderScreen;

@@ -7,7 +7,6 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 const WishlistScreen = () => {
   const wishlistItems = ItemData;
-
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Danh sách yêu thích</Text>

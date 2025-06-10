@@ -11,7 +11,8 @@
 // });
 import { Comment } from "@/models/ProductDetailModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axiosInstance, { SERVER_URL_BASE, showToast } from "./axiosInstance";
+import axiosInstance, { showToast } from "./axiosInstance";
+import { SERVER_URL_BASE } from "./ipConstant";
 
 export async function submitComment(
   productId: number,

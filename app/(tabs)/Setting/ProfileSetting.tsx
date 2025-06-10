@@ -4,7 +4,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect, useState } from "react";
 import { Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SERVER_URL_BASE } from "../../../api/ipConstant";
-import userApi from '../../../api/userApi';
+import userApi, { UserRequest } from '../../../api/userApi';
+
+
 const ProfileSetting = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -37,7 +39,7 @@ const ProfileSetting = () => {
     }, []);
 
     const updateInfoHandler = () => {
-        const updatedUser = {
+        const updatedUser: UserRequest = {
             fullName: fullName,
             email: email,
             birthday: birthDate,
