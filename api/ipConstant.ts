@@ -1,7 +1,9 @@
 
 // thay ip thanh ip máy của mình và đừng commit file này
-export const IP_ADDRESS = "192.168.1.3";
+
+// export const IP_ADDRESS = "192.168.1.3";
 // export const IP_ADDRESS = "localhost";
+export const IP_ADDRESS = "192.168.100.3";
 
 export const SERVER_URL_BASE = `http://${IP_ADDRESS}:8080`;
 

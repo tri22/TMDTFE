@@ -16,6 +16,7 @@ export interface AddressRequest {
     ward: string;
     detail: string;
     phone: string;
+
 }
 
 const userApi = {
@@ -35,7 +36,7 @@ const userApi = {
     upadtetUserAddressById: (data: AddressRequest) => {
         return axiosInstance.put(`/users/address-update`, data);
     },
-
+  
     getUserAddress: (userId: number) => {
         return axiosInstance.get(`/users/address-list/${userId}`);
     }
