@@ -1,3 +1,4 @@
+import axiosInstance from '@/api/axiosInstance';
 import { Feather } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
@@ -5,7 +6,6 @@ import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import InputField from './Components/InputField';
 import LogoSection from './Components/LogoSection';
-import axiosInstance from '@/api/axiosInstance';
 
 export default function RegisterForm() {
     const [email, setEmail] = useState('');
@@ -25,7 +25,7 @@ export default function RegisterForm() {
 
             await axiosInstance.post('/users/register', { email, pwd, phone, });
 
-            alert("Đăng ký thành công!");   
+            alert("Đăng ký thành công!");
             router.replace('/Login/login_form');
         } catch (error) {
             // Lỗi đã được xử lý bởi interceptor trong axiosInstance

@@ -10,6 +10,8 @@ import {
 } from "react-native";
 
 type ContactInfoModalProps = {
+  email: string;
+  phone: string;
   visible: boolean;
   onClose: () => void;
   onSave: (contactInfo: ContactInfo) => void;
@@ -21,13 +23,15 @@ type ContactInfo = {
 };
 
 const ContactInfoModal: React.FC<ContactInfoModalProps> = ({
+  email,
+  phone,
   visible,
   onClose,
   onSave,
 }) => {
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
-    phone: "",
-    email: "",
+    phone: phone || "",
+    email: email || "",
   });
 
   return (
@@ -43,7 +47,7 @@ const ContactInfoModal: React.FC<ContactInfoModalProps> = ({
 
           <TextInput
             style={styles.input}
-            value={contactInfo.phone}
+            value={phone || contactInfo.phone}
             onChangeText={(text) =>
               setContactInfo((prev) => ({ ...prev, phone: text }))
             }
@@ -53,7 +57,7 @@ const ContactInfoModal: React.FC<ContactInfoModalProps> = ({
 
           <TextInput
             style={styles.input}
-            value={contactInfo.email}
+            value={email || contactInfo.email}
             onChangeText={(text) =>
               setContactInfo((prev) => ({ ...prev, email: text }))
             }

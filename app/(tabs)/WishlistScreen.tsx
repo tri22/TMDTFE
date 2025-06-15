@@ -1,6 +1,7 @@
 import { WishlistItem } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import fetchDataWishlist, { Item } from "@/data/item";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -11,7 +12,16 @@ const WishlistScreen = () => {
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
-        const data = await fetchDataWishlist(3);
+        const userString = await AsyncStorage.getItem("user");
+     
+
+        if (!userString) {
+          console.warn("No user data found");
+          return;
+        }
+        const user = JSON.parse(userString);
+
+        const data = await fetchDataWishlist(user.id);
         setWishlistItems(data);
       } catch (error) {
         console.error("Error fetching wishlist:", error);

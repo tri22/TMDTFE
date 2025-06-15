@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ContactInfoModal from "./ContactModal";
 
@@ -7,13 +8,8 @@ type ContactInfo = {
   phone: string;
   email: string;
 };
-interface ContactInfoProps {
-  onSendData: (
-    email: string,
-    phone: string
-  ) => { email: string; phone: string };
-}
-const ContactInfo: React.FC<ContactInfoProps> = ({ onSendData }) => {
+interface ContactInfoProps {}
+const ContactInfo: React.FC<ContactInfoProps> = () => {
   // Sample data for contact information
 
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
@@ -23,9 +19,33 @@ const ContactInfo: React.FC<ContactInfoProps> = ({ onSendData }) => {
 
   const [visible, setVisible] = useState(false);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userString = await AsyncStorage.getItem("user");
+
+        if (!userString) {
+          console.warn("No user data found");
+          return;
+        }
+
+        const user = JSON.parse(userString);
+
+        setContactInfo({
+          phone: user.phone || "",
+          email: user.email || "",
+        });
+      } catch (error) {
+        console.error("Error fetching contact info:", error);
+      }
+    };
+
+    fetchUserData(); // ← Gọi hàm async ở đây
+  }, []);
+
   const handleSave = (contactInfo: ContactInfo) => {
     setContactInfo(contactInfo);
-    onSendData(contactInfo.email, contactInfo.phone);
+
     setVisible(false);
   };
 
@@ -51,6 +71,8 @@ const ContactInfo: React.FC<ContactInfoProps> = ({ onSendData }) => {
         {contactInfo.email && `Email: ${contactInfo.email}`}
       </Text>
       <ContactInfoModal
+        email={contactInfo.email}
+        phone={contactInfo.phone}
         visible={visible}
         onClose={() => setVisible(false)}
         onSave={handleSave}
