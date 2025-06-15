@@ -21,9 +21,9 @@ const axiosInstance: AxiosInstance = axios.create({
 });
 
 export const showToast = (
-  type: "success" | "error" | "info",
-  text1: string,
-  text2?: string
+    type: "success" | "error" | "info",
+    text1: string,
+    text2?: string
 ): void => {
     Toast.show({
         type,
@@ -38,7 +38,7 @@ axiosInstance.interceptors.request.use(
     async (config) => {
         const token = await AsyncStorage.getItem("token"); // Lấy token từ AsyncStorage
         if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },

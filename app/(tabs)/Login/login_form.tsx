@@ -1,4 +1,4 @@
-import axiosInstance from '@/api/axiosInstance';
+import { authApi } from '@/api/authApi';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
@@ -22,11 +22,14 @@ export default function LoginScreen() {
         }
         setIsLoading(true);
         try {
-            const response = await axiosInstance.post("/users/login", { email, pwd });
-            const userData = response.data; // Giả sử API trả về thông tin user
-            console.log("Đăng nhập thành công:", userData);
+            const response = await authApi.login({ email, pwd });
+            const userData = response.data;
+            const token = response.data.token;
 
+            console.log("Đăng nhập thành công:", userData);
+            console.log("Đăng nhập thành công:", token);
             // Lưu thông tin user vào AsyncStorage
+            await AsyncStorage.setItem('token', JSON.stringify(token));
             await AsyncStorage.setItem('user', JSON.stringify(userData))
             handleHomePage();
         } catch (error) {

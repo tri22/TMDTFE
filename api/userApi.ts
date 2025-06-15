@@ -1,21 +1,22 @@
 import axiosInstance from "./axiosInstance";
 
-export  interface UserRequest  {
+export interface UserRequest {
     id?: number;
-    fullName:String;
-    email:String;
-    birthday:Date;
-    phone:String;
+    fullName: String;
+    email: String;
+    birthday: Date;
+    phone: String;
     avatar: String;
 }
 
 export interface AddressRequest {
-  id:number;
-  province: string;
-  district: string;
-  ward: string;
-  detail: string;
-  phone: string;
+    id: number;
+    province: string;
+    district: string;
+    ward: string;
+    detail: string;
+    phone: string;
+
 }
 
 const userApi = {
@@ -24,19 +25,19 @@ const userApi = {
         return axiosInstance.get(`/users/me`);
     },
 
-    getUserById: (userId:number) => {
+    getUserById: (userId: number) => {
         return axiosInstance.get(`/users/${userId}`);
     },
 
-    upadtetUserById: (userId:number, data:UserRequest) => {
+    upadtetUserById: (userId: number, data: UserRequest) => {
         return axiosInstance.put(`/users/${userId}`, data);
     },
 
-    upadtetUserAddressById: (data:AddressRequest) => {
+    upadtetUserAddressById: (data: AddressRequest) => {
         return axiosInstance.put(`/users/address-update`, data);
     },
-
-    getUserAddress: (userId:number) => {
+  
+    getUserAddress: (userId: number) => {
         return axiosInstance.get(`/users/address-list/${userId}`);
     }
 

@@ -39,7 +39,7 @@ const ProfileSetting = () => {
     }, []);
 
     const updateInfoHandler = () => {
-        const updatedUser:UserRequest = {
+        const updatedUser: UserRequest = {
             fullName: fullName,
             email: email,
             birthday: birthDate,

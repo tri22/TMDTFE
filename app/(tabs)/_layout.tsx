@@ -18,7 +18,7 @@ export default function RootLayout() {
 
     return (
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-              <Stack screenOptions={{ headerShown: false }}>
+            <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="Settings" options={{ headerShown: false }} />
                 <Stack.Screen name="Setting/AddressSettings" options={{ headerShown: false }} />
@@ -37,11 +37,28 @@ export default function RootLayout() {
                 <Stack.Screen name="Login/email_recovery" options={{ headerShown: false }} />
                 <Stack.Screen name="Login/password_recovery" options={{ headerShown: false }} />
                 <Stack.Screen name="Login/new_pass_form" options={{ headerShown: false }} />
-                
+
                 <Stack.Screen name="Profile" options={{ headerShown: false }} />
                 {/* product, product detail */}
                 <Stack.Screen name="product" />
                 <Stack.Screen name="productDetail" />
+
+                {/* Phần Đăng bán sản phẩm */}
+                <Stack.Screen
+                    name="Profile/PostProduct"
+                    options={{
+                        headerShown: true,
+                        title: 'Đăng bán sản phẩm',
+                        headerStyle: {
+                            backgroundColor: '#fff',
+                        },
+                        headerTintColor: '#000',
+                        headerTitleStyle: {
+                            color: '#2e384d',
+                            fontWeight: 'bold',
+                        },
+                    }}
+                />
             </Stack>
             <StatusBar style="auto" />
         </ThemeProvider>
