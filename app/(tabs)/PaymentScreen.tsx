@@ -13,8 +13,9 @@ import { CardData, VoucherData } from "@/data";
 import { Item } from "@/data/item";
 import { Voucher } from "@/data/voucher";
 import { FormValidation } from "@/validate";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, useSearchParams } from "expo-router/build/hooks";
-import React, { useMemo, useState } from "react"; // Thêm import useMemo
+import React, { useEffect, useMemo, useState } from "react"; // Thêm import useMemo
 import {
   ScrollView,
   StyleSheet,
@@ -74,6 +75,29 @@ const PaymentScreen: React.FC = () => {
 
   // create useState for child data
   const [childData, setChildData] = useState<any>({ email: "", phone: "" });
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const userString = await AsyncStorage.getItem("user");
+
+        if (!userString) {
+          console.warn("No user data found");
+          return;
+        }
+        const user = JSON.parse(userString);
+        setChildData({
+          email: user.email,
+          phone: user.phone,
+        });
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      } finally {
+      }
+    };
+
+    fetchWishlist();
+  }, []);
 
   // create childData for AddressInfo
   const [addressData, setAddressData] = useState<Address>({
@@ -138,7 +162,7 @@ const PaymentScreen: React.FC = () => {
     <>
       <ScrollView style={styles.container}>
         <AddressInfo onSave={handleDataFromChildForAddress} />
-        <ContactInfo onSendData={handleDataFromChild} />
+        <ContactInfo />
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionHeaderText}>Sản phẩm</Text>{" "}
           {/* Sửa thành Text */}
@@ -183,11 +207,10 @@ const PaymentScreen: React.FC = () => {
           <TouchableOpacity onPress={() => setVisibleCard(true)}>
             {selectedCard ? (
               <CardItem
-                cardType={selectedCard.cardType}
+                img={selectedCard.img || ""}
                 cardNumber={selectedCard.cardNumber}
                 ownerName={selectedCard.ownerName}
                 expiry={selectedCard.expiry}
-                onSettings={() => alert("Settings")}
               />
             ) : (
               <View style={styles.placeholder}>

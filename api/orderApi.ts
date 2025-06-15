@@ -3,7 +3,7 @@ import axiosInstance from "./axiosInstance";
 const createOrder = async (orderData: any): Promise<any> => {
   try {
     const orderRequest = {
-      idUser: 3, // nếu bạn đã xác định userId là 3
+      idUser: orderData.idUser, // nếu bạn đã xác định userId là 3
       email: orderData.email,
       phone: orderData.phone,
       total: orderData.total,
@@ -34,7 +34,6 @@ const createOrder = async (orderData: any): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error("Error creating order:", error);
-    throw error;
   }
 };
 
