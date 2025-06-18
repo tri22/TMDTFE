@@ -24,6 +24,7 @@ import {
 
 import { submitComment } from "@/api/commentApi";
 import { getProductDetail } from "@/api/productApi";
+import wishlistAPI from "@/api/WishlistAPI";
 import { colors } from "@/baseStyle/Style";
 import { IconButton, SimpleButton } from "@/components/button";
 import {
@@ -35,10 +36,10 @@ import {
 } from "@/models/ProductDetailModel";
 import { formatMoney } from "@/util";
 import { saveRecentViewedProduct } from "@/util/historySeach";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultLayout from "../DefaultLayout";
 import { CommentItem, MyCarousel, ShopInfo } from "./components";
-
 const imgDir = "@/assets/images/searchProduct";
 
 type ShopInfo = {
@@ -48,7 +49,6 @@ type ShopInfo = {
   link: string;
   saledQty: number;
 };
-
 
 type CommentItem = {
   name: string;
@@ -270,6 +270,19 @@ function ProductDetail() {
       if (qty >= 2) setQty(qty - 1);
     };
 
+    // function for handle add to wish list or cart
+    const handleAddToWishlist = async () => {
+      const userString = await AsyncStorage.getItem("user");
+
+      if (!userString) {
+        console.warn("No user data found");
+        return;
+      }
+      const user = JSON.parse(userString);
+
+      const ob = await wishlistAPI.addWishlistByUserId(user.id, productId);
+    };
+    //
     return (
       <BottomSheet
         ref={bottomSheetRef}
@@ -338,7 +351,7 @@ function ProductDetail() {
           <View style={[styles.dFlex, {}]}>
             <SimpleButton
               title="Thêm vào giỏ hàng"
-              onPress={() => console.log("Add")}
+              onPress={() => handleAddToWishlist()}
               style={{
                 flex: 1,
                 marginHorizontal: 5,
@@ -383,22 +396,18 @@ function ProductDetail() {
     setReplyingParentId(0);
   };
 
-  
-    const router = useRouter();
-  
-    const handleGoBack = () => {
-      router.back();
-    };
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    router.back();
+  };
 
   return (
     <DefaultLayout>
       <ScrollView style={styles.container}>
-            <TouchableOpacity
-            onPress={handleGoBack}
-            style={styles.goBackBtn}
-          >
-            <Text style={{ color: colors.primary }}>Quay lại</Text>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={handleGoBack} style={styles.goBackBtn}>
+          <Text style={{ color: colors.primary }}>Quay lại</Text>
+        </TouchableOpacity>
         <MyCarousel images={images} />
         <View
           style={[
@@ -609,7 +618,7 @@ const styles = StyleSheet.create({
     // padding: 15,
     // marginTop: 40,
     // backgroundColor: '#fff'
-    position: "relative"
+    position: "relative",
   },
   dFlex: {
     flexDirection: "row",
@@ -732,6 +741,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     left: 10,
-    zIndex: 1
+    zIndex: 1,
   },
 });

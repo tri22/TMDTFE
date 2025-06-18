@@ -13,7 +13,6 @@ const WishlistScreen = () => {
     const fetchWishlist = async () => {
       try {
         const userString = await AsyncStorage.getItem("user");
-     
 
         if (!userString) {
           console.warn("No user data found");

@@ -1,4 +1,4 @@
-import getWishlistByUserId from "@/api/WishlistAPI";
+import wishlistAPI from "@/api/WishlistAPI";
 interface Item {
   id: number;
   imageUrl: string;
@@ -10,9 +10,12 @@ interface Item {
 const cartItems: Item[] = [];
 export default async function fetchDataWishlist(id: number) {
   try {
-    const data = await getWishlistByUserId(id);
-    for (const item of data) {
+    const object = await wishlistAPI.getWishlistByUserId(id);
+
+    for (const item of object.data) {
       const { id, name, price, imageUrl, qty } = item; // <-- use image
+      console.log("Processing item:", id, name, price, imageUrl, qty);
+
       cartItems.push({
         id,
         name,
@@ -20,7 +23,6 @@ export default async function fetchDataWishlist(id: number) {
         imageUrl: imageUrl, // <-- use image here
         quantity: qty,
       });
-      console.log("Item added to cartItems:");
     }
 
     return cartItems; // trả về mảng cartItems sau khi đã xử lý

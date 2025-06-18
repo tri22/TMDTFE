@@ -9,7 +9,7 @@ import {
   Text,
   TouchableOpacity,
   useWindowDimensions,
-  View
+  View,
 } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -164,11 +164,9 @@ function Home() {
   const handleCategoryPress = () => {
     router.push({
       pathname: "/category",
-      params: {
-       
-      },
+      params: {},
     });
-  }
+  };
 
   const Category = ({ category }: CategoryProps) => {
     const { width } = useWindowDimensions();
@@ -298,10 +296,10 @@ function Home() {
   };
 
   return (
-    <DefaultLayout >
+    <DefaultLayout>
       <Search />
       <FlatList
-        style={{paddingHorizontal: 20}}
+        style={{ paddingHorizontal: 20 }}
         ListHeaderComponent={
           <>
             <View style={{ borderRadius: 10, overflow: "hidden" }}>
