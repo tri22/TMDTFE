@@ -20,7 +20,10 @@ export default function CategorySelection({ onchange }) {
     const handleSelectCategory = (item) => {
         setCategoryId(item.id);
         setCategoryName(item.title);
-        onchange?.(item.title);
+        onchange?.({
+            id: item.id,
+            title: item.title
+        });
         setShowDropdown(false);
     };
     return (
