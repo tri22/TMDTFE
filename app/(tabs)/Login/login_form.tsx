@@ -1,23 +1,30 @@
-import { authApi } from '@/api/authApi';
-import { Feather } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import InputField from './Components/InputField';
+import { authApi } from "@/api/authApi";
+import { Feather } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import InputField from "./Components/InputField";
 
 export default function LoginScreen() {
-    const [email, setEmail] = useState('');
-    const [pwd, setPwd] = useState('');
+    const [email, setEmail] = useState("");
+    const [pwd, setPwd] = useState("");
     const [showPwd, setShowPwd] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const handleRegister = () => router.replace('/(tabs)/Login/register_form');
-    const handleForgetPass = () => router.replace('/(tabs)/Login/password_recovery');
-    const handleHomePage = () => router.push('/');
+    const handleRegister = () => router.replace("/(tabs)/Login/register_form");
+    const handleForgetPass = () =>
+        router.replace("/(tabs)/Login/password_recovery");
+    const handleHomePage = () => router.push("/");
 
     const handleLogin = async () => {
         if (!email || !pwd) {
-            alert('Vui lòng nhập đầy đủ email và mật khẩu');
+            alert("Vui lòng nhập đầy đủ email và mật khẩu");
             return;
         }
         setIsLoading(true);
@@ -29,15 +36,19 @@ export default function LoginScreen() {
             console.log("Đăng nhập thành công:", userData);
             console.log("Đăng nhập thành công:", token);
             // Lưu thông tin user vào AsyncStorage
-            await AsyncStorage.setItem('token', JSON.stringify(token));
-            await AsyncStorage.setItem('user', JSON.stringify(userData))
+            if (token) {
+                await AsyncStorage.setItem('token', token);
+            } else {
+                console.error("Token is undefined");
+            }
+            await AsyncStorage.setItem("user", JSON.stringify(userData));
             handleHomePage();
         } catch (error) {
-            console.error('Đăng nhập thất bại:', error);
+            console.error("Đăng nhập thất bại:", error);
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -46,11 +57,7 @@ export default function LoginScreen() {
                 <Text style={styles.greet}>Chào mừng bạn quay trở lại</Text>
             </View>
             <View style={styles.formWrapper2}>
-                <InputField
-                    placeholder="Email"
-                    value={email}
-                    onChangeText={setEmail}
-                />
+                <InputField placeholder="Email" value={email} onChangeText={setEmail} />
 
                 <InputField
                     placeholder="Mật khẩu"
@@ -60,7 +67,7 @@ export default function LoginScreen() {
                     rightIcon={
                         <TouchableOpacity onPress={() => setShowPwd(!showPwd)}>
                             <Feather
-                                name={showPwd ? 'eye' : 'eye-off'}
+                                name={showPwd ? "eye" : "eye-off"}
                                 size={20}
                                 color="gray"
                             />
@@ -69,150 +76,144 @@ export default function LoginScreen() {
                 />
             </View>
             <View style={styles.formWrapper}>
-                <Text
-                    style={styles.forPassText}
-                    onPress={handleForgetPass}>
+                <Text style={styles.forPassText} onPress={handleForgetPass}>
                     Quên mật khẩu ?
                 </Text>
             </View>
             <View style={styles.formWrapper2}>
-                <TouchableOpacity
-                    style={styles.loginBtn} onPress={handleLogin}>
-                    <Text style={styles.loginBtnText}>{isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}</Text>
+                <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
+                    <Text style={styles.loginBtnText}>
+                        {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+                    </Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.ggLoginBtn} onPress={handleHomePage}>
+                <TouchableOpacity style={styles.ggLoginBtn} onPress={handleHomePage}>
                     <Text style={styles.ggLoginBtnText}>Đăng nhập bằng Google</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.fbLoginBtn} onPress={handleHomePage}>
+                <TouchableOpacity style={styles.fbLoginBtn} onPress={handleHomePage}>
                     <Text style={styles.fbLoginBtnText}>Đăng nhập bằng Facebook</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.formWrapper3}>
                 <Text style={styles.questText}>Bạn chưa có tài khoản ?</Text>
-                <Text
-                    style={styles.registerText}
-                    onPress={handleRegister}>
+                <Text style={styles.registerText} onPress={handleRegister}>
                     Đăng ký ngay
                 </Text>
             </View>
-
         </SafeAreaView>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
+        backgroundColor: "#fff",
+        alignItems: "center",
         padding: 20,
-        justifyContent: 'center'
+        justifyContent: "center",
     },
     formWrapper1: {
-        width: '100%',
+        width: "100%",
         marginVertical: 20,
         marginTop: 130,
     },
     titleHead: {
         fontSize: 40,
-        fontWeight: '700',
+        fontWeight: "700",
     },
     greet: {
         fontSize: 18,
     },
     formWrapper2: {
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "center",
         marginBottom: 10,
     },
     input: {
-        width: '95%',
+        width: "95%",
         height: 55,
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: "#ccc",
         borderRadius: 40,
-        backgroundColor: '#f1f1f1',
+        backgroundColor: "#f1f1f1",
         paddingHorizontal: 15,
         marginBottom: 15,
     },
     passwordContainer: {
-        width: '95%',
+        width: "95%",
         height: 55,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f1f1f1',
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#f1f1f1",
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: "#ccc",
         borderRadius: 40,
         paddingHorizontal: 15,
-        justifyContent: 'space-between',
+        justifyContent: "space-between",
     },
     passwordInput: {
         flex: 1,
     },
     formWrapper: {
-        width: '90%',
-        alignItems: 'flex-start',
+        width: "90%",
+        alignItems: "flex-start",
     },
     forPassText: {
-        color: '#4e5276',
-        fontWeight: '500',
+        color: "#4e5276",
+        fontWeight: "500",
     },
     loginBtn: {
-        width: '60%',
+        width: "60%",
         borderRadius: 16,
-        backgroundColor: '#323660',
-        alignItems: 'center',
+        backgroundColor: "#323660",
+        alignItems: "center",
         paddingVertical: 10,
         marginTop: 10,
     },
     loginBtnText: {
         fontSize: 22,
-        fontWeight: '300',
-        color: '#f3f3f3',
+        fontWeight: "300",
+        color: "#f3f3f3",
     },
     ggLoginBtn: {
-        width: '90%',
-        backgroundColor: '#FFEBEB',
-        alignItems: 'center',
+        width: "90%",
+        backgroundColor: "#FFEBEB",
+        alignItems: "center",
         borderRadius: 16,
         paddingVertical: 15,
         marginTop: 50,
         marginBottom: 10,
     },
     ggLoginBtnText: {
-        fontWeight: '500',
+        fontWeight: "500",
         fontSize: 15,
-        color: '#707070',
+        color: "#707070",
     },
     fbLoginBtn: {
-        width: '90%',
-        backgroundColor: '#E5EBFC',
-        alignItems: 'center',
+        width: "90%",
+        backgroundColor: "#E5EBFC",
+        alignItems: "center",
         borderRadius: 16,
         paddingVertical: 15,
         marginBottom: 10,
     },
     fbLoginBtnText: {
-        fontWeight: '500',
+        fontWeight: "500",
         fontSize: 15,
-        color: '#707070',
+        color: "#707070",
     },
     formWrapper3: {
         flex: 1,
-        flexDirection: 'row',
+        flexDirection: "row",
     },
     questText: {
-        fontWeight: '300',
+        fontWeight: "300",
         fontSize: 15,
         marginRight: 10,
     },
     registerText: {
-        fontWeight: '900',
-        color: '#4472C4',
+        fontWeight: "900",
+        color: "#4472C4",
         fontSize: 15,
     },
 });

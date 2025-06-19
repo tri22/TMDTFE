@@ -1,6 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  ImageSourcePropType,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type CardItemProps = {
   img: ImageSourcePropType;
@@ -19,10 +26,7 @@ const CardItem: React.FC<CardItemProps> = ({
     <View style={styles.cardContainer}>
       <View style={styles.cardContent}>
         {/* Logo Mastercard */}
-        <Image
-          source={img}
-          style={styles.logo}
-        />
+        <Image source={img} style={styles.logo} />
 
         {/* Icon bên phải */}
         <TouchableOpacity style={styles.secureIcon}>
@@ -43,7 +47,6 @@ const CardItem: React.FC<CardItemProps> = ({
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   cardContainer: {
@@ -86,7 +89,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#333",
     fontWeight: "bold",
-
   },
   expiry: {
     fontSize: 12,

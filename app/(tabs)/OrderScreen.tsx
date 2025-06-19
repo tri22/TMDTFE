@@ -1,8 +1,9 @@
 import createOrder from "@/api/orderApi";
 import { Card, CardContent, ProductItemSection } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSearchParams } from "expo-router/build/hooks";
-import React from "react";
+import React, { useEffect } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const OrderScreen = () => {
@@ -13,18 +14,38 @@ const OrderScreen = () => {
 
   const { carts, cards, voucher, total, email, phone, address } = data;
 
-  if (data) {
-    createOrder({
-      idUser: 3, // Giả sử userId là 3
-      carts: carts,
-      cards: cards,
-      voucher: voucher,
-      total: total,
-      email: email,
-      phone: phone,
-      address: address,
-    });
-  }
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const userString = await AsyncStorage.getItem("user");
+
+        if (!userString) {
+          console.warn("No user data found");
+          return;
+        }
+        const user = JSON.parse(userString);
+        console.log("user", user.id);
+
+        if (data) {
+          createOrder({
+            idUser: user.id, // Giả sử userId là
+            carts: carts,
+            cards: cards,
+            voucher: voucher,
+            total: total,
+            email: email,
+            phone: phone,
+            address: address,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      } finally {
+      }
+    };
+
+    fetchWishlist();
+  }, []);
 
   const currentDate = new Date();
   const date = currentDate.toLocaleDateString("vi-VN", {

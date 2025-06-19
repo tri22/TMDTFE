@@ -41,9 +41,13 @@ export interface Product {
 }
 
 // Hàm gọi API lấy danh sách wishlist theo userId
-const getWishlistByUserId = async (userId: number): Promise<Product[]> => {
-  const response = await axiosInstance.get<Product[]>(`/wishlists/${userId}`);
-  return response.data;
-};
 
-export default getWishlistByUserId;
+const wishlistAPI = {
+  addWishlistByUserId: (userId: number, productId: number) => {
+    return axiosInstance.post(`/wishlists/${userId}/add/${productId}`);
+  },
+  getWishlistByUserId: (userId: number) => {
+    return axiosInstance.get(`/wishlists/${userId}`);
+  },
+};
+export default wishlistAPI;
