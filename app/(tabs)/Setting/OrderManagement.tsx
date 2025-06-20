@@ -56,6 +56,12 @@ const statusTabs = [
   { label: 'Đã giao', value: 'COMPLETED' },
 ];
 
+const getStatusLabel = (statusCode: string) => {
+  const found = statusTabs.find(tab => tab.value === statusCode);
+  return found ? found.label : statusCode;
+};
+
+
 const OrderManagement: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [user, setUser] = useState<User | null>(null);
@@ -90,11 +96,14 @@ const OrderManagement: React.FC = () => {
         <Text style={styles.name}>{item.productOrder.name}</Text>
         <Text style={styles.tracking}>Tổng tiền: {item.total}đ</Text>
         <Text style={styles.delivery}>Địa chỉ: {item.addressOrder.address}</Text>
-        <Text style={styles.status}>Trạng thái: {item.status}</Text>
+        <Text style={styles.status}>
+          {getStatusLabel(item.status)}
+        </Text>
+
       </View>
       <View style={styles.actions}>
         <Button mode="contained" style={styles.button}>
-          Chi tiết
+          Cập nhật
         </Button>
       </View>
     </View>

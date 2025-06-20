@@ -45,5 +45,8 @@ export const getOrderBySeller = async (userId: number) => {
   return axiosInstance.get(`/orders/bought-orders/${userId}`)
 }
 
+export const updateStatus = async (orderId: number,status:string) => {
+  return axiosInstance.put(`/orders/update-status/${orderId}`,status)
+}
 
 export default createOrder;
