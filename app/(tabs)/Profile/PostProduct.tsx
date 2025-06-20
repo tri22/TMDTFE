@@ -1,5 +1,5 @@
+import { postProductApi } from '@/api/postApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Alert, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
@@ -14,7 +14,7 @@ export default function PostProductScreen() {
     const [product, setProduct] = useState({});
     const [pickupAddress, setPickupAddress] = useState({});
     const [images, setImages] = useState([]);
-    const [categoryId, setCategoryId] = useState('');
+    const [categoryTitle, setCategoryTitle] = useState('');
     const [user, setUser] = useState(); // Lấy User được lưu trong storage 
 
     useEffect(() => {
@@ -30,50 +30,78 @@ export default function PostProductScreen() {
         }; fetchUser();
     }, []);
 
+    // const handlePost = async () => {
+    //     if (!termAccept) {
+    //         Alert.alert("Bạn phải đồng ý điều khoản trước khi đăng");
+    //         return;
+    //     }
+    //     const data = {
+    //         ...product,
+    //         categoryTitle: categoryTitle,
+    //         pickupAddress: pickupAddress,
+    //         imageUrls: images,
+    //         userId: user?.id,
+    //         termsAccepted: termAccept,
+    //     };
+    //     try {
+    //         console.log('Dữ liệu gửi lên:', JSON.stringify(data, null, 2));
+    //         const response = await postProductApi.createProduct(data); // ✅ Gọi qua postProductApi
+    //         console.log("Phản hồi từ server:", response.data);
+    //         Alert.alert("Đăng sản phẩm thành công!");
+    //     } catch (error) {
+    //         console.error('Lỗi khi gọi API:', error);
+    //         if (error.response) {
+    //             // Lỗi từ server
+    //             console.log('Status:', error.response.status);
+    //             console.log('Data:', error.response.data);
+    //             Alert.alert('Lỗi', error.response.data.message || 'Không thể đăng sản phẩm.');
+    //         } else if (error.request) {
+    //             // Không nhận được phản hồi (lỗi kết nối)
+    //             console.log('Không có phản hồi từ server:', error.request);
+    //             Alert.alert('Lỗi', 'Không thể kết nối đến máy chủ.');
+    //         } else {
+    //             // Lỗi khác
+    //             console.log('Lỗi khác:', error.message);
+    //             Alert.alert('Lỗi', 'Đã xảy ra lỗi khi gửi yêu cầu.');
+    //         }
+    //     }
+    // };
+
     const handlePost = async () => {
         if (!termAccept) {
             Alert.alert("Bạn phải đồng ý điều khoản trước khi đăng");
             return;
         }
-        const data = {
-            ...product,
-            categoryId: categoryId,
-            pickupAddress: pickupAddress,
-            imageUrls: images,
-            userId: user?.id,
-            termsAccepted: termAccept,
-        };
+
         try {
-            const token = await AsyncStorage.getItem('token');
-            const headers = {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
+            // Bắt đầu upload từng ảnh
+            const uploadedUrls = [];
+
+            for (const uri of images) {
+                if (uri) {
+                    const uploadedUrl = await postProductApi.uploadImage(uri);
+                    uploadedUrls.push(uploadedUrl);
+                }
+            }
+
+            const data = {
+                ...product,
+                categoryTitle: categoryTitle,
+                pickupAddress: pickupAddress,
+                imageUrls: uploadedUrls,
+                userId: user?.id,
+                termsAccepted: termAccept,
             };
-            console.log('Header gửi lên:', headers);
+
             console.log('Dữ liệu gửi lên:', JSON.stringify(data, null, 2));
-            const response = await axios.post(
-                'http://localhost:8080/api/v1/products/create', // Thay bằng URL backend
-                data,
-                { headers }
-            );
+            const response = await postProductApi.createProduct(data);
+
             console.log("Phản hồi từ server:", response.data);
             Alert.alert("Đăng sản phẩm thành công!");
+
         } catch (error) {
-            console.error('Lỗi khi gọi API:', error);
-            if (error.response) {
-                // Lỗi từ server
-                console.log('Status:', error.response.status);
-                console.log('Data:', error.response.data);
-                Alert.alert('Lỗi', error.response.data.message || 'Không thể đăng sản phẩm.');
-            } else if (error.request) {
-                // Không nhận được phản hồi (lỗi kết nối)
-                console.log('Không có phản hồi từ server:', error.request);
-                Alert.alert('Lỗi', 'Không thể kết nối đến máy chủ.');
-            } else {
-                // Lỗi khác
-                console.log('Lỗi khác:', error.message);
-                Alert.alert('Lỗi', 'Đã xảy ra lỗi khi gửi yêu cầu.');
-            }
+            console.error('Lỗi khi xử lý đăng sản phẩm:', error);
+            Alert.alert('Lỗi', 'Đã xảy ra lỗi khi đăng sản phẩm.');
         }
     };
 
@@ -82,7 +110,7 @@ export default function PostProductScreen() {
             <SafeAreaView style={styles.container}>
                 <ScrollView keyboardShouldPersistTaps="handled">
                     <ImageUploadSection onchange={setImages} />
-                    <CategorySelection onchange={(category) => setCategoryId(category.id)} />
+                    <CategorySelection onchange={(title) => setCategoryTitle(title)} />
                     <ProductDetails onchange={setProduct} />
                     <AddressSelection onchange={setPickupAddress} />
                     <View style={styles.checkboxRow}>
@@ -177,4 +205,3 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
-
