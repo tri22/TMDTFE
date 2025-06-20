@@ -1,28 +1,116 @@
+import userApi from '@/api/userApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import { getBoughtOrders } from '../../../api/orderApi';
 import { BottomNavigation } from '../../../components/BottomNavigation';
+interface SpendingItem {
+    label: string;
+    value: number;
+}
+
+interface Order {
+    id: number;
+    email: string;
+    phone: string;
+    total: number;
+    status: string;
+    user: User;
+    addressOrder: AddressOrder;
+    cardOrder: CardOrder;
+    productOrder: ProductOrder;
+    voucherOrder: VoucherOrder;
+}
+
+interface User {
+    id: number;
+}
+
+interface AddressOrder {
+    address: string;
+}
+
+interface CardOrder {
+    cardInfor: string;
+}
+
+interface ProductOrder {
+    id: number;
+    category: Category;
+    name: string;
+    price: number;
+    quantity: number;
+    imageUrl: string;
+}
+
+interface Category {
+    title: string;
+}
+
+interface VoucherOrder {
+    discount: number;
+    description: string;
+    title: string;
+}
+
+const countOrderStatuses = (orders: Order[]) => {
+    const statusCount: Record<string, number> = {};
+
+    for (const order of orders) {
+        const status = order.status;
+        statusCount[status] = (statusCount[status] || 0) + 1;
+    }
+
+    return defaultStatuses.map(({ key, label }) => ({
+        label,
+        value: statusCount[key] || 0,
+    }));
+};
+
+const defaultStatuses = [
+    { key: "PENDING", label: "Chờ xác nhận" },
+    { key: "SHIPPING", label: "Đang vận chuyển" },
+    { key: "DELIVERED", label: "Đã giao" },
+    { key: "CANCELLED", label: "Đã huỷ" },
+];
+
+
 const MyActivity: React.FC = () => {
     const router = useRouter();
+    const [spendingData, setSpendingData] = useState<SpendingItem[]>([]);
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [statusData, setStatusData] = useState<{ label: string, value: number }[]>([]);
+
 
     const handleViewOrderHistory = () => {
         router.push('/(tabs)/Setting/OrderHistory');
     };
-    const sampleData = [
-        { label: "Quần", value: 400000, color: "#007bff" },
-        { label: "Áo", value: 350000, color: "#FF9800" },
-        { label: "Giày", value: 300000, color: "#4CAF50" },
-        { label: "Túi", value: 300000, color: "#E91E63" },
-    ];
 
-    const statusData: { label: string, value: number }[] = [
-        { label: "Đơn đã đặt", value: 12 },
-        { label: "Đã Nhận", value: 10 },
-        { label: "Đang vận chuyển", value: 52 },
-    ];
+    useEffect(() => {
+        fetchData();
+    }, []);
 
-    const total = sampleData.reduce((sum, item) => sum + item.value, 0);
+    const fetchData = async () => {
+        try {
+            const userDataString = await AsyncStorage.getItem('user');
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                const response = await userApi.getUserSpending(userData.id);
+                setSpendingData(response.data);
+                const order = await getBoughtOrders(userData.id);
+                setOrders(order.data);
+                const countedStatuses = countOrderStatuses(order.data);
+                setStatusData(countedStatuses);
+            }
+        } catch (error) {
+            console.error("Lỗi khi fetch orders:", error);
+        }
+    };
+    const colors = ['#007bff', '#FF9800', '#4CAF50', '#E91E63']
+    const total = spendingData.reduce((sum, item) => sum + item.value, 0);
     const CIRCLE_RADIUS = 90;
     const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
     const CustomPieChart = () => {
@@ -31,7 +119,6 @@ const MyActivity: React.FC = () => {
         return (
             <View style={styles.circleContainer}>
                 <Svg height="200" width="200" viewBox="0 0 200 200">
-                    {/* Background Circle */}
                     <Circle
                         cx="100"
                         cy="100"
@@ -40,8 +127,8 @@ const MyActivity: React.FC = () => {
                         strokeWidth="20"
                         fill="none"
                     />
-                    {/* Foreground Segments */}
-                    {sampleData.map((item, index) => {
+                    {spendingData.map((item, index) => {
+                        if (item.value === 0) return null;
                         const percentage = item.value / total;
                         const dashLength = percentage * CIRCLE_CIRCUMFERENCE;
                         const circle = (
@@ -50,7 +137,7 @@ const MyActivity: React.FC = () => {
                                 cx="100"
                                 cy="100"
                                 r={CIRCLE_RADIUS}
-                                stroke={item.color}
+                                stroke={colors[index % colors.length]}
                                 strokeWidth="20"
                                 strokeDasharray={`${dashLength} ${CIRCLE_CIRCUMFERENCE}`}
                                 strokeDashoffset={-cumulativeOffset}
@@ -82,10 +169,11 @@ const MyActivity: React.FC = () => {
 
                 {/* Categories */}
                 <View style={styles.categoriesContainer}>
-                    {sampleData.map((item, index) => (
-                        renderCategory(item.label + ": " + item.value, item.color)
+                    {spendingData.map((item, index) => (
+                        item.value > 0 && renderCategory(`${item.label}: ${item.value.toLocaleString()}₫`, colors[index % colors.length])
                     ))}
                 </View>
+
 
 
                 {/* Order Status */}

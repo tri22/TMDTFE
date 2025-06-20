@@ -37,4 +37,13 @@ const createOrder = async (orderData: any): Promise<any> => {
   }
 };
 
+export const getBoughtOrders = async (userId: number) => {
+  return axiosInstance.get(`/orders/sold-orders/${userId}`)
+}
+
+export const getOrderBySeller = async (userId: number) => {
+  return axiosInstance.get(`/orders/bought-orders/${userId}`)
+}
+
+
 export default createOrder;
