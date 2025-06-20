@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import Toast from "react-native-toast-message";
-import { API_BASE_URL } from "./ipConstant";
+import { SERVER_URL_BASE } from "./ipConstant";
 
 //chinh ve dia chi cua spring boot neu chay fe tren dien thoai: 
 
@@ -13,7 +13,8 @@ import { API_BASE_URL } from "./ipConstant";
 // export const SERVER_URL_BASE = "http://localhost:8080";
 
 const axiosInstance: AxiosInstance = axios.create({
-    baseURL: API_BASE_URL,
+    // baseURL: API_BASE_URL,
+    baseURL: SERVER_URL_BASE,
     withCredentials: true,
     headers: {
         "Content-Type": "application/json",

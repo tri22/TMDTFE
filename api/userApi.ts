@@ -1,3 +1,4 @@
+
 import axiosInstance from "./axiosInstance";
 
 export interface UserRequest {
@@ -38,6 +39,11 @@ const userApi = {
   getUserAddress: (userId: number) => {
     return axiosInstance.get(`/users/address-list/${userId}`);
   },
+
+  getUserSpending: (userId: number) => {
+    return axiosInstance.get(`/users/spending/${userId}`);
+  },
 };
 
 export default userApi;
+

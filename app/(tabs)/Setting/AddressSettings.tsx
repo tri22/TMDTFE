@@ -1,4 +1,5 @@
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -13,23 +14,36 @@ const AddressSettings = () => {
   const [selectedAddress, setSelectedAddress] = useState<AddressRequest>();
   const [selectedAddressIndex, setSelectedAddressIndex] = useState<number>();
   const [showPicker, setShowPicker] = useState(false);
+  const [user, setUser] = useState(null);
 
- 
-    const fetchAddressList = async () => {
-      try {
-        const response = await userApi.getUserAddress(4);
-        console.log(response.data);
-        setAddressList(response.data)
-
-      } catch {
-
+  const fetchAddressList = async () => {
+    try {
+      const userDataString = await AsyncStorage.getItem('user');
+      console.log(userDataString)
+      if (userDataString) {
+        const userData = JSON.parse(userDataString); // 👈 chuyển sang object
+        setUser(userData);
+        const response = await userApi.getUserAddress(userData.id);
+        const list = response.data;
+        if (list.length > 0) {
+          setSelectedAddressIndex(0);
+          setSelectedAddress(list[0]);
+        }
+        setAddressList(list);
       }
+
+
+
+    } catch (error) {
+      console.log(error);
     }
+  };
+
   useEffect(() => {
     fetchAddressList();
   }, []);
 
-  
+
 
   return (
     <SafeAreaView style={styles.container}>
