@@ -1,3 +1,4 @@
+
 import axiosInstance from "./axiosInstance";
 
 export interface UserRequest {
@@ -45,3 +46,4 @@ const userApi = {
 };
 
 export default userApi;
+
