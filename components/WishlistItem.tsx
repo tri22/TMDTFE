@@ -1,9 +1,11 @@
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // import icontrash and add
+import wishlistAPI from "@/api/WishlistAPI";
 import imageMap from "@/data/imageMap";
 import { Item } from "@/data/item";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 const WishlistItem: React.FC<Item> = ({ ...item }) => {
   // get data
@@ -18,10 +20,28 @@ const WishlistItem: React.FC<Item> = ({ ...item }) => {
     });
   };
 
+  // handle delete item
+  const handleDeleteItem = async () => {
+    // Logic to delete the item from wishlist
+    console.log(`Delete item with id: ${item.id}`);
+    const userString = await AsyncStorage.getItem("user");
+
+    if (!userString) {
+      console.warn("No user data found");
+      return;
+    }
+    const user = JSON.parse(userString);
+
+    const deleteACtion = await wishlistAPI.deleteWishlistByUserId(
+      user.id,
+      item.id
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Image source={imageMap[item.imageUrl]} style={styles.image} />
-      <TouchableOpacity style={styles.iconButton}>
+      <TouchableOpacity style={styles.iconButton} onPress={handleDeleteItem}>
         <AntDesign name="delete" size={24} color="#FF6347" />
       </TouchableOpacity>
       <View style={styles.details}>

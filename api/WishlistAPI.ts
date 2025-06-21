@@ -49,5 +49,8 @@ const wishlistAPI = {
   getWishlistByUserId: (userId: number) => {
     return axiosInstance.get(`/wishlists/${userId}`);
   },
+  deleteWishlistByUserId: (userId: number, productId: number) => {
+    return axiosInstance.delete(`/wishlists/${userId}/remove/${productId}`);
+  },
 };
 export default wishlistAPI;
