@@ -1,305 +1,166 @@
-// import CheckBox from '@react-native-community/checkbox';
+import { showToast } from '@/api/axiosInstance';
+import { postProductApi } from '@/api/postApi';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { Checkbox } from 'react-native-paper';
+import { commonStyles } from '../styles/PostPdStyle';
+import Dropdown from './Dropdown';
 
-export default function ProductDetails({ onchange }) {
-    const [material, setMaterial] = useState('');
-    const [brand, setBrand] = useState('');
-    const [condition, setCondition] = useState('');
-    const [customMaterial, setCustomMaterial] = useState('');
-    const [customBrand, setCustomBrand] = useState('');
-    const [customCondition, setCustomCondition] = useState('');
-    const [negotiable, setNegotiable] = useState(false);
-    const [name, setName] = useState('');
-    const [price, setPrice] = useState('');
-    const [salePrice, setSalePrice] = useState('');
-    const [description, setDescription] = useState('');
-    const [qty, setQty] = useState('1');
+export default function ProductDetails({ onChange }) {
+    const [form, setForm] = useState({
+        name: '',
+        qty: '1',
+        price: '',
+        salePrice: '',
+        material: '',
+        brand: '',
+        condition: '',
+        description: '',
+        negotiable: false,
+    });
+    const [dropdowns, setDropdowns] = useState({
+        material: false,
+        brand: false,
+        condition: false,
+    });
+    const [customValues, setCustomValues] = useState({
+        material: '',
+        brand: '',
+        condition: '',
+    });
 
-    const [showMaterialDropdown, setShowMaterialDropdown] = useState(false);
-    const [showBrandDropdown, setShowBrandDropdown] = useState(false);
-    const [showConditionDropdown, setShowConditionDropdown] = useState(false);
+    // lấy ra tất cả material có trong danh sách sản phẩm
+    const [materials, setMaterials] = useState<string[]>([]);
+    useEffect(() => {
+        const fetchMaterials = async () => {
+            try {
+                const res = await postProductApi.getAllMaterial();
+                setMaterials(res.data);
+            } catch (error) {
+                console.error('Lỗi khi lấy materials:', error);
+                showToast('error', "Lỗi", 'Lỗi khi lấy danh sách materials');
+            }
+        };
 
-    const materials = ['Nhựa', 'Kim loại', 'Gỗ', 'Thủy tinh'];
+        fetchMaterials();
+    }, []);
+
+    // const materials = ['Nhựa', 'Kim loại', 'Gỗ', 'Thủy tinh'];
     const brands = ['Chanel', 'Gucci', 'Prada'];
     const conditions = ['Mới', 'Đã qua sử dụng', 'Như mới'];
 
-    const handleSelectMaterial = (value: string) => {
-        setMaterial(value);
-        setShowMaterialDropdown(false);
-    };
-
-    const handleSelectBrand = (value: string) => {
-        setBrand(value);
-        setShowBrandDropdown(false);
-    };
-
-    const handleSelectCondition = (value: string) => {
-        setCondition(value);
-        setShowConditionDropdown(false);
-    };
-
     useEffect(() => {
-        onchange({
-            name,
-            price: parseFloat(price) || 0,
-            salePrice: parseFloat(salePrice) || 0,
-            material,
-            brand,
-            condition,
-            description,
-            negotiable,
-            qty: parseInt(qty) || 1,
+        onChange({
+            ...form,
+            price: parseFloat(form.price) || 0,
+            salePrice: parseFloat(form.salePrice) || 0,
+            qty: parseInt(form.qty) || 1,
         });
-    }, [name, price, salePrice, material, brand, condition, description, negotiable]);
+    }, [form]);
+
+    const updateForm = (key, value) => {
+        setForm((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const toggleDropdown = (key) => {
+        setDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
+    };
 
     return (
-        <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Thông tin chi tiết</Text>
-
-            <Text style={styles.inputLabel}>Tiêu đề</Text>
+        <View style={commonStyles.sectionContainer}>
+            <Text style={commonStyles.title}>Thông tin chi tiết</Text>
+            <Text style={commonStyles.inputLabel}>Tiêu đề</Text>
             <TextInput
                 placeholder="Điền tên của sản phẩm"
                 placeholderTextColor="#a6b3ac"
-                style={styles.input}
-                value={name}
-                onChangeText={setName}
+                style={commonStyles.input}
+                value={form.name}
+                onChangeText={(text) => updateForm('name', text)}
             />
-
-            <Text style={styles.inputLabel}>Số lượng</Text>
+            <Text style={commonStyles.inputLabel}>Số lượng</Text>
             <TextInput
                 placeholder="1"
-                style={styles.input}
+                style={commonStyles.input}
                 keyboardType="numeric"
-                value={qty}
-                onChangeText={setQty}
+                value={form.qty}
+                onChangeText={(text) => updateForm('qty', text)}
             />
-
-            <Text style={styles.inputLabel}>Chất liệu</Text>
-            <TouchableOpacity
-                onPress={() => setShowMaterialDropdown(!showMaterialDropdown)}
-                style={styles.inputDropdown}
-            >
-                <Text style={styles.inputText}>{material || 'Chọn chất liệu'}</Text>
-                <Text style={styles.dropdownArrow}>▼</Text>
-            </TouchableOpacity>
-
-            {showMaterialDropdown && (
-                <View style={styles.dropdownList}>
-                    <ScrollView nestedScrollEnabled>
-                        {materials.map((item, index) => (
-                            <TouchableOpacity key={index} onPress={() => handleSelectMaterial(item)}>
-                                <Text style={styles.dropdownItemText}>{item}</Text>
-                            </TouchableOpacity>
-                        ))}
-                        <View style={styles.otherInputContainer}>
-                            <Text style={styles.otherInputLabel}>Khác:</Text>
-                            <TextInput
-                                value={customMaterial}
-                                onChangeText={(text) => {
-                                    setCustomMaterial(text);
-                                    setMaterial(text);
-                                }}
-                                style={styles.otherInput}
-                            />
-                        </View>
-                    </ScrollView>
-                </View>
-            )}
-
+            <Text style={commonStyles.inputLabel}>Chất liệu</Text>
+            <Dropdown
+                label="chất liệu"
+                value={form.material}
+                items={materials}
+                onSelect={(value) => updateForm('material', value)}
+                showDropdown={dropdowns.material}
+                setShowDropdown={() => toggleDropdown('material')}
+                customValue={customValues.material}
+                setCustomValue={(text) => setCustomValues({ ...customValues, material: text })}
+            />
             <View style={styles.row}>
                 <View style={styles.halfInput}>
-                    <Text style={styles.inputLabel}>Giá</Text>
+                    <Text style={commonStyles.inputLabel}>Giá</Text>
                     <TextInput
                         placeholder="0.00"
-                        style={styles.input}
+                        style={commonStyles.input}
                         keyboardType="numeric"
-                        value={price}
-                        onChangeText={setPrice}
+                        value={form.price}
+                        onChangeText={(text) => updateForm('price', text)}
                     />
                 </View>
                 <View style={styles.halfInput}>
-                    <Text style={styles.inputLabel}>Giá Sale</Text>
+                    <Text style={commonStyles.inputLabel}>Giá Sale</Text>
                     <TextInput
                         placeholder="0.00"
-                        style={styles.input}
+                        style={commonStyles.input}
                         keyboardType="numeric"
-                        value={salePrice}
-                        onChangeText={setSalePrice}
+                        value={form.salePrice}
+                        onChangeText={(text) => updateForm('salePrice', text)}
                     />
                 </View>
             </View>
-
             <View style={styles.checkboxRow}>
                 <Checkbox
-                    status={negotiable ? 'checked' : 'unchecked'}
-                    onPress={() => setNegotiable(!negotiable)}
+                    status={form.negotiable ? 'checked' : 'unchecked'}
+                    onPress={() => updateForm('negotiable', !form.negotiable)}
                     color="#2e384d"
                 />
                 <Text style={styles.checkboxLabel}>Giá có thể thương lượng?</Text>
             </View>
-
-            <Text style={styles.inputLabel}>Thương hiệu</Text>
-            <TouchableOpacity
-                onPress={() => setShowBrandDropdown(!showBrandDropdown)}
-                style={styles.inputDropdown}
-            >
-                <Text style={styles.inputText}>{brand || 'Chọn thương hiệu'}</Text>
-                <Text style={styles.dropdownArrow}>▼</Text>
-            </TouchableOpacity>
-
-            {showBrandDropdown && (
-                <View style={styles.dropdownList}>
-                    <ScrollView nestedScrollEnabled>
-                        {brands.map((item, index) => (
-                            <TouchableOpacity key={index} onPress={() => handleSelectBrand(item)}>
-                                <Text style={styles.dropdownItemText}>{item}</Text>
-                            </TouchableOpacity>
-                        ))}
-                        <View style={styles.otherInputContainer}>
-                            <Text style={styles.otherInputLabel}>Khác:</Text>
-                            <TextInput
-                                value={customBrand}
-                                onChangeText={(text) => {
-                                    setCustomBrand(text);
-                                    setBrand(text);
-                                }}
-                                placeholder="Nhập thương hiệu"
-                                style={styles.otherInput}
-                            />
-                        </View>
-                    </ScrollView>
-                </View>
-            )}
-
-            <Text style={styles.inputLabel}>Tình trạng</Text>
-            <TouchableOpacity
-                onPress={() => setShowConditionDropdown(!showConditionDropdown)}
-                style={styles.inputDropdown}
-            >
-                <Text style={styles.inputText}>{condition || 'Chọn tình trạng'}</Text>
-                <Text style={styles.dropdownArrow}>▼</Text>
-            </TouchableOpacity>
-
-            {showConditionDropdown && (
-                <View style={styles.dropdownList}>
-                    <ScrollView nestedScrollEnabled>
-                        {conditions.map((item, index) => (
-                            <TouchableOpacity key={index} onPress={() => handleSelectCondition(item)}>
-                                <Text style={styles.dropdownItemText}>{item}</Text>
-                            </TouchableOpacity>
-                        ))}
-                        <View style={styles.otherInputContainer}>
-                            <Text style={styles.otherInputLabel}>Khác:</Text>
-                            <TextInput
-                                value={customCondition}
-                                onChangeText={(text) => {
-                                    setCustomCondition(text);
-                                    setCondition(text);
-                                }}
-                                placeholder="Nhập tình trạng"
-                                style={styles.otherInput}
-                            />
-                        </View>
-                    </ScrollView>
-                </View>
-            )}
-
+            <Text style={commonStyles.inputLabel}>Thương hiệu</Text>
+            <Dropdown
+                label="thương hiệu"
+                value={form.brand}
+                items={brands}
+                onSelect={(value) => updateForm('brand', value)}
+                showDropdown={dropdowns.brand}
+                setShowDropdown={() => toggleDropdown('brand')}
+                customValue={customValues.brand}
+                setCustomValue={(text) => setCustomValues({ ...customValues, brand: text })}
+            />
+            <Text style={commonStyles.inputLabel}>Tình trạng</Text>
+            <Dropdown
+                label="tình trạng"
+                value={form.condition}
+                items={conditions}
+                onSelect={(value) => updateForm('condition', value)}
+                showDropdown={dropdowns.condition}
+                setShowDropdown={() => toggleDropdown('condition')}
+                customValue={customValues.condition}
+                setCustomValue={(text) => setCustomValues({ ...customValues, condition: text })}
+            />
             <TextInput
                 placeholder="Mô tả chi tiết"
                 placeholderTextColor="#a6b3ac"
-                style={[styles.input, styles.textarea]}
+                style={[commonStyles.input, styles.textarea]}
                 multiline
-                value={description}
-                onChangeText={setDescription}
+                value={form.description}
+                onChangeText={(text) => updateForm('description', text)}
             />
         </View>
     );
 }
 
-
 const styles = StyleSheet.create({
-    sectionContainer: {
-        backgroundColor: '#fff',
-        paddingHorizontal: 16,
-        marginTop: 16,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#2e384d',
-    },
-    inputLabel: {
-        color: '#a6b3ac',
-        fontSize: 14,
-        marginBottom: 4,
-    },
-    input: {
-        borderWidth: 2,
-        borderColor: '#2e384d',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        backgroundColor: "#e5ebfc",
-        fontSize: 16,
-        color: '#2e384d',
-    },
-    textarea: {
-        height: 100,
-        textAlignVertical: 'top',
-    },
-    inputDropdown: {
-        borderWidth: 2,
-        borderColor: '#2e384d',
-        borderRadius: 8,
-        backgroundColor: '#e5ebfc',
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    inputText: {
-        fontSize: 16,
-        color: '#2e384d',
-    },
-    dropdownArrow: {
-        fontSize: 16,
-        color: '#2e384d',
-    },
-    dropdownList: {
-        backgroundColor: '#e5ebfc',
-        borderWidth: 2,
-        borderColor: '#2e384d',
-        borderRadius: 8,
-        marginTop: 4,
-        maxHeight: 150,
-    },
-    dropdownItemText: {
-        padding: 10,
-        fontSize: 16,
-        color: '#2e384d',
-    },
-
-    otherInputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-    },
-    otherInputLabel: {
-        marginRight: 8,
-    },
-    otherInput: {
-        flex: 1,
-        borderWidth: 2,
-        borderColor: '#ccc',
-        borderRadius: 6,
-        paddingHorizontal: 8,
-        height: 36,
-        color: '#2e384d',
-    },
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -314,5 +175,10 @@ const styles = StyleSheet.create({
     },
     checkboxLabel: {
         marginLeft: 8,
+    },
+    textarea: {
+        height: 100,
+        textAlignVertical: 'top',
+        marginTop: 10,
     },
 });

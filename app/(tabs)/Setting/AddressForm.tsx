@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import userApi from "../../../api/userApi";
 
 interface Address {
-  id: number;
-  province: string;
-  district: string;
-  ward: string;
-  detail: string;
-  phone: string;
+    id: number;
+    province: string;
+    district: string;
+    ward: string;
+    detail: string;
+    phone: string;
 }
 
 interface AddressProps {
-  address?: Address;
-  refetchAddresses: () => void;
+    address?: Address;
+    refetchAddresses: () => void;
 }
 
 const AddressForm: React.FC<AddressProps> = ({ address, refetchAddresses }) => {

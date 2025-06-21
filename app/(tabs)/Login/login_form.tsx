@@ -17,11 +17,15 @@ export default function LoginScreen() {
     const [pwd, setPwd] = useState("");
     const [showPwd, setShowPwd] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    // Chuyển hướng đến trang đăng ký
     const handleRegister = () => router.replace("/(tabs)/Login/register_form");
+
+    // Chuyển hướng đến trang quên mật khẩu
     const handleForgetPass = () =>
         router.replace("/(tabs)/Login/password_recovery");
     const handleHomePage = () => router.push("/");
 
+    // Chức năng đăng nhập
     const handleLogin = async () => {
         if (!email || !pwd) {
             alert("Vui lòng nhập đầy đủ email và mật khẩu");
