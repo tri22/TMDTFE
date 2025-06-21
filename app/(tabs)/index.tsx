@@ -4,10 +4,12 @@ import {
     ScrollView,
 } from "react-native-gesture-handler";
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { en, registerTranslation } from 'react-native-paper-dates';
 import Toast from "react-native-toast-message";
 import { BottomNavigation } from "../../components/BottomNavigation";
 import Home from "./home";
 
+registerTranslation('en', en);
 export default function HomeScreen() {
     return (
         <PaperProvider theme={DefaultTheme}>

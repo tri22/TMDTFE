@@ -1,8 +1,8 @@
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect, useState } from "react";
 import { Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { DatePickerModal } from 'react-native-paper-dates';
 import { SERVER_URL_BASE } from "../../../api/ipConstant";
 import userApi, { UserRequest } from '../../../api/userApi';
 
@@ -11,6 +11,8 @@ const ProfileSetting = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+
     const [birthDate, setBirthDate] = useState(new Date());
     const [email, setEmail] = useState("");
     const [fullName, setFullName] = useState("");
@@ -23,12 +25,16 @@ const ProfileSetting = () => {
                 const user = response.data;
                 console.log(user);
                 if (user) {
-                    setBirthDate(new Date(user.birthday));
+                    if (user.birthday) {
+                        setBirthDate(new Date(user.birthday));
+                    } else {
+                        setBirthDate(new Date(0));
+                    }
+
                     setEmail(user.email)
                     setFullName(user.name)
                     setPhone(user.phone)
                     setAvatar(user.imageUrl)
-
                 }
             } catch (error) {
                 console.error("Lỗi khi lấy người dùng:", error);
@@ -86,18 +92,33 @@ const ProfileSetting = () => {
                     <TextInput style={styles.input} placeholder="Số điện thoại" defaultValue={phone} onChangeText={setPhone} />
                 </View>
                 <View style={styles.field}>
-                    <Text style={styles.label}>Ngày sinh</Text>
-                    <DateTimePicker
-                        value={birthDate}
-                        mode="date"
-                        display="default"
-                        onChange={(event, selectedDate) => {
-                            if (selectedDate) {
-                                setBirthDate(selectedDate);
-                            }
-                        }}
-                        style={{ marginLeft: -15, }}
-                    />
+                    <View style={styles.field}>
+                        <View style={styles.field}>
+                            <Text style={styles.label}>Ngày sinh</Text>
+                            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
+                                <Text>{birthDate.toLocaleDateString('vi-VN')}</Text>
+                            </TouchableOpacity>
+
+                            <DatePickerModal
+                                locale="en"
+                                mode="single"
+                                visible={showDatePicker}
+                                onDismiss={() => setShowDatePicker(false)}
+                                date={birthDate}
+                                onConfirm={(params) => {
+                                    setShowDatePicker(false);
+                                    if (params.date) {
+                                        const adjustedDate = new Date(params.date);
+                                        adjustedDate.setHours(12); 
+                                        setBirthDate(adjustedDate);
+                                    }
+                                }}
+
+                            />
+                        </View>
+
+                    </View>
+
                 </View>
                 <View style={styles.field}>
                     <Text style={styles.label}>Ảnh đại diện</Text>
