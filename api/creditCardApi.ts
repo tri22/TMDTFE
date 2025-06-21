@@ -14,7 +14,7 @@ const creditCardApi = {
         return axiosInstance.get(`/credit_card/all/${userId}`);
     },
 
-    upadteCard: (id: number, data: CardData) => {
+    updateCard : (id: number, data: CardData) => {
         return axiosInstance.put(`/credit_card/update/${id}`, data);
     },
 
