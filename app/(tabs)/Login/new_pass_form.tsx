@@ -1,7 +1,8 @@
+import { authApi } from '@/api/authApi';
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import InputField from './Components/InputField';
 
 export default function NewPasswordForm() {
@@ -9,11 +10,28 @@ export default function NewPasswordForm() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
+    const { email } = useLocalSearchParams();
 
     const togglePasswordVisibility = () => setShowPassword(prev => !prev);
+    // const handleSave = () => router.replace('/(tabs)/Login/login_form');
+    const handleSave = async () => {
+        if (password.length < 8) {
+            Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 8 ký tự.');
+            return;
+        }
+        if (password !== confirmPassword) {
+            Alert.alert('Lỗi', 'Mật khẩu và xác nhận mật khẩu không khớp.');
+            return;
+        }
+        try {
+            await authApi.resetPassword({ email, password });
+            Alert.alert('Thành công', 'Mật khẩu đã được cập nhật!');
+            router.replace('/(tabs)/Login/login_form');
+        } catch (error) {
+            Alert.alert('Lỗi', 'Không thể cập nhật mật khẩu. Vui lòng thử lại.');
+        }
+    };
     const handleExit = () => router.replace('/(tabs)/MainLogin');
-    const handleSave = () => router.replace('/(tabs)/Login/login_form');
-
     const eyeIcon = (
         <TouchableOpacity onPress={togglePasswordVisibility}>
             <Feather name={showPassword ? 'eye' : 'eye-off'} size={20} color="gray" />

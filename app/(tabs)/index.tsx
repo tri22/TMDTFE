@@ -10,6 +10,7 @@ import Toast from "react-native-toast-message";
 import Home from "./home";
 
 export default function HomeScreen() {
+
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <View style={styles.container}>
