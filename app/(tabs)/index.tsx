@@ -1,27 +1,26 @@
-
 import { StyleSheet, View } from "react-native";
-import { BottomNavigation } from "../../components/BottomNavigation";
-
 import {
     GestureHandlerRootView,
     ScrollView,
 } from "react-native-gesture-handler";
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Toast from "react-native-toast-message";
+import { BottomNavigation } from "../../components/BottomNavigation";
 import Home from "./home";
 
 export default function HomeScreen() {
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <View style={styles.container}>
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
-                    <Home></Home>
-                    {/* <LoginScreen></LoginScreen> */}
-                </ScrollView>
-
-                <BottomNavigation />
-            </View>
-            <Toast />
-        </GestureHandlerRootView>
+        <PaperProvider theme={DefaultTheme}>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <View style={styles.container}>
+                    <ScrollView contentContainerStyle={styles.scrollContainer}>
+                        <Home />
+                    </ScrollView>
+                    <BottomNavigation />
+                </View>
+                <Toast />
+            </GestureHandlerRootView>
+        </PaperProvider>
     );
 }
 

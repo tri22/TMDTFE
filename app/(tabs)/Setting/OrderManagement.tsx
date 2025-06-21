@@ -2,8 +2,9 @@ import { BottomNavigation } from '@/components/BottomNavigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button } from 'react-native-paper';
-import { getOrderBySeller } from '../../../api/orderApi';
+import { Button, Menu } from 'react-native-paper';
+import { getOrderBySeller, updateStatus } from '../../../api/orderApi';
+
 
 interface Order {
   id: number;
@@ -86,28 +87,69 @@ const OrderManagement: React.FC = () => {
   };
 
 
-  const renderItem = ({ item }: { item: Order }) => (
-    <View style={styles.card}>
-      <Image
-        source={{ uri: item.productOrder.imageUrl }}
-        style={styles.productImage}
-      />
-      <View style={styles.info}>
-        <Text style={styles.name}>{item.productOrder.name}</Text>
-        <Text style={styles.tracking}>Tổng tiền: {item.total}đ</Text>
-        <Text style={styles.delivery}>Địa chỉ: {item.addressOrder.address}</Text>
-        <Text style={styles.status}>
-          {getStatusLabel(item.status)}
-        </Text>
+  const OrderItem = ({ item, onStatusChange }: { item: Order; onStatusChange: () => void }) => {
+    const [menuVisible, setMenuVisible] = useState(false);
 
+    const openMenu = () => setMenuVisible(true);
+    const closeMenu = () => setMenuVisible(false);
+
+    const handleStatusChange = async (newStatus: string) => {
+      closeMenu();
+      try {
+        const data = { status: newStatus };
+        await updateStatus(item.id, data);
+        onStatusChange();
+      } catch (error) {
+        console.error("Lỗi khi cập nhật trạng thái:", error);
+      }
+    };
+
+    //  Ẩn toàn bộ nút cập nhật nếu trạng thái là COMPLETED hoặc CANCELLED
+    const isFinalStatus = item.status === 'COMPLETED' || item.status === 'CANCELLED';
+
+    return (
+      <View style={styles.card}>
+        <Image
+          source={{ uri: item.productOrder.imageUrl }}
+          style={styles.productImage}
+        />
+        <View style={styles.info}>
+          <Text style={styles.name}>{item.productOrder.name}</Text>
+          <Text style={styles.tracking}>Tổng tiền: {item.total}đ</Text>
+          <Text style={styles.delivery}>Địa chỉ: {item.addressOrder.address}</Text>
+          <Text style={styles.status}>{getStatusLabel(item.status)}</Text>
+        </View>
+
+        {/* Ẩn toàn bộ button nếu đã hoàn tất hoặc đã hủy */}
+        {!isFinalStatus && (
+          <View style={styles.actions}>
+            <Menu
+              visible={menuVisible}
+              onDismiss={closeMenu}
+              anchor={
+                <Button mode="contained" style={styles.button} onPress={openMenu}>
+                  Cập nhật
+                </Button>
+              }
+            >
+              {/* Chỉ hiển thị các trạng thái KHÁC với trạng thái hiện tại */}
+              {item.status !== 'SHIPPING' && (
+                <Menu.Item onPress={() => handleStatusChange("SHIPPING")} title="Đang vận chuyển" />
+              )}
+              {item.status !== 'COMPLETED' && (
+                <Menu.Item onPress={() => handleStatusChange("COMPLETED")} title="Đã giao" />
+              )}
+              {item.status !== 'CANCELLED' && (
+                <Menu.Item onPress={() => handleStatusChange("CANCELLED")} title="Hủy" />
+              )}
+            </Menu>
+          </View>
+        )}
       </View>
-      <View style={styles.actions}>
-        <Button mode="contained" style={styles.button}>
-          Cập nhật
-        </Button>
-      </View>
-    </View>
-  );
+    );
+  };
+
+
 
   return (
     <View style={styles.container}>
@@ -120,8 +162,9 @@ const OrderManagement: React.FC = () => {
 
         {/* Danh sách đơn hàng */}
         {orders.map((item) => (
-          <View key={item.id}>{renderItem({ item })}</View>
+          <OrderItem key={item.id} item={item} onStatusChange={fetchOrders} />
         ))}
+
       </ScrollView>
       <BottomNavigation></BottomNavigation>
     </View>
