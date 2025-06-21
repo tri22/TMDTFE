@@ -2,10 +2,10 @@ import creditCardApi, { CardData } from "@/api/creditCardApi";
 import { CardItem } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import CardFormModal from "@/components/CardFormModal";
+import { MaterialIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-
+import { Swipeable } from 'react-native-gesture-handler';
 const PaymentSetting = () => {
   const bankLogos: { [key: string]: { name: string; logo: string } } = {
     "970436": {
@@ -61,7 +61,7 @@ const PaymentSetting = () => {
       logo: "https://i.pinimg.com/736x/92/dd/9d/92dd9ddf90fef6277a3109f51b03dcbd.jpg"
     },
   };
-
+  const [isEditMode, setIsEditMode] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [cardList, setCardList] = useState<CardData[]>([]);
   const [editCard, setEditCard] = useState<CardData>({
@@ -74,50 +74,61 @@ const PaymentSetting = () => {
 
 
   useEffect(() => {
-    const fetchCardData = async () => {
-      try {
-        const response = await creditCardApi.getAllByUserId(6)
-        const data = response.data;
-        console.log(data)
-        setCardList(data)
-      } catch {
-
-      }
-    }
     fetchCardData();
   }, [])
 
-  const handleCardSetting = (card: CardData) => {
-    setEditCard(card);
-    setModalVisible(true);
+  const fetchCardData = async () => {
+    try {
+      const response = await creditCardApi.getAllByUserId(4);
+      const data = response.data;
+
+      const formattedData = data.map((item: CardData) => {
+        const [year, month] = item.expiryDate.split("-");
+        const yy = year.slice(-2);
+        return {
+          ...item,
+          expiryDate: `${month}/${yy}`,
+        };
+      });
+
+      setCardList(formattedData);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
 
-  const handleSaveCard = () => {
-    console.log("settings")
-    console.log(bankLogos["970436"].logo);
+  const handleDeleteCard = async (id: number | undefined) => {
+    if (id === undefined) return;
+    try {
+      await creditCardApi.deleteCard(id);
+      fetchCardData(); // load lại danh sách
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  }
+
+  const handleSaveSuccess = () => {
+    setModalVisible(false);   // đóng modal
+    fetchCardData();          // gọi lại API để lấy danh sách thẻ mới
+  };
+
+
+  const handleCardSetting = (card: CardData) => {
+    setEditCard(card);
+    setIsEditMode(true);
+    setModalVisible(true);
+  };
 
   const handleAddCard = () => {
-    console.log("settings")
-    console.log(bankLogos["970436"].logo);
-
-    setEditCard({
-      id: 0,
-      number: "",
-      ownerName: "",
-      expiryDate: "",
-      ccv: 0,
-      userId: 0, // nếu CardData yêu cầu
-    });
+    setEditCard({ id: 0, number: "", ownerName: "", expiryDate: "", ccv: 0, userId: 0 });
+    setIsEditMode(false);
     setModalVisible(true);
-
-
-  }
+  };
 
   const formatExpiryDate = (rawDate: string): string => {
-    const [year, month] = rawDate.split("/");
+    const [year, month] = rawDate.split("-");
     const yy = year.slice(-2);
     return `${month}/${yy}`;
   };
@@ -133,32 +144,38 @@ const PaymentSetting = () => {
         {/* Card */}
         {cardList.map((item, index) => {
           const cardNumber = item.number;
-          const bankCode = cardNumber?.slice(0, 6); // lấy 6 số đầu
-          const logo = bankLogos[bankCode]?.logo || "https://via.placeholder.com/40"; // fallback logo nếu không tìm được
+          const bankCode = cardNumber?.slice(0, 6);
+          const logo = bankLogos[bankCode]?.logo || "https://via.placeholder.com/40";
+
+          const renderRightActions = () => (
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => handleDeleteCard(item.id)}
+            >
+              <MaterialIcons name="delete" size={24} color="#fff" />
+            </TouchableOpacity>
+          );
 
           return (
-            <TouchableOpacity onPress={() => handleCardSetting(item)}>
-              <CardItem
-                key={index}
-                cardNumber={cardNumber}
-                img={{ uri: logo }}
-                expiry={formatExpiryDate(item.expiryDate)}
-                ownerName={item.ownerName}
-              />
-            </TouchableOpacity>
-
+            <Swipeable key={index} renderRightActions={renderRightActions}>
+              <TouchableOpacity onPress={() => handleCardSetting(item)}>
+                <CardItem
+                  cardNumber={cardNumber}
+                  img={{ uri: logo }}
+                  expiry={item.expiryDate}
+                  ownerName={item.ownerName}
+                />
+              </TouchableOpacity>
+            </Swipeable>
           );
         })}
-
-
-
       </ScrollView>
       <CardFormModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onSave={handleSaveCard}
         initialData={editCard}
-
+        handleSaveSuccess={handleSaveSuccess}
+        editMode={isEditMode}
       />
 
       <TouchableOpacity style={styles.addButton} onPress={handleAddCard}>
@@ -245,6 +262,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
   },
+  deleteButton: {
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginVertical: 5,
+  },
+  deleteText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
 });
 
 export default PaymentSetting;
