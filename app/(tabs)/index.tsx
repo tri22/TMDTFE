@@ -1,11 +1,9 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import {
-    GestureHandlerRootView,
-    ScrollView,
+    GestureHandlerRootView
 } from "react-native-gesture-handler";
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import Toast from "react-native-toast-message";
-import { BottomNavigation } from "../../components/BottomNavigation";
 import Home from "./home";
 
 export default function HomeScreen() {
@@ -13,12 +11,14 @@ export default function HomeScreen() {
     return (
         <PaperProvider theme={DefaultTheme}>
             <GestureHandlerRootView style={{ flex: 1 }}>
-                <View style={styles.container}>
+                <Home />
+                {/* <View style={styles.container}>
                     <ScrollView contentContainerStyle={styles.scrollContainer}>
-                        <Home />
+                      
                     </ScrollView>
+                      
                     <BottomNavigation />
-                </View>
+                </View> */}
                 <Toast />
             </GestureHandlerRootView>
         </PaperProvider>
@@ -43,9 +43,9 @@ const styles = StyleSheet.create({
         position: "absolute",
     },
     container: {
-        flex: 1,
-        justifyContent: "flex-end",
-        backgroundColor: "#fff",
+        // flex: 1,
+        // justifyContent: "flex-end",
+        // backgroundColor: "#fff",
     },
     scrollContainer: {
         paddingBottom: 100, // Đảm bảo BottomNavigation không che khuất nội dung

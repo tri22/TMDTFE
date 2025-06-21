@@ -12,8 +12,25 @@
 import { Comment } from "@/models/ProductDetailModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance, { showToast } from "./axiosInstance";
-import { SERVER_URL_BASE } from "./ipConstant";
+import { SERVER_BASE_URL } from "./ipConstant";
+interface User {
+  id: number;
+  name: string;
+  // …các trường khác nếu có
+}
+export async function getUserId(): Promise<number | undefined> {
+  try {
+    const json = await AsyncStorage.getItem('user');   // "{"id":123,"name":"A"}" | null
+    console.log("user: " + json);
+    if (!json) return undefined;
 
+    const user = JSON.parse(json) as { id?: number };
+    return user.id;
+  } catch (err) {
+    console.error('Lỗi đọc user từ AsyncStorage', err);
+    return undefined;
+  }
+}
 export async function submitComment(
   productId: number,
   content: string,
@@ -21,10 +38,10 @@ export async function submitComment(
   level: number
 ): Promise<Comment[]> {
   console.log("submitComment");
-    const userIdStr = await AsyncStorage.getItem('userId');
-  const userId = userIdStr ? parseInt(userIdStr) : null;
-
-  if (userId === null) {
+    let userId = await getUserId();
+    console.log("userId: " + userId);
+  
+  if (userId === undefined) {
       showToast("error", "Bạn cần đăng nhập để bình luận.");
      throw new Error("Bạn cần đăng nhập để bình luận.");
     
@@ -49,7 +66,7 @@ export async function submitComment(
         id: item.id,
         userId: item.userId,
         userName: item.userName,
-        userAvatar: SERVER_URL_BASE + "/" + item.userAvatar,
+        userAvatar: SERVER_BASE_URL + "/" + item.userAvatar,
         content: item.content,
         createdAt: new Date(item.createdAt),
         parentId: item.parentId,
@@ -60,7 +77,7 @@ export async function submitComment(
                 id: reply.id,
                 userId: reply.userId,
                 userName: reply.userName,
-                userAvatar: SERVER_URL_BASE + "/" + reply.userAvatar,
+                userAvatar: SERVER_BASE_URL + "/" + reply.userAvatar,
                 content: reply.content,
                 createdAt: new Date(reply.createdAt),
                 parentId: reply.parentId,

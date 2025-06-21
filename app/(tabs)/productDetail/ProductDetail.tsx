@@ -13,18 +13,17 @@ import {
   FlatList,
   Image,
   ImageSourcePropType,
-  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import { submitComment } from "@/api/commentApi";
-import { getProductDetail } from "@/api/productApi";
+import { getProductDetail, getProductsByUser } from "@/api/productApi";
 import wishlistAPI from "@/api/WishlistAPI";
 import { colors } from "@/baseStyle/Style";
 import { IconButton, SimpleButton } from "@/components/button";
@@ -35,12 +34,17 @@ import {
   ProductDetailModel,
   User,
 } from "@/models/ProductDetailModel";
+import {
+  PaginatedProductsResult,
+  ProductItemModel,
+} from "@/models/ProductItemModel";
 import { formatMoney } from "@/util";
 import { saveRecentViewedProduct } from "@/util/historySeach";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Modal } from "react-native-paper";
 import DefaultLayout from "../DefaultLayout";
+import ProductItem from "../product/components/productItem";
 import { CommentItem, MyCarousel, ShopInfo } from "./components";
 const imgDir = "@/assets/images/searchProduct";
 
@@ -59,46 +63,6 @@ type CommentItem = {
   time: string;
   replies: CommentItem[];
 };
-
-type ProductOfSaler = {
-  image: ImageSourcePropType;
-  link: string;
-};
-
-const productOfSalers: ProductOfSaler[] = [
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-];
 
 type ShippingFeeItem = {
   title: string;
@@ -176,6 +140,9 @@ function ProductDetail() {
   const [productDetail, setProductDetail] = useState<ProductDetailModel | null>(
     null
   );
+  const [productOfSalers, setProductOfSalers] = useState<ProductItemModel[]>(
+    []
+  );
   const [showWishlistSuccess, setShowWishlistSuccess] = useState(false);
 
   const [product, setProduct] = useState<Product>(productDefault);
@@ -196,6 +163,18 @@ function ProductDetail() {
     } finally {
     }
   };
+  const fetchProductsByUser = async (id: number) => {
+    try {
+      const result: PaginatedProductsResult = await getProductsByUser(owner.id);
+      setProductOfSalers((prevProducts) => [
+        ...prevProducts,
+        ...result.products,
+      ]);
+    } catch (err: any) {
+      console.error("Failed to fetch products of saler: ", err);
+    }
+  };
+
   useEffect(() => {
     if (productDetail) {
       setProduct(productDetail.product ?? productDefault);
@@ -212,6 +191,12 @@ function ProductDetail() {
       fetchProductDetail(productId);
     }
   }, [productId]);
+
+  useEffect(() => {
+    if (owner) {
+      fetchProductsByUser(owner.id);
+    }
+  }, [owner]);
 
   useEffect(() => {
     if (images.length > 0) {
@@ -439,10 +424,10 @@ function ProductDetail() {
 
   return (
     <DefaultLayout>
+      <TouchableOpacity onPress={handleGoBack} style={styles.goBackBtn}>
+        <Text style={{ color: colors.primary }}>Quay lại</Text>
+      </TouchableOpacity>
       <ScrollView style={styles.container}>
-        <TouchableOpacity onPress={handleGoBack} style={styles.goBackBtn}>
-          <Text style={{ color: colors.primary }}>Quay lại</Text>
-        </TouchableOpacity>
         <MyCarousel images={images} />
         <View
           style={[
@@ -590,12 +575,12 @@ function ProductDetail() {
             keyExtractor={(item, index) => index.toString()}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.productOfSalerItem}
-                onPress={() => Linking.openURL("https://google.com")}
-              >
-                <Image source={item.image} style={styles.image} />
-              </TouchableOpacity>
+              <ProductItem
+                id={item.id}
+                name={item.name}
+                price={item.price}
+                thumbnail={item.thumbnail}
+              />
             )}
           />
         </View>
