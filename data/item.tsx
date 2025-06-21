@@ -5,6 +5,7 @@ interface Item {
   name: string;
   price: number;
   quantity: number;
+  onDelete: (id: number) => void;
 }
 
 const cartItems: Item[] = [];
@@ -22,6 +23,7 @@ export default async function fetchDataWishlist(id: number) {
         price,
         imageUrl: imageUrl, // <-- use image here
         quantity: qty,
+        onDelete: function (id: number): void {},
       });
     }
 

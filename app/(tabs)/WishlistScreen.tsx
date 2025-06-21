@@ -1,3 +1,4 @@
+import wishlistAPI from "@/api/WishlistAPI";
 import { WishlistItem } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import fetchDataWishlist, { Item } from "@/data/item";
@@ -32,6 +33,28 @@ const WishlistScreen = () => {
     fetchWishlist();
   }, []);
 
+  // handle delete item
+  const handleDeleteItem = async (id: number) => {
+    // Logic to delete the item from wishlist
+    const userString = await AsyncStorage.getItem("user");
+
+    if (!userString) {
+      return;
+    }
+    const user = JSON.parse(userString);
+
+    await wishlistAPI
+      .deleteWishlistByUserId(user.id, id)
+      .then((s) => {
+        setWishlistItems((prevItems) =>
+          prevItems.filter((item) => item.id !== id)
+        );
+      })
+      .catch((e) => {
+        alert(e);
+      });
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Danh sách yêu thích</Text>
@@ -40,7 +63,7 @@ const WishlistScreen = () => {
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {wishlistItems.map((item: Item) => (
-            <WishlistItem key={item.id} {...item} />
+            <WishlistItem key={item.id} {...item} onDelete={handleDeleteItem} />
           ))}
         </ScrollView>
       )}
