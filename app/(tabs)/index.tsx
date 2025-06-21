@@ -9,6 +9,7 @@ import { BottomNavigation } from "../../components/BottomNavigation";
 import Home from "./home";
 
 export default function HomeScreen() {
+
     return (
         <PaperProvider theme={DefaultTheme}>
             <GestureHandlerRootView style={{ flex: 1 }}>

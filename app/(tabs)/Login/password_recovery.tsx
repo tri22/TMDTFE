@@ -1,6 +1,8 @@
+import { authApi } from '@/api/authApi';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import InputField from './Components/InputField';
 import RadioOption from './Components/RadioOption';
 
 const recoveryMethods = [
@@ -21,19 +23,44 @@ const recoveryMethods = [
 export default function PassRecoveryScreen() {
     const [selectedMethod, setSelectedMethod] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [contact, setContact] = useState(''); // Lưu email hoặc số điện thoại
     const router = useRouter();
 
-    const handleRecovery = () => {
-        const method = recoveryMethods.find((m) => m.key === selectedMethod);
-        if (!method) {
+    const validateEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // Chuyển hướng đến trang Email hoặc SMS Recovery
+    const handleRecovery = async () => {
+        if (!selectedMethod || !contact) {
             setShowModal(true);
             return;
         }
-        router.push(method.route);
+        if (selectedMethod === 'email' && !validateEmail(contact)) {
+            Alert.alert('Lỗi', 'Vui lòng nhập email hợp lệ.');
+            return;
+        }
+
+        if (selectedMethod === 'email') {
+            try {
+                // Gửi yêu cầu gửi mã xác nhận
+                await authApi.forgotPassword({ email: contact });
+                // Nếu thành công, chuyển sang EmailRecovery
+                router.push({ pathname: '/(tabs)/Login/email_recovery', params: { contact } });
+            } catch (error) {
+                Alert.alert('Lỗi', 'Không thể gửi mã xác nhận. Vui lòng kiểm tra email và thử lại.');
+            }
+        } else {
+            // Xử lý SMS nếu cần (giả định tạm thời chuyển thẳng)
+            router.push({ pathname: '/(tabs)/Login/email_recovery', params: { contact } });
+        }
     };
 
+    // Chuyển hướng đến trang main Login
     const handleExit = () => router.push('/(tabs)/MainLogin');
 
+    // Nội dung đã sửa
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.formWrapper}>
@@ -50,6 +77,15 @@ export default function PassRecoveryScreen() {
                         />
                     ))}
                 </View>
+                {(selectedMethod === 'email' || selectedMethod === 'sms') && (
+                    <InputField
+                        value={contact}
+                        onChangeText={setContact}
+                        placeholder={selectedMethod === 'email' ? 'Nhập email' : 'Nhập số điện thoại'}
+                        keyboardType={selectedMethod === 'email' ? 'email-address' : 'phone-pad'}
+                        containerStyle={styles.inputContainer}
+                    />
+                )}
             </View>
 
             <TouchableOpacity style={styles.next} onPress={handleRecovery}>
@@ -62,7 +98,9 @@ export default function PassRecoveryScreen() {
             <Modal transparent visible={showModal} animationType="fade" onRequestClose={() => setShowModal(false)}>
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalText}>Vui lòng chọn phương thức để lấy lại mật khẩu!</Text>
+                        <Text style={styles.modalText}>
+                            Vui lòng {selectedMethod ? 'nhập email hoặc số điện thoại' : 'chọn phương thức'} để lấy lại mật khẩu!
+                        </Text>
                         <TouchableOpacity onPress={() => setShowModal(false)} style={styles.modalButton}>
                             <Text style={styles.modalButtonText}>OK</Text>
                         </TouchableOpacity>
@@ -99,6 +137,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
+    inputContainer: {
+        marginBottom: 20
+    },
     methodWrapper: {
         marginTop: 50,
     },
@@ -118,6 +159,7 @@ const styles = StyleSheet.create({
     exitText: {
         textAlign: 'center',
         marginTop: 20,
+        marginBottom: 50,
         color: '#666',
         textDecorationLine: 'underline',
     },

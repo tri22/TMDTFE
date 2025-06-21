@@ -14,6 +14,7 @@ import {
   Image,
   ImageSourcePropType,
   Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -38,6 +39,7 @@ import { formatMoney } from "@/util";
 import { saveRecentViewedProduct } from "@/util/historySeach";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Modal } from "react-native-paper";
 import DefaultLayout from "../DefaultLayout";
 import { CommentItem, MyCarousel, ShopInfo } from "./components";
 const imgDir = "@/assets/images/searchProduct";
@@ -174,6 +176,8 @@ function ProductDetail() {
   const [productDetail, setProductDetail] = useState<ProductDetailModel | null>(
     null
   );
+  const [showWishlistSuccess, setShowWishlistSuccess] = useState(false);
+
   const [product, setProduct] = useState<Product>(productDefault);
   const [images, setImages] = useState<string[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -280,89 +284,120 @@ function ProductDetail() {
       }
       const user = JSON.parse(userString);
 
-      const ob = await wishlistAPI.addWishlistByUserId(user.id, productId);
+      await wishlistAPI
+        .addWishlistByUserId(user.id, productId)
+        .then((r) => {
+          // show a pop up to notify user
+          setShowWishlistSuccess(true);
+          setTimeout(() => {
+            setShowWishlistSuccess(false);
+          }, 1500);
+        })
+        .catch((e) => {
+          console.log("Error adding to wishlist:", e);
+        });
     };
     //
     return (
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        snapPoints={snapPoints}
-        backdropComponent={(props) => (
-          <BottomSheetBackdrop
-            {...props}
-            appearsOnIndex={0}
-            disappearsOnIndex={-1}
-            opacity={0.5}
-          />
-        )}
-      >
-        <BottomSheetView style={{}}>
-          <View style={styles.dFlex}>
-            <Image source={{ uri: thumbnail }} style={styles.image} />
-            <View>
-              <Text style={{ fontSize: 20, marginBottom: 20 }}>
-                {product.name}
-              </Text>
-              <View style={styles.dFlex}>
-                <Text style={styles.price}>{formatMoney(product.price)}</Text>
-                <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
+      <>
+        <BottomSheet
+          ref={bottomSheetRef}
+          index={-1}
+          snapPoints={snapPoints}
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop
+              {...props}
+              appearsOnIndex={0}
+              disappearsOnIndex={-1}
+              opacity={0.5}
+            />
+          )}
+        >
+          <BottomSheetView style={{}}>
+            <View style={styles.dFlex}>
+              <Image source={{ uri: thumbnail }} style={styles.image} />
+              <View>
+                <Text style={{ fontSize: 20, marginBottom: 20 }}>
+                  {product.name}
+                </Text>
+                <View style={styles.dFlex}>
+                  <Text style={styles.price}>{formatMoney(product.price)}</Text>
+                  <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
+                </View>
               </View>
             </View>
-          </View>
-          <Text style={[styles.label, { marginLeft: 10 }]}>Chọn số lượng</Text>
-          <View style={[styles.dFlex, { marginLeft: "auto" }]}>
-            <View style={styles.dFlex}>
-              <IconButton
-                icon="add-circle-outline"
-                onPress={handlePlus}
-                iconColor={colors.primary}
-                iconSize={60}
+            <Text style={[styles.label, { marginLeft: 10 }]}>
+              Chọn số lượng
+            </Text>
+            <View style={[styles.dFlex, { marginLeft: "auto" }]}>
+              <View style={styles.dFlex}>
+                <IconButton
+                  icon="add-circle-outline"
+                  onPress={handlePlus}
+                  iconColor={colors.primary}
+                  iconSize={60}
+                  style={{
+                    alignSelf: "stretch",
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                  }}
+                />
+                <TextInput
+                  style={[styles.inputQty]}
+                  placeholderTextColor={"lightgray"}
+                  placeholder="Nhập số lượng"
+                  onChangeText={(text) => {
+                    const number = parseInt(text, 10);
+                    setQty(isNaN(number) ? 0 : number);
+                  }}
+                  value={qty.toString()}
+                  keyboardType="numeric"
+                />
+                <IconButton
+                  icon="remove-circle-outline"
+                  onPress={handleMinus}
+                  iconColor={colors.primary}
+                  iconSize={60}
+                  style={{
+                    alignSelf: "stretch",
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                  }}
+                />
+              </View>
+            </View>
+            <View style={[styles.dFlex, {}]}>
+              <SimpleButton
+                title="Thêm vào giỏ hàng"
+                onPress={() => handleAddToWishlist()}
                 style={{
-                  alignSelf: "stretch",
-                  borderTopLeftRadius: 0,
-                  borderBottomLeftRadius: 0,
+                  flex: 1,
+                  marginHorizontal: 5,
+                  marginVertical: 10,
+                  backgroundColor: colors.darkPrimary,
                 }}
-              />
-              <TextInput
-                style={[styles.inputQty]}
-                placeholderTextColor={"lightgray"}
-                placeholder="Nhập số lượng"
-                onChangeText={(text) => {
-                  const number = parseInt(text, 10);
-                  setQty(isNaN(number) ? 0 : number);
-                }}
-                value={qty.toString()}
-                keyboardType="numeric"
-              />
-              <IconButton
-                icon="remove-circle-outline"
-                onPress={handleMinus}
-                iconColor={colors.primary}
-                iconSize={60}
-                style={{
-                  alignSelf: "stretch",
-                  borderTopLeftRadius: 0,
-                  borderBottomLeftRadius: 0,
-                }}
+                textColor="white"
               />
             </View>
-          </View>
-          <View style={[styles.dFlex, {}]}>
-            <SimpleButton
-              title="Thêm vào giỏ hàng"
-              onPress={() => handleAddToWishlist()}
-              style={{
-                flex: 1,
-                marginHorizontal: 5,
-                marginVertical: 10,
-                backgroundColor: colors.darkPrimary,
-              }}
-              textColor="white"
-            />
-          </View>
-        </BottomSheetView>
-      </BottomSheet>
+          </BottomSheetView>
+        </BottomSheet>
+        <Modal
+          visible={showWishlistSuccess}
+          onDismiss={() => setShowWishlistSuccess(false)}
+          contentContainerStyle={{ backgroundColor: "transparent" }}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowWishlistSuccess(false)}
+          >
+            <View style={styles.popupContainer}>
+              <Text style={styles.popupText}>
+                Đã thêm vào danh sách yêu thích!
+              </Text>
+            </View>
+          </Pressable>
+        </Modal>
+      </>
     );
   };
 
@@ -742,5 +777,27 @@ const styles = StyleSheet.create({
     top: 10,
     left: 10,
     zIndex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  popupContainer: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  popupText: {
+    fontSize: 18,
+    color: colors.primary,
+    fontWeight: "bold",
   },
 });
