@@ -7,6 +7,7 @@ import Toast from "react-native-toast-message";
 import Home from "./home";
 
 export default function HomeScreen() {
+
     return (
         <PaperProvider theme={DefaultTheme}>
             <GestureHandlerRootView style={{ flex: 1 }}>

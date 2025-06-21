@@ -29,35 +29,35 @@ export const BottomNavigation: React.FC = () => {
     };
 
 
-  return (
-    <View style={styles.container}>
-      <Link href="/(tabs)" asChild>
-        <Pressable style={styles.iconWrapper}>
-          <Feather name="home" size={24} color={getIconColor("/(tabs)")} />
-        </Pressable>
-      </Link>
+    return (
+        <View style={styles.container}>
+            <Link href="/(tabs)" asChild>
+                <Pressable style={styles.iconWrapper}>
+                    <Feather name="home" size={24} color={getIconColor("/(tabs)")} />
+                </Pressable>
+            </Link>
 
-      <Link href="/(tabs)/WishlistScreen" asChild>
-        <Pressable style={styles.iconWrapper}>
-          <AntDesign name="hearto" size={24} color={getIconColor("/(tabs)")} />
-        </Pressable>
-      </Link>
+            <Link href="/(tabs)/WishlistScreen" asChild>
+                <Pressable style={styles.iconWrapper}>
+                    <AntDesign name="hearto" size={24} color={getIconColor("/(tabs)")} />
+                </Pressable>
+            </Link>
 
-      <Link href="/(tabs)" asChild>
-        <Pressable style={styles.iconWrapper}>
-          <MaterialIcons
-            name="list-alt"
-            size={24}
-            color={getIconColor("/(tabs)")}
-          />
-        </Pressable>
-      </Link>
+            <Link href="/(tabs)" asChild>
+                <Pressable style={styles.iconWrapper}>
+                    <MaterialIcons
+                        name="list-alt"
+                        size={24}
+                        color={getIconColor("/(tabs)")}
+                    />
+                </Pressable>
+            </Link>
 
-      <Link href="/(tabs)/CartlistScreen" asChild>
-        <Pressable style={styles.iconWrapper}>
-          <Feather name="bookmark" size={24} color={getIconColor("/(tabs)")} />
-        </Pressable>
-      </Link>
+            <Link href="/(tabs)/CartlistScreen" asChild>
+                <Pressable style={styles.iconWrapper}>
+                    <Feather name="bookmark" size={24} color={getIconColor("/(tabs)")} />
+                </Pressable>
+            </Link>
 
 
             <Pressable style={styles.iconWrapper} onPress={handleProfilePress}>
@@ -107,23 +107,23 @@ export const BottomNavigation: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 84,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "white",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -1 },
-    shadowOpacity: 0.16,
-    shadowRadius: 1,
-    elevation: 5,
-    zIndex: 999, // đảm bảo không bị che
-  },
+    container: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 84,
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
+        backgroundColor: "white",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -1 },
+        shadowOpacity: 0.16,
+        shadowRadius: 1,
+        elevation: 5,
+        zIndex: 999, // đảm bảo không bị che
+    },
 
 
     iconWrapper: {

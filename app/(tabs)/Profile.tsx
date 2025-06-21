@@ -1,15 +1,29 @@
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { Feather, Ionicons } from '@expo/vector-icons'; // icon thư viện phổ biến
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export default function ProfileScreen() {
     const navigateSetting = () => router.push('/(tabs)/Settings');
     const navigateEdit = () => router.push('/(tabs)/Setting/ProfileSetting')
     const [user, setUser] = useState(null);
 
+    // Phần hiển thị toast đã thành công sau khi đăng sản phẩm
+    const { toast } = useLocalSearchParams();
+    useEffect(() => {
+        if (toast === 'success') {
+            Toast.show({
+                type: 'success',
+                text1: 'Thành công',
+                text2: 'Đăng sản phẩm thành công!',
+            });
+        }
+    }, [toast]);
+
+    // Lấy ra user được lưu trong AsyncStorage
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -23,6 +37,8 @@ export default function ProfileScreen() {
         };
         fetchUser();
     }, []);
+
+    // Danh sách ảnh 
     const images = [
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 1
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 2
@@ -33,9 +49,11 @@ export default function ProfileScreen() {
         '', // phần tử cuối là nút next
     ];
 
+    // Điều hướng qua trang PostProduct
     const navigatePostProduct = () => {
         router.push('/(tabs)/Profile/PostProduct')
     }
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -129,6 +147,7 @@ export default function ProfileScreen() {
                 </View>
             </ScrollView>
             <BottomNavigation></BottomNavigation>
+            <Toast />
         </SafeAreaView>
     );
 

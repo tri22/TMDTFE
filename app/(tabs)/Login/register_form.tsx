@@ -1,35 +1,41 @@
-import axiosInstance from '@/api/axiosInstance';
+import axiosInstance, { showToast } from '@/api/axiosInstance';
 import { Feather } from '@expo/vector-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import InputField from './Components/InputField';
 import LogoSection from './Components/LogoSection';
 
 export default function RegisterForm() {
     const [email, setEmail] = useState('');
     const [pwd, setPwd] = useState('');
-    const [phone, setPhone] = useState('');
     const [showPwd, setShowPwd] = useState(false);
+    const [phone, setPhone] = useState('');
+    const [confirmPwd, setConfirmPwd] = useState('');
+    const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
     const handleTogglePwd = () => setShowPwd(prev => !prev);
+    const handleToggleConfirmPwd = () => setShowConfirmPwd(prev => !prev);
     const handleLogin = () => router.replace('/Login/login_form');
 
     const handleRegister = async () => {
-        if (!email || !pwd || !phone) {
-            alert('Vui lòng nhập đầy đủ email, mật khẩu và số điện thoại');
+        if (!email || !pwd || !phone || !confirmPwd) {
+            showToast('error', 'Lỗi', 'Bạn chưa nhập email, mật khẩu, xác nhận mật khẩu và số điện thoại')
+            return;
+        }
+        if (pwd !== confirmPwd) {
+            showToast('error', 'Lỗi', 'Xác nhận mật khẩu không đúng')
             return;
         }
         try {
 
-            await axiosInstance.post('/users/register', { email, pwd, phone, });
-
+            await axiosInstance.post('/users/register', { email, pwd, confirmPwd, phone, });
             alert("Đăng ký thành công!");
             router.replace('/Login/login_form');
-        } catch (error) {
-            // Lỗi đã được xử lý bởi interceptor trong axiosInstance
-            // Không cần thêm logic xử lý lỗi ở đây
+        } catch (error: any) {
+            console.log("Lỗi khi đăng ký:", error.response?.data); // kiểm tra chi tiết lỗi
         }
     };
 
@@ -58,6 +64,17 @@ export default function RegisterForm() {
                         </TouchableOpacity>
                     }
                 />
+                <InputField
+                    placeholder="Xác nhận mật khẩu"
+                    value={confirmPwd}
+                    onChangeText={setConfirmPwd}
+                    secureTextEntry={!showConfirmPwd}
+                    rightIcon={
+                        <TouchableOpacity onPress={handleToggleConfirmPwd}>
+                            <Feather name={showConfirmPwd ? 'eye' : 'eye-off'} size={20} color="gray" />
+                        </TouchableOpacity>
+                    }
+                />
 
                 <InputField
                     placeholder="Số điện thoại"
@@ -83,6 +100,7 @@ export default function RegisterForm() {
                     />
                 </View>
             </View>
+            <Toast></Toast>
         </SafeAreaView>
     );
 };

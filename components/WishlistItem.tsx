@@ -21,7 +21,10 @@ const WishlistItem: React.FC<Item> = ({ ...item }) => {
   return (
     <View style={styles.container}>
       <Image source={imageMap[item.imageUrl]} style={styles.image} />
-      <TouchableOpacity style={styles.iconButton}>
+      <TouchableOpacity
+        style={styles.iconButton}
+        onPress={() => item.onDelete(item.id)}
+      >
         <AntDesign name="delete" size={24} color="#FF6347" />
       </TouchableOpacity>
       <View style={styles.details}>
