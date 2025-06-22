@@ -43,6 +43,10 @@ const userApi = {
   getUserSpending: (userId: number) => {
     return axiosInstance.get(`/users/spending/${userId}`);
   },
+
+  getProductsByUser: (userId: number) => {
+    return axiosInstance.get(`/products/seller/${userId}`);
+  },
 };
 
 export default userApi;

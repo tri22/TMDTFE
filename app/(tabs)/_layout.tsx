@@ -60,6 +60,7 @@ export default function RootLayout() {
                             },
                         }}
                     />
+                    <Stack.Screen name="Profile/EditProduct" options={{ headerShown: false }} />
                 </Stack>
                 <StatusBar style="auto" />
             </ThemeProvider>
