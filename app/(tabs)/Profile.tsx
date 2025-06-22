@@ -1,11 +1,12 @@
-import { SERVER_URL_BASE } from '@/api/ipConstant';
+import { SERVER_BASE_URL } from '@/api/ipConstant';
 import userApi from '@/api/userApi';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { Feather, Ionicons } from '@expo/vector-icons'; // icon thư viện phổ biến
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 
 export interface User {
@@ -24,6 +25,19 @@ export default function ProfileScreen() {
     const [user, setUser] = useState<User | null>(null);
     const [products, setProducts] = useState([]);
 
+    // Phần hiển thị toast đã thành công sau khi đăng sản phẩm
+    const { toast } = useLocalSearchParams();
+    useEffect(() => {
+        if (toast === 'success') {
+            Toast.show({
+                type: 'success',
+                text1: 'Thành công',
+                text2: 'Đăng sản phẩm thành công!',
+            });
+        }
+    }, [toast]);
+
+    // Lấy ra user được lưu trong AsyncStorage
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -31,7 +45,7 @@ export default function ProfileScreen() {
                 if (userData) {
                     setUser(JSON.parse(userData));
                     console.log(JSON.parse(userData))
-                    console.log(`${SERVER_URL_BASE}/images/avatars/${JSON.parse(userData).imageUrl}`)
+                    console.log(`${SERVER_BASE_URL}/images/avatars/${JSON.parse(userData).imageUrl}`)
                 }
             } catch (error) {
                 console.error('Lỗi khi lấy thông tin user:', error);
@@ -62,9 +76,11 @@ export default function ProfileScreen() {
         '', // phần tử cuối là nút next
     ];
 
+    // Điều hướng qua trang PostProduct
     const navigatePostProduct = () => {
         router.push('/(tabs)/Profile/PostProduct')
     }
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -72,7 +88,7 @@ export default function ProfileScreen() {
                     <Image
                         source={{
                             uri: user?.imageUrl
-                                ? `${SERVER_URL_BASE}/${user.imageUrl}`
+                                ? `${SERVER_BASE_URL}/${user.imageUrl}`
                                 : 'https://img.freepik.com/premium-vector/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806.jpg?semt=ais_hybrid&w=740',
                         }}
                         style={styles.avatar}
@@ -146,6 +162,7 @@ export default function ProfileScreen() {
                 </View>
             </ScrollView>
             <BottomNavigation></BottomNavigation>
+            <Toast />
         </SafeAreaView>
     );
 

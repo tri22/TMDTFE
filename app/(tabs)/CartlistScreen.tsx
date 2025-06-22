@@ -1,112 +1,140 @@
-import { CartItem } from "@/components/";
+import wishlistAPI from "@/api/WishlistAPI";
+import { WishlistItem } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { Item } from "@/data/item";
-import { useRouter } from "expo-router";
-import { useSearchParams } from "expo-router/build/hooks";
-import React from "react";
-import { Button, ScrollView, StyleSheet, Text, View } from "react-native";
+import fetchDataWishlist, { Item } from "@/data/item";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
+import {
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const CartScreen = () => {
-  const searchParams = useSearchParams();
-  const data = searchParams.get("data");
+const { width } = Dimensions.get("window");
+const isSmallDevice = width < 375;
 
-  const initialItem: Item = data
-    ? JSON.parse(data)
-    : {
-        id: 0,
-        name: "",
-        price: 0,
-        imageUrl: "",
-        quantity: 1,
-      };
+const CartlistScreen = () => {
+  const insets = useSafeAreaInsets();
+  const [wishlistItems, setWishlistItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [cartItem, setCartItem] = React.useState<Item>(initialItem);
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const userString = await AsyncStorage.getItem("user");
 
-  const totalPrice = cartItem.price * cartItem.quantity;
+        if (!userString) {
+          console.warn("No user data found");
+          return;
+        }
+        const user = JSON.parse(userString);
 
-  const router = useRouter();
+        const data = await fetchDataWishlist(user.id);
+        setWishlistItems(data);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleIncrease = () => {
-    setCartItem((prev) => ({
-      ...prev,
-      quantity: prev.quantity + 1,
-    }));
-  };
+    fetchWishlist();
+  }, []);
 
-  const handleDecrease = () => {
-    setCartItem((prev) => ({
-      ...prev,
-      quantity: prev.quantity > 1 ? prev.quantity - 1 : 1,
-    }));
-  };
+  const handleDeleteItem = async (id: number) => {
+    try {
+      const userString = await AsyncStorage.getItem("user");
 
-  const handleRemove = () => {
-    setCartItem({
-      id: 0,
-      name: "",
-      price: 0,
-      imageUrl: "",
-      quantity: 0,
-    });
+      if (!userString) {
+        console.warn("No user data found");
+        return;
+      }
+      const user = JSON.parse(userString);
+
+      await wishlistAPI.deleteWishlistByUserId(user.id, id);
+      setWishlistItems((prevItems) =>
+        prevItems.filter((item) => item.id !== id)
+      );
+    } catch (error) {
+      console.error("Error deleting item from wishlist:", error);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Giỏ hàng</Text>
-      <ScrollView style={styles.scroll}>
-        <CartItem
-          item={initialItem}
-          key={initialItem.id}
-          onIncrease={() => handleIncrease()}
-          onDecrease={() => handleDecrease()}
-          onRemove={() => handleRemove()}
-        />
-      </ScrollView>
-      <View style={styles.purchase}>
-        <Text>Tổng Cộng </Text>
-        <Text style={styles.subtitle}>Tổng tiền: {totalPrice}.000 VND</Text>
-        <Button
-          title="Thanh toán"
-          onPress={() =>
-            router.push({
-              pathname: "/(tabs)/PaymentScreen",
-              params: { list: JSON.stringify(cartItem) },
-            })
-          }
-        />
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Giỏ Hàng : </Text>
       </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Đang tải...</Text>
+          </View>
+        ) : wishlistItems.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Giỏ hàng của bạn đang trống</Text>
+          </View>
+        ) : (
+          wishlistItems.map((item: Item) => (
+            <WishlistItem key={item.id} {...item} onDelete={handleDeleteItem} />
+          ))
+        )}
+      </ScrollView>
       <BottomNavigation />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
-    padding: 10,
+    backgroundColor: "#F9F9F9",
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginVertical: 10,
+  header: {
+    paddingHorizontal: isSmallDevice ? 12 : 16,
+    paddingVertical: 12,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEEEEE",
   },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 10,
-    color: "#555",
+  headerText: {
+    fontSize: isSmallDevice ? 20 : 24,
+    fontWeight: "700",
+    color: "#333",
+    textAlign: "left",
   },
-  scroll: {
-    marginBottom: 0,
+  scrollContent: {
+    paddingHorizontal: isSmallDevice ? 12 : 16,
+    paddingBottom: 80, // Extra padding for BottomNavigation
   },
-  purchase: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    padding: 100,
+    paddingVertical: 40,
+  },
+  loadingText: {
+    fontSize: isSmallDevice ? 16 : 18,
+    color: "#666",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: isSmallDevice ? 16 : 18,
+    color: "#666",
+    textAlign: "center",
   },
 });
 
-export default CartScreen;
+export default CartlistScreen;

@@ -1,149 +1,123 @@
+import { showToast } from '@/api/axiosInstance';
 import { postProductApi } from '@/api/postApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
-import { Alert, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
+import { router } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Checkbox } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 import AddressSelection from './components/AddressSelection';
 import CategorySelection from './components/CategorySelection';
 import ImageUploadSection from './components/ImageUploadSection';
 import ProductDetails from './components/ProductDetails';
+import { commonStyles } from './styles/PostPdStyle';
 
 export default function PostProductScreen() {
-    const [termAccept, setTermAccept] = useState(false);
-    const [product, setProduct] = useState({});
-    const [pickupAddress, setPickupAddress] = useState({});
-    const [images, setImages] = useState([]);
-    const [categoryTitle, setCategoryTitle] = useState('');
-    const [user, setUser] = useState(); // Lấy User được lưu trong storage 
+    const [formData, setFormData] = useState({
+        product: {},
+        pickupAddress: '',
+        images: [],
+        categoryTitle: '',
+        termAccept: false,
+    });
+
+    interface User {
+        id: string;
+        [key: string]: any;
+    }
+    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
                 const userData = await AsyncStorage.getItem('user');
-                if (userData) {
-                    setUser(JSON.parse(userData));
-                }
+                if (userData) setUser(JSON.parse(userData));
             } catch (error) {
                 console.error('Lỗi khi lấy thông tin user:', error);
+                showToast('error', 'lỗi', 'Không thể lấy thông tin người dùng');
             }
-        }; fetchUser();
+        };
+        fetchUser();
     }, []);
 
-    // const handlePost = async () => {
-    //     if (!termAccept) {
-    //         Alert.alert("Bạn phải đồng ý điều khoản trước khi đăng");
-    //         return;
-    //     }
-    //     const data = {
-    //         ...product,
-    //         categoryTitle: categoryTitle,
-    //         pickupAddress: pickupAddress,
-    //         imageUrls: images,
-    //         userId: user?.id,
-    //         termsAccepted: termAccept,
-    //     };
-    //     try {
-    //         console.log('Dữ liệu gửi lên:', JSON.stringify(data, null, 2));
-    //         const response = await postProductApi.createProduct(data); // ✅ Gọi qua postProductApi
-    //         console.log("Phản hồi từ server:", response.data);
-    //         Alert.alert("Đăng sản phẩm thành công!");
-    //     } catch (error) {
-    //         console.error('Lỗi khi gọi API:', error);
-    //         if (error.response) {
-    //             // Lỗi từ server
-    //             console.log('Status:', error.response.status);
-    //             console.log('Data:', error.response.data);
-    //             Alert.alert('Lỗi', error.response.data.message || 'Không thể đăng sản phẩm.');
-    //         } else if (error.request) {
-    //             // Không nhận được phản hồi (lỗi kết nối)
-    //             console.log('Không có phản hồi từ server:', error.request);
-    //             Alert.alert('Lỗi', 'Không thể kết nối đến máy chủ.');
-    //         } else {
-    //             // Lỗi khác
-    //             console.log('Lỗi khác:', error.message);
-    //             Alert.alert('Lỗi', 'Đã xảy ra lỗi khi gửi yêu cầu.');
-    //         }
-    //     }
-    // };
+    const updateFormData = useCallback((key: string, value: any) => {
+        setFormData((prev) => ({ ...prev, [key]: value }));
+    }, []);
 
-    const handlePost = async () => {
-        if (!termAccept) {
-            Alert.alert("Bạn phải đồng ý điều khoản trước khi đăng");
-            return;
-        }
-
+    const uploadImages = async (images: string[]) => {
         try {
-            // Bắt đầu upload từng ảnh
             const uploadedUrls = [];
-
             for (const uri of images) {
                 if (uri) {
                     const uploadedUrl = await postProductApi.uploadImage(uri);
                     uploadedUrls.push(uploadedUrl);
                 }
             }
+            return uploadedUrls;
+        } catch (error) {
+            showToast('error', 'Lỗi', 'Không thể upload ảnh.');
+        }
+    };
 
+    const handlePost = async () => {
+        if (!formData.termAccept) {
+            showToast('info', 'Thông báo', 'Bạn phải đồng ý với điều khoản sử dụng');
+            return;
+        }
+
+        try {
+            const uploadedUrls = await uploadImages(formData.images);
             const data = {
-                ...product,
-                categoryTitle: categoryTitle,
-                pickupAddress: pickupAddress,
+                ...formData.product,
+                categoryTitle: formData.categoryTitle,
+                pickupAddress: formData.pickupAddress,
                 imageUrls: uploadedUrls,
                 userId: user?.id,
-                termsAccepted: termAccept,
+                termsAccepted: formData.termAccept,
             };
 
-            console.log('Dữ liệu gửi lên:', JSON.stringify(data, null, 2));
             const response = await postProductApi.createProduct(data);
-
-            console.log("Phản hồi từ server:", response.data);
-            Alert.alert("Đăng sản phẩm thành công!");
-
-        } catch (error) {
-            console.error('Lỗi khi xử lý đăng sản phẩm:', error);
-            Alert.alert('Lỗi', 'Đã xảy ra lỗi khi đăng sản phẩm.');
+            console.log('Phản hồi từ server:', response.data);
+            showToast('success', 'Thành công', 'Đăng sản phẩm thành công!');
+            router.replace({ pathname: '/(tabs)/Profile', params: { toast: 'success' } });
+        } catch (error: any) {
+            console.error('Lỗi khi đăng sản phẩm:', error);
+            showToast('error', 'lỗi', 'Lỗi khi đăng sản phẩm!');
         }
     };
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }} >
-            <SafeAreaView style={styles.container}>
-                <ScrollView keyboardShouldPersistTaps="handled">
-                    <ImageUploadSection onchange={setImages} />
-                    <CategorySelection onchange={(title) => setCategoryTitle(title)} />
-                    <ProductDetails onchange={setProduct} />
-                    <AddressSelection onchange={setPickupAddress} />
-                    <View style={styles.checkboxRow}>
-                        <Checkbox
-                            status={termAccept ? 'checked' : 'unchecked'}
-                            onPress={() => setTermAccept(!termAccept)} color="#2e384d"
-                        />
-                        <Text>Đồng ý với điều khoản sử dụng</Text>
-                    </View>
-                    <View style={styles.groupBtn}>
-                        <TouchableOpacity style={styles.btnCancle}>
-                            <Text style={styles.btnTextCancle}>Huỷ</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.btnSubmit}
-                            onPress={handlePost}
-                        >
-                            <Text style={styles.btnTextSubmit}>Đăng</Text>
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
-        </GestureHandlerRootView >
+        <SafeAreaView style={commonStyles.container}>
+            <ScrollView keyboardShouldPersistTaps="handled">
+                <ImageUploadSection onChange={useCallback((images: string[]) => updateFormData('images', images), [updateFormData])} />
+                <CategorySelection onChange={useCallback((title: string) => updateFormData('categoryTitle', title), [updateFormData])} />
+                <ProductDetails onChange={useCallback((product: any) => updateFormData('product', product), [updateFormData])} />
+                <AddressSelection onChange={useCallback((address: string) => updateFormData('pickupAddress', address), [updateFormData])} />
+                <View style={styles.checkboxRow}>
+                    <Checkbox
+                        status={formData.termAccept ? 'checked' : 'unchecked'}
+                        onPress={() => updateFormData('termAccept', !formData.termAccept)}
+                        color="#2e384d"
+                    />
+                    <Text>Đồng ý với điều khoản sử dụng</Text>
+                </View>
+                <View style={styles.groupBtn}>
+                    <TouchableOpacity style={[commonStyles.button, styles.btnCancel]}>
+                        <Text style={[commonStyles.buttonText, styles.btnTextCancel]}>Hủy</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[commonStyles.button, styles.btnSubmit]} onPress={handlePost}>
+                        <Text style={[commonStyles.buttonText, styles.btnTextSubmit]}>Đăng</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+            <Toast></Toast>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
     checkboxRow: {
-        paddingHorizontal: 10,
+        paddingHorizontal: 16,
         flexDirection: 'row',
         alignItems: 'center',
     },
@@ -151,57 +125,18 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 20,
-        marginBottom: 50,
+        marginVertical: 20,
     },
-    btnCancle: {
+    btnCancel: {
         backgroundColor: '#e3eaec',
-        width: '48%',
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: 'center',
     },
     btnSubmit: {
         backgroundColor: '#323660',
-        width: '48%',
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: 'center',
     },
-    btnTextCancle: {
+    btnTextCancel: {
         color: '#000',
-        fontWeight: '600',
     },
     btnTextSubmit: {
         color: '#fff',
-        fontWeight: '600',
-    },
-
-    // =========================
-    scrollContent: {
-        flexGrow: 1,
-        paddingBottom: 30,
-    },
-    errorText: {
-        color: 'red',
-        fontSize: 12,
-        marginBottom: 8,
-    },
-    btnDisabled: {
-        backgroundColor: '#aaa',
-    },
-    btnCancel: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        padding: 12,
-        alignItems: 'center',
-        marginRight: 8,
-    },
-    btnTextCancel: {
-        color: '#333',
-        fontSize: 16,
     },
 });

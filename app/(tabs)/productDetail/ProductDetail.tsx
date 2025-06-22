@@ -13,17 +13,17 @@ import {
   FlatList,
   Image,
   ImageSourcePropType,
-  Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import { submitComment } from "@/api/commentApi";
-import { getProductDetail } from "@/api/productApi";
+import { getProductDetail, getProductsByUser } from "@/api/productApi";
 import wishlistAPI from "@/api/WishlistAPI";
 import { colors } from "@/baseStyle/Style";
 import { IconButton, SimpleButton } from "@/components/button";
@@ -34,11 +34,17 @@ import {
   ProductDetailModel,
   User,
 } from "@/models/ProductDetailModel";
+import {
+  PaginatedProductsResult,
+  ProductItemModel,
+} from "@/models/ProductItemModel";
 import { formatMoney } from "@/util";
 import { saveRecentViewedProduct } from "@/util/historySeach";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Modal } from "react-native-paper";
 import DefaultLayout from "../DefaultLayout";
+import ProductItem from "../product/components/productItem";
 import { CommentItem, MyCarousel, ShopInfo } from "./components";
 const imgDir = "@/assets/images/searchProduct";
 
@@ -57,46 +63,6 @@ type CommentItem = {
   time: string;
   replies: CommentItem[];
 };
-
-type ProductOfSaler = {
-  image: ImageSourcePropType;
-  link: string;
-};
-
-const productOfSalers: ProductOfSaler[] = [
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-  {
-    image: require("@/assets/images/searchProduct/quan-jean.png"),
-    link: "quan-jean",
-  },
-];
 
 type ShippingFeeItem = {
   title: string;
@@ -174,6 +140,11 @@ function ProductDetail() {
   const [productDetail, setProductDetail] = useState<ProductDetailModel | null>(
     null
   );
+  const [productOfSalers, setProductOfSalers] = useState<ProductItemModel[]>(
+    []
+  );
+  const [showWishlistSuccess, setShowWishlistSuccess] = useState(false);
+
   const [product, setProduct] = useState<Product>(productDefault);
   const [images, setImages] = useState<string[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -192,6 +163,18 @@ function ProductDetail() {
     } finally {
     }
   };
+  const fetchProductsByUser = async (id: number) => {
+    try {
+      const result: PaginatedProductsResult = await getProductsByUser(owner.id);
+      setProductOfSalers((prevProducts) => [
+        ...prevProducts,
+        ...result.products,
+      ]);
+    } catch (err: any) {
+      console.error("Failed to fetch products of saler: ", err);
+    }
+  };
+
   useEffect(() => {
     if (productDetail) {
       setProduct(productDetail.product ?? productDefault);
@@ -208,6 +191,12 @@ function ProductDetail() {
       fetchProductDetail(productId);
     }
   }, [productId]);
+
+  useEffect(() => {
+    if (owner) {
+      fetchProductsByUser(owner.id);
+    }
+  }, [owner]);
 
   useEffect(() => {
     if (images.length > 0) {
@@ -280,89 +269,120 @@ function ProductDetail() {
       }
       const user = JSON.parse(userString);
 
-      const ob = await wishlistAPI.addWishlistByUserId(user.id, productId);
+      await wishlistAPI
+        .addWishlistByUserId(user.id, productId)
+        .then((r) => {
+          // show a pop up to notify user
+          setShowWishlistSuccess(true);
+          setTimeout(() => {
+            setShowWishlistSuccess(false);
+          }, 1500);
+        })
+        .catch((e) => {
+          console.log("Error adding to wishlist:", e);
+        });
     };
     //
     return (
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        snapPoints={snapPoints}
-        backdropComponent={(props) => (
-          <BottomSheetBackdrop
-            {...props}
-            appearsOnIndex={0}
-            disappearsOnIndex={-1}
-            opacity={0.5}
-          />
-        )}
-      >
-        <BottomSheetView style={{}}>
-          <View style={styles.dFlex}>
-            <Image source={{ uri: thumbnail }} style={styles.image} />
-            <View>
-              <Text style={{ fontSize: 20, marginBottom: 20 }}>
-                {product.name}
-              </Text>
-              <View style={styles.dFlex}>
-                <Text style={styles.price}>{formatMoney(product.price)}</Text>
-                <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
+      <>
+        <BottomSheet
+          ref={bottomSheetRef}
+          index={-1}
+          snapPoints={snapPoints}
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop
+              {...props}
+              appearsOnIndex={0}
+              disappearsOnIndex={-1}
+              opacity={0.5}
+            />
+          )}
+        >
+          <BottomSheetView style={{}}>
+            <View style={styles.dFlex}>
+              <Image source={{ uri: thumbnail }} style={styles.image} />
+              <View>
+                <Text style={{ fontSize: 20, marginBottom: 20 }}>
+                  {product.name}
+                </Text>
+                <View style={styles.dFlex}>
+                  <Text style={styles.price}>{formatMoney(product.price)}</Text>
+                  <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
+                </View>
               </View>
             </View>
-          </View>
-          <Text style={[styles.label, { marginLeft: 10 }]}>Chọn số lượng</Text>
-          <View style={[styles.dFlex, { marginLeft: "auto" }]}>
-            <View style={styles.dFlex}>
-              <IconButton
-                icon="add-circle-outline"
-                onPress={handlePlus}
-                iconColor={colors.primary}
-                iconSize={60}
+            <Text style={[styles.label, { marginLeft: 10 }]}>
+              Chọn số lượng
+            </Text>
+            <View style={[styles.dFlex, { marginLeft: "auto" }]}>
+              <View style={styles.dFlex}>
+                <IconButton
+                  icon="add-circle-outline"
+                  onPress={handlePlus}
+                  iconColor={colors.primary}
+                  iconSize={60}
+                  style={{
+                    alignSelf: "stretch",
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                  }}
+                />
+                <TextInput
+                  style={[styles.inputQty]}
+                  placeholderTextColor={"lightgray"}
+                  placeholder="Nhập số lượng"
+                  onChangeText={(text) => {
+                    const number = parseInt(text, 10);
+                    setQty(isNaN(number) ? 0 : number);
+                  }}
+                  value={qty.toString()}
+                  keyboardType="numeric"
+                />
+                <IconButton
+                  icon="remove-circle-outline"
+                  onPress={handleMinus}
+                  iconColor={colors.primary}
+                  iconSize={60}
+                  style={{
+                    alignSelf: "stretch",
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                  }}
+                />
+              </View>
+            </View>
+            <View style={[styles.dFlex, {}]}>
+              <SimpleButton
+                title="Thêm vào giỏ hàng"
+                onPress={() => handleAddToWishlist()}
                 style={{
-                  alignSelf: "stretch",
-                  borderTopLeftRadius: 0,
-                  borderBottomLeftRadius: 0,
+                  flex: 1,
+                  marginHorizontal: 5,
+                  marginVertical: 10,
+                  backgroundColor: colors.darkPrimary,
                 }}
-              />
-              <TextInput
-                style={[styles.inputQty]}
-                placeholderTextColor={"lightgray"}
-                placeholder="Nhập số lượng"
-                onChangeText={(text) => {
-                  const number = parseInt(text, 10);
-                  setQty(isNaN(number) ? 0 : number);
-                }}
-                value={qty.toString()}
-                keyboardType="numeric"
-              />
-              <IconButton
-                icon="remove-circle-outline"
-                onPress={handleMinus}
-                iconColor={colors.primary}
-                iconSize={60}
-                style={{
-                  alignSelf: "stretch",
-                  borderTopLeftRadius: 0,
-                  borderBottomLeftRadius: 0,
-                }}
+                textColor="white"
               />
             </View>
-          </View>
-          <View style={[styles.dFlex, {}]}>
-            <SimpleButton
-              title="Thêm vào giỏ hàng"
-              onPress={() => handleAddToWishlist()}
-              style={{
-                flex: 1,
-                marginHorizontal: 5,
-                marginVertical: 10,
-                backgroundColor: colors.darkPrimary,
-              }}
-              textColor="white"
-            />
-          </View>
-        </BottomSheetView>
-      </BottomSheet>
+          </BottomSheetView>
+        </BottomSheet>
+        <Modal
+          visible={showWishlistSuccess}
+          onDismiss={() => setShowWishlistSuccess(false)}
+          contentContainerStyle={{ backgroundColor: "transparent" }}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowWishlistSuccess(false)}
+          >
+            <View style={styles.popupContainer}>
+              <Text style={styles.popupText}>
+                Đã thêm vào danh sách yêu thích!
+              </Text>
+            </View>
+          </Pressable>
+        </Modal>
+      </>
     );
   };
 
@@ -404,10 +424,10 @@ function ProductDetail() {
 
   return (
     <DefaultLayout>
+      <TouchableOpacity onPress={handleGoBack} style={styles.goBackBtn}>
+        <Text style={{ color: colors.primary }}>Quay lại</Text>
+      </TouchableOpacity>
       <ScrollView style={styles.container}>
-        <TouchableOpacity onPress={handleGoBack} style={styles.goBackBtn}>
-          <Text style={{ color: colors.primary }}>Quay lại</Text>
-        </TouchableOpacity>
         <MyCarousel images={images} />
         <View
           style={[
@@ -555,12 +575,12 @@ function ProductDetail() {
             keyExtractor={(item, index) => index.toString()}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.productOfSalerItem}
-                onPress={() => Linking.openURL("https://google.com")}
-              >
-                <Image source={item.image} style={styles.image} />
-              </TouchableOpacity>
+              <ProductItem
+                id={item.id}
+                name={item.name}
+                price={item.price}
+                thumbnail={item.thumbnail}
+              />
             )}
           />
         </View>
@@ -742,5 +762,27 @@ const styles = StyleSheet.create({
     top: 10,
     left: 10,
     zIndex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  popupContainer: {
+    backgroundColor: "#fff",
+    padding: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  popupText: {
+    fontSize: 18,
+    color: colors.primary,
+    fontWeight: "bold",
   },
 });

@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DatePickerModal } from 'react-native-paper-dates';
-import { SERVER_URL_BASE } from "../../../api/ipConstant";
+import { SERVER_BASE_URL } from "../../../api/ipConstant";
 import userApi, { UserRequest } from '../../../api/userApi';
 
 
@@ -71,7 +71,7 @@ const ProfileSetting = () => {
                 {/* Avatar */}
                 <View style={styles.center}>
                     <Image
-                        source={{ uri: `${SERVER_URL_BASE}/images/avatars/${avatar}` }}
+                        source={{ uri: `${SERVER_BASE_URL}/${avatar}` }}
                         style={styles.avatar}
                     />
 

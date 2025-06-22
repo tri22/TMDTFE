@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
-import axiosInstance from "./axiosInstance";
 import * as FileSystem from 'expo-file-system';
+import axiosInstance from "./axiosInstance";
 
 // Định nghĩa interface cho Category
 export interface Category {
@@ -49,5 +49,9 @@ export const postProductApi = {
             console.error('Upload error:', error);
             throw error;
         }
+    },
+
+    getAllMaterial: async (): Promise<AxiosResponse<string[]>> => {
+        return await axiosInstance.get<string[]>('/products/material');
     },
 }
