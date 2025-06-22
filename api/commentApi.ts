@@ -13,7 +13,24 @@ import { Comment } from "@/models/ProductDetailModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance, { showToast } from "./axiosInstance";
 import { SERVER_URL_BASE } from "./ipConstant";
+interface User {
+  id: number;
+  name: string;
+  // …các trường khác nếu có
+}
+export async function getUserId(): Promise<number | undefined> {
+  try {
+    const json = await AsyncStorage.getItem('user');   // "{"id":123,"name":"A"}" | null
+    console.log("user: " + json);
+    if (!json) return undefined;
 
+    const user = JSON.parse(json) as { id?: number };
+    return user.id;
+  } catch (err) {
+    console.error('Lỗi đọc user từ AsyncStorage', err);
+    return undefined;
+  }
+}
 export async function submitComment(
   productId: number,
   content: string,
@@ -21,10 +38,10 @@ export async function submitComment(
   level: number
 ): Promise<Comment[]> {
   console.log("submitComment");
-    const userIdStr = await AsyncStorage.getItem('userId');
-  const userId = userIdStr ? parseInt(userIdStr) : null;
-
-  if (userId === null) {
+    let userId = await getUserId();
+    console.log("userId: " + userId);
+  
+  if (userId === undefined) {
       showToast("error", "Bạn cần đăng nhập để bình luận.");
      throw new Error("Bạn cần đăng nhập để bình luận.");
     

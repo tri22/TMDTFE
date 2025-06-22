@@ -56,6 +56,46 @@ export async function getProductsByCategory(
     }
 }
 
+export async function getProductsByUser(
+    id: number,
+): Promise<PaginatedProductsResult> {
+    console.log("getProductsByUser:" + id);
+    try {
+        const response = await axiosInstance.post<ProductResponse<any>>(
+            `/products/owner/${id}`,
+            {},
+            {
+               
+            }
+        );
+
+        const responseData = response.data;
+
+        const products: ProductItemModel[] = responseData.content.map(
+            (item: any): ProductItemModel => ({
+                id: item.id,
+                name: item.name + " id" + item.id,
+                price: item.price,
+                thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
+                isSold: item.sold,
+            })
+        );
+
+        return {
+            products: products,
+            isFirst: responseData.last,
+            isLast: responseData.last,
+            nextPage: !responseData.last ? responseData.number + 1 : 0,
+        };
+    } catch (error: any) {
+        console.error(
+            "Lỗi khi lấy sản phẩm theo category (paginated):",
+            error?.response?.data || error?.message || error
+        );
+        throw new Error("Không thể tải danh sách sản phẩm.");
+    }
+}
+
 export async function getProductDetail(
     id: number
 ): Promise<ProductDetailModel> {
@@ -247,4 +287,12 @@ export async function getNewestProducts(
         throw new Error("Không thể tải danh sách sản phẩm.");
     }
 }
+
+export const getProductById = (productId: number) => {
+  return axiosInstance.get(`/products/find/${productId}`)
+};
+
+export const updateProduct = (productId: number,data:any) => {
+  return axiosInstance.put(`/products/update/${productId}`,data)
+};
 
