@@ -15,11 +15,11 @@ export interface User {
     email?: string;
     birthday?: string;
     phone?: string;
-    imageUrl?: string;
+    avatar?: string;
     token?: string;
 }
 
-export interface Product  {
+export interface Product {
     id: number;
     name: string;
     price: number;
@@ -90,7 +90,7 @@ export default function ProfileScreen() {
     }
 
     // Điều hướng qua trang PostProduct
-    const handleEditProduct = (item:Product) => {
+    const handleEditProduct = (item: Product) => {
         router.push({
             pathname: '/(tabs)/Profile/EditProduct',
             params: { id: item.id.toString() }
@@ -104,9 +104,9 @@ export default function ProfileScreen() {
                 <View style={styles.profileHeader}>
                     <Image
                         source={{
-                            uri: user?.imageUrl
-                                ? `${SERVER_URL_BASE}/${user.imageUrl}`
-                                : 'https://img.freepik.com/premium-vector/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806.jpg?semt=ais_hybrid&w=740',
+                            uri: user?.avatar
+                                ? `${SERVER_URL_BASE}/${user?.avatar}`
+                                : 'http://192.168.1.2:8080/uploads/category-dong-ho-1.png',
                         }}
                         style={styles.avatar}
                     />

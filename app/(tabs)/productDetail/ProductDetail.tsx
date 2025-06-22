@@ -19,7 +19,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import { submitComment } from "@/api/commentApi";
@@ -144,6 +144,7 @@ function ProductDetail() {
     []
   );
   const [showWishlistSuccess, setShowWishlistSuccess] = useState(false);
+
   const [notify, setNotify] = useState("Đã thêm vào danh sách yêu thích!");
   const [product, setProduct] = useState<Product>(productDefault);
   const [images, setImages] = useState<string[]>([]);
