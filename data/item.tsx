@@ -1,3 +1,4 @@
+import { SERVER_BASE_URL } from "@/api/ipConstant";
 import wishlistAPI from "@/api/WishlistAPI";
 interface Item {
   id: number;
@@ -15,13 +16,12 @@ export default async function fetchDataWishlist(id: number) {
 
     for (const item of object.data) {
       const { id, name, price, imageUrl, qty } = item; // <-- use image
-      console.log("Processing item:", id, name, price, imageUrl, qty);
 
       cartItems.push({
         id,
         name,
         price,
-        imageUrl: imageUrl, // <-- use image here
+        imageUrl: SERVER_BASE_URL + "/" + imageUrl, // <-- use image here
         quantity: qty,
         onDelete: function (id: number): void {},
       });
