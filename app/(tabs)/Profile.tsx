@@ -1,4 +1,4 @@
-import { SERVER_BASE_URL } from '@/api/ipConstant';
+import { SERVER_URL_BASE } from '@/api/ipConstant';
 import userApi from '@/api/userApi';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { Feather, Ionicons } from '@expo/vector-icons'; // icon thư viện phổ biến
@@ -19,11 +19,24 @@ export interface User {
     token?: string;
 }
 
+export interface Product  {
+    id: number;
+    name: string;
+    price: number;
+    qty: number;
+    images: {
+        id: number;
+        url: string;
+        alt: string;
+    }[];
+};
+
+
 export default function ProfileScreen() {
     const navigateSetting = () => router.push('/(tabs)/Settings');
     const navigateEdit = () => router.push('/(tabs)/Setting/ProfileSetting')
     const [user, setUser] = useState<User | null>(null);
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState<Product[]>([]);
 
     // Phần hiển thị toast đã thành công sau khi đăng sản phẩm
     const { toast } = useLocalSearchParams();
@@ -45,40 +58,44 @@ export default function ProfileScreen() {
                 if (userData) {
                     setUser(JSON.parse(userData));
                     console.log(JSON.parse(userData))
-                    console.log(`${SERVER_BASE_URL}/images/avatars/${JSON.parse(userData).imageUrl}`)
                 }
             } catch (error) {
                 console.error('Lỗi khi lấy thông tin user:', error);
             }
         };
         fetchUser();
-        fetchUserProducts()
     }, []);
 
-    const fetchUserProducts = async () => {
-        try {
-            if (user?.id) {
-                const response = await userApi.getUserProducts(user.id);
-                setProducts(response.data)
+    useEffect(() => {
+        const fetchUserProducts = async () => {
+            try {
+                if (user?.id) {
+                    const response = await userApi.getProductsByUser(user.id);
+                    setProducts(response.data);
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy sản phẩm của user:', error);
             }
-        } catch (error) {
-            console.error(error)
-        }
-    }
+        };
 
-    const images = [
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 1
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 2
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 3
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 4
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 4
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 4
-        '', // phần tử cuối là nút next
-    ];
+        if (user?.id) {
+            fetchUserProducts();
+        }
+    }, [user]);
+
 
     // Điều hướng qua trang PostProduct
     const navigatePostProduct = () => {
         router.push('/(tabs)/Profile/PostProduct')
+    }
+
+    // Điều hướng qua trang PostProduct
+    const handleEditProduct = (item:Product) => {
+        router.push({
+            pathname: '/(tabs)/Profile/EditProduct',
+            params: { id: item.id.toString() }
+        });
+
     }
 
     return (
@@ -88,7 +105,7 @@ export default function ProfileScreen() {
                     <Image
                         source={{
                             uri: user?.imageUrl
-                                ? `${SERVER_BASE_URL}/${user.imageUrl}`
+                                ? `${SERVER_URL_BASE}/${user.imageUrl}`
                                 : 'https://img.freepik.com/premium-vector/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806.jpg?semt=ais_hybrid&w=740',
                         }}
                         style={styles.avatar}
@@ -147,16 +164,19 @@ export default function ProfileScreen() {
                 <View style={styles.sellingSection}>
                     <Text style={styles.sellingTitle}>Sản phẩm đang bán</Text>
                     <View style={styles.productGrid}>
-                        {[...Array(6)].map((_, index) => (
-                            <View key={index} style={styles.productCard}>
+                        {products.map((item, index) => (
+                            <TouchableOpacity key={index} style={styles.productCard} onPress={() => handleEditProduct(item)}>
                                 <Image
-                                    source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s' }}
+                                    source={{ uri: `${SERVER_URL_BASE}/${item.images[0].url}` }}
                                     style={styles.productImageCard}
                                     resizeMode="cover"
                                 />
-                                <Text style={styles.productName}>áo thun champion đen đỏ</Text>
-                                <Text style={styles.productPrice}>150.000 vnđ</Text>
-                            </View>
+                                <View style={styles.productInfo}>
+                                    <Text style={styles.productName}>{item.name}</Text>
+                                    <View style={{ flex: 1 }} />
+                                    <Text style={styles.productPrice}>{item.price} vnđ</Text>
+                                </View>
+                            </TouchableOpacity>
                         ))}
                     </View>
                 </View>
@@ -356,28 +376,40 @@ const styles = StyleSheet.create({
         width: '48%',
         backgroundColor: '#fff',
         borderRadius: 8,
-        padding: 10,
+        padding: 4,
         marginBottom: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 2,
+        height: 240, // chiều cao cố định
     },
+
     productImageCard: {
         width: '100%',
         height: 160,
         borderRadius: 5,
         marginBottom: 8,
     },
+
+    productInfo: {
+        flex: 1,
+        flexDirection: 'column',
+        padding: 4
+    },
+
     productName: {
         fontSize: 14,
         color: '#333',
-        marginBottom: 4,
+        alignSelf: 'flex-start',
     },
+
     productPrice: {
         fontSize: 14,
         color: '#202020',
         fontWeight: 'bold',
     },
+
+
 });

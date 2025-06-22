@@ -44,8 +44,8 @@ const userApi = {
     return axiosInstance.get(`/users/spending/${userId}`);
   },
 
-  getUserProducts: (userId: number) => {
-    return axiosInstance.get(`/users/products/${userId}`);
+  getProductsByUser: (userId: number) => {
+    return axiosInstance.get(`/products/seller/${userId}`);
   },
 };
 

@@ -11,7 +11,7 @@ import {
     ProductResponse,
 } from "@/models/ProductItemModel";
 import axiosInstance from "./axiosInstance";
-import { SERVER_BASE_URL } from "./ipConstant";
+import { SERVER_URL_BASE } from "./ipConstant";
 
 export async function getProductsByCategory(
     categoryLink: string,
@@ -36,7 +36,7 @@ export async function getProductsByCategory(
                 id: item.id,
                 name: item.name + " id" + item.id,
                 price: item.price,
-                thumbnail: SERVER_BASE_URL + "/" + item.thumbnail,
+                thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
                 isSold: item.sold,
             })
         );
@@ -76,7 +76,7 @@ export async function getProductsByUser(
                 id: item.id,
                 name: item.name + " id" + item.id,
                 price: item.price,
-                thumbnail: SERVER_BASE_URL + "/" + item.thumbnail,
+                thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
                 isSold: item.sold,
             })
         );
@@ -134,7 +134,7 @@ export async function getProductDetail(
                 id: item.id,
                 userId: item.userId,
                 userName: item.userName,
-                userAvatar: SERVER_BASE_URL + "/" + item.userAvatar,
+                userAvatar: SERVER_URL_BASE + "/" + item.userAvatar,
                 content: item.content,
                 createdAt: new Date(item.createdAt),
                 parentId: item.parentId,
@@ -144,7 +144,7 @@ export async function getProductDetail(
                         id: reply.id,
                         userId: reply.userId,
                         userName: reply.userName,
-                        userAvatar: SERVER_BASE_URL + "/" + reply.userAvatar,
+                        userAvatar: SERVER_URL_BASE + "/" + reply.userAvatar,
                         content: reply.content,
                         createdAt: new Date(reply.createdAt),
                         parentId: reply.parentId,
@@ -157,7 +157,7 @@ export async function getProductDetail(
 
 
         const responseImages = responseData.images;
-        const images: string[] = responseImages.map((img: string) => SERVER_BASE_URL + "/" + img);
+        const images: string[] = responseImages.map((img: string) => SERVER_URL_BASE + "/" + img);
 
         const ownerDefault: User = {
             id: 0,
@@ -172,7 +172,7 @@ export async function getProductDetail(
             name: responseOwner.name,
             soldOrderQty: responseOwner.soldOrderQty,
             rating: responseOwner.rating,
-            avatar: SERVER_BASE_URL + "/" + responseOwner.avatar,
+            avatar: SERVER_URL_BASE + "/" + responseOwner.avatar,
         };
 
 
@@ -230,7 +230,7 @@ export async function searchProductByKeyword(
                 id: item.id,
                 name: item.name + " id" + item.id,
                 price: item.price,
-                thumbnail: SERVER_BASE_URL + "/" + item.thumbnail,
+                thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
                 isSold: item.sold,
             })
         );
@@ -268,7 +268,7 @@ export async function getNewestProducts(
                 id: item.id,
                 name: item.name + " id" + item.id,
                 price: item.price,
-                thumbnail: SERVER_BASE_URL + "/" + item.thumbnail,
+                thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
                 isSold: item.sold,
             })
         );
@@ -287,4 +287,12 @@ export async function getNewestProducts(
         throw new Error("Không thể tải danh sách sản phẩm.");
     }
 }
+
+export const getProductById = (productId: number) => {
+  return axiosInstance.get(`/products/find/${productId}`)
+};
+
+export const updateProduct = (productId: number,data:any) => {
+  return axiosInstance.put(`/products/update/${productId}`,data)
+};
 
