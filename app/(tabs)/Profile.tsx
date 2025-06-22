@@ -1,3 +1,5 @@
+import { SERVER_URL_BASE } from '@/api/ipConstant';
+import userApi from '@/api/userApi';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { Feather, Ionicons } from '@expo/vector-icons'; // icon thư viện phổ biến
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -5,10 +7,22 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+
+export interface User {
+    id?: number;
+    name?: string;
+    email?: string;
+    birthday?: string;
+    phone?: string;
+    imageUrl?: string;
+    token?: string;
+}
+
 export default function ProfileScreen() {
     const navigateSetting = () => router.push('/(tabs)/Settings');
     const navigateEdit = () => router.push('/(tabs)/Setting/ProfileSetting')
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [products, setProducts] = useState([]);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -16,13 +30,28 @@ export default function ProfileScreen() {
                 const userData = await AsyncStorage.getItem('user');
                 if (userData) {
                     setUser(JSON.parse(userData));
+                    console.log(JSON.parse(userData))
+                    console.log(`${SERVER_URL_BASE}/images/avatars/${JSON.parse(userData).imageUrl}`)
                 }
             } catch (error) {
                 console.error('Lỗi khi lấy thông tin user:', error);
             }
         };
         fetchUser();
+        fetchUserProducts()
     }, []);
+
+    const fetchUserProducts = async () => {
+        try {
+            if (user?.id) {
+                const response = await userApi.getUserProducts(user.id);
+                setProducts(response.data)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
     const images = [
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 1
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s', // ảnh 2
@@ -41,7 +70,11 @@ export default function ProfileScreen() {
             <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
                 <View style={styles.profileHeader}>
                     <Image
-                        source={{ uri: user?.imageUrl || 'https://img.freepik.com/premium-vector/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806.jpg?semt=ais_hybrid&w=740' }}
+                        source={{
+                            uri: user?.imageUrl
+                                ? `${SERVER_URL_BASE}/${user.imageUrl}`
+                                : 'https://img.freepik.com/premium-vector/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806.jpg?semt=ais_hybrid&w=740',
+                        }}
                         style={styles.avatar}
                     />
                     <View style={styles.nameContainer}>
@@ -95,23 +128,6 @@ export default function ProfileScreen() {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View style={styles.savedProductsSection}>
-                    <Text style={styles.savedTitle}>Sản phẩm đã lưu</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        {images.map((uri, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={styles.imageCircle}
-                            >
-                                {index === images.length - 1 ? (
-                                    <Ionicons name="chevron-forward" size={20} color="#fff" />
-                                ) : (
-                                    <Image source={{ uri }} style={styles.productImage} />
-                                )}
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
                 <View style={styles.sellingSection}>
                     <Text style={styles.sellingTitle}>Sản phẩm đang bán</Text>
                     <View style={styles.productGrid}>
@@ -120,8 +136,9 @@ export default function ProfileScreen() {
                                 <Image
                                     source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXami-XYPmXZlpVRHx1QDJIiGM7gFtC7iQZw&s' }}
                                     style={styles.productImageCard}
+                                    resizeMode="cover"
                                 />
-                                <Text style={styles.productName}>áo thun champion đen đỏ Size L</Text>
+                                <Text style={styles.productName}>áo thun champion đen đỏ</Text>
                                 <Text style={styles.productPrice}>150.000 vnđ</Text>
                             </View>
                         ))}
@@ -304,7 +321,6 @@ const styles = StyleSheet.create({
     },
     // View thứ 5
     sellingSection: {
-        paddingHorizontal: 16,
         marginTop: 20,
         marginBottom: 70,
     },
@@ -333,7 +349,7 @@ const styles = StyleSheet.create({
     },
     productImageCard: {
         width: '100%',
-        height: 100,
+        height: 160,
         borderRadius: 5,
         marginBottom: 8,
     },
