@@ -19,7 +19,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 import { submitComment } from "@/api/commentApi";
@@ -144,7 +144,7 @@ function ProductDetail() {
     []
   );
   const [showWishlistSuccess, setShowWishlistSuccess] = useState(false);
-
+  const [notify, setNotify] = useState("Đã thêm vào danh sách yêu thích!");
   const [product, setProduct] = useState<Product>(productDefault);
   const [images, setImages] = useState<string[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -271,12 +271,20 @@ function ProductDetail() {
 
       await wishlistAPI
         .addWishlistByUserId(user.id, productId)
-        .then((r) => {
+        .then((respone) => {
           // show a pop up to notify user
-          setShowWishlistSuccess(true);
-          setTimeout(() => {
-            setShowWishlistSuccess(false);
-          }, 1500);
+          if (respone.status == 200 && respone.data == "success") {
+            setShowWishlistSuccess(true);
+            setTimeout(() => {
+              setShowWishlistSuccess(false);
+            }, 1500);
+          } else {
+            setShowWishlistSuccess(true);
+            setNotify("Vật phẩm đã có trong giỏ hàng!");
+            setTimeout(() => {
+              setShowWishlistSuccess(false);
+            }, 1500);
+          }
         })
         .catch((e) => {
           console.log("Error adding to wishlist:", e);
@@ -376,9 +384,7 @@ function ProductDetail() {
             onPress={() => setShowWishlistSuccess(false)}
           >
             <View style={styles.popupContainer}>
-              <Text style={styles.popupText}>
-                Đã thêm vào danh sách yêu thích!
-              </Text>
+              <Text style={styles.popupText}>{notify}</Text>
             </View>
           </Pressable>
         </Modal>
