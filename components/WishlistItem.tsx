@@ -1,7 +1,6 @@
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // import icontrash and add
-import imageMap from "@/data/imageMap";
 import { Item } from "@/data/item";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -20,7 +19,9 @@ const WishlistItem: React.FC<Item> = ({ ...item }) => {
 
   return (
     <View style={styles.container}>
-      <Image source={imageMap[item.imageUrl]} style={styles.image} />
+      {/* <Image source={imageMap[item.imageUrl]} style={styles.image} /> */}
+      <Image source={{ uri: item.imageUrl }} style={styles.image} />
+
       <TouchableOpacity
         style={styles.iconButton}
         onPress={() => item.onDelete(item.id)}

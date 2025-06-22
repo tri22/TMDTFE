@@ -48,7 +48,7 @@ export async function submitComment(
   }
   try {
     const response = await axiosInstance.post<Comment[]>(
-      `/comments`,
+      `/comments/add`,
       {
         userId,
         productId,

@@ -1,4 +1,6 @@
 import wishlistAPI from "@/api/WishlistAPI";
+import { SERVER_BASE_URL } from "../api/ipConstant";
+
 interface Item {
   id: number;
   imageUrl: string;
@@ -21,11 +23,13 @@ export default async function fetchDataWishlist(id: number) {
         id,
         name,
         price,
-        imageUrl: imageUrl, // <-- use image here
+        imageUrl: SERVER_BASE_URL + "/" + imageUrl, // <-- use image here
         quantity: qty,
         onDelete: function (id: number): void {},
       });
     }
+
+    // console.log("Processing item:" + JSON.stringify(cartItems, null, 2));
 
     return cartItems; // trả về mảng cartItems sau khi đã xử lý
     // xử lý data ở đây
@@ -36,3 +40,4 @@ export default async function fetchDataWishlist(id: number) {
 }
 
 export type { Item };
+
