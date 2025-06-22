@@ -11,7 +11,7 @@ import {
     ProductResponse,
 } from "@/models/ProductItemModel";
 import axiosInstance from "./axiosInstance";
-import { SERVER_URL_BASE } from "./ipConstant";
+import { SERVER_BASE_URL } from "./ipConstant";
 
 export async function getProductsByCategory(
     categoryLink: string,
@@ -36,7 +36,47 @@ export async function getProductsByCategory(
                 id: item.id,
                 name: item.name + " id" + item.id,
                 price: item.price,
-                thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
+                thumbnail: SERVER_BASE_URL + "/" + item.thumbnail,
+                isSold: item.sold,
+            })
+        );
+
+        return {
+            products: products,
+            isFirst: responseData.last,
+            isLast: responseData.last,
+            nextPage: !responseData.last ? responseData.number + 1 : 0,
+        };
+    } catch (error: any) {
+        console.error(
+            "Lỗi khi lấy sản phẩm theo category (paginated):",
+            error?.response?.data || error?.message || error
+        );
+        throw new Error("Không thể tải danh sách sản phẩm.");
+    }
+}
+
+export async function getProductsByUser(
+    id: number,
+): Promise<PaginatedProductsResult> {
+    console.log("getProductsByUser:" + id);
+    try {
+        const response = await axiosInstance.post<ProductResponse<any>>(
+            `/products/owner/${id}`,
+            {},
+            {
+               
+            }
+        );
+
+        const responseData = response.data;
+
+        const products: ProductItemModel[] = responseData.content.map(
+            (item: any): ProductItemModel => ({
+                id: item.id,
+                name: item.name + " id" + item.id,
+                price: item.price,
+                thumbnail: SERVER_BASE_URL + "/" + item.thumbnail,
                 isSold: item.sold,
             })
         );
@@ -94,7 +134,7 @@ export async function getProductDetail(
                 id: item.id,
                 userId: item.userId,
                 userName: item.userName,
-                userAvatar: SERVER_URL_BASE + "/" + item.userAvatar,
+                userAvatar: SERVER_BASE_URL + "/" + item.userAvatar,
                 content: item.content,
                 createdAt: new Date(item.createdAt),
                 parentId: item.parentId,
@@ -104,7 +144,7 @@ export async function getProductDetail(
                         id: reply.id,
                         userId: reply.userId,
                         userName: reply.userName,
-                        userAvatar: SERVER_URL_BASE + "/" + reply.userAvatar,
+                        userAvatar: SERVER_BASE_URL + "/" + reply.userAvatar,
                         content: reply.content,
                         createdAt: new Date(reply.createdAt),
                         parentId: reply.parentId,
@@ -117,7 +157,7 @@ export async function getProductDetail(
 
 
         const responseImages = responseData.images;
-        const images: string[] = responseImages.map((img: string) => SERVER_URL_BASE + "/" + img);
+        const images: string[] = responseImages.map((img: string) => SERVER_BASE_URL + "/" + img);
 
         const ownerDefault: User = {
             id: 0,
@@ -132,7 +172,7 @@ export async function getProductDetail(
             name: responseOwner.name,
             soldOrderQty: responseOwner.soldOrderQty,
             rating: responseOwner.rating,
-            avatar: SERVER_URL_BASE + "/" + responseOwner.avatar,
+            avatar: SERVER_BASE_URL + "/" + responseOwner.avatar,
         };
 
 
@@ -190,7 +230,7 @@ export async function searchProductByKeyword(
                 id: item.id,
                 name: item.name + " id" + item.id,
                 price: item.price,
-                thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
+                thumbnail: SERVER_BASE_URL + "/" + item.thumbnail,
                 isSold: item.sold,
             })
         );
@@ -228,7 +268,7 @@ export async function getNewestProducts(
                 id: item.id,
                 name: item.name + " id" + item.id,
                 price: item.price,
-                thumbnail: SERVER_URL_BASE + "/" + item.thumbnail,
+                thumbnail: SERVER_BASE_URL + "/" + item.thumbnail,
                 isSold: item.sold,
             })
         );
