@@ -11,12 +11,13 @@ export interface UserRequest {
 }
 
 export interface AddressRequest {
-  id: number;
+  id?: number;
   province: string;
   district: string;
   ward: string;
   detail: string;
   phone: string;
+  userId?: number;
 }
 
 const userApi = {
@@ -30,6 +31,10 @@ const userApi = {
 
   upadtetUserById: (userId: number, data: UserRequest) => {
     return axiosInstance.put(`/users/${userId}`, data);
+  },
+
+  addUserAddress:(data: AddressRequest)=>{
+    return axiosInstance.post(`/users/add-address`,data)
   },
 
   upadtetUserAddressById: (data: AddressRequest) => {

@@ -1,5 +1,6 @@
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { DatePickerModal } from 'react-native-paper-dates';
@@ -21,28 +22,32 @@ const ProfileSetting = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await userApi.getUserById(4);
-                const user = response.data;
-                console.log(user);
-                if (user) {
-                    if (user.birthday) {
-                        setBirthDate(new Date(user.birthday));
-                    } else {
-                        setBirthDate(new Date(0));
+                const userDataString = await AsyncStorage.getItem('user');
+                if (userDataString) {
+                    const userData = JSON.parse(userDataString);
+                    const response = await userApi.getUserById(userData.id);
+                    const user = response.data;
+                    console.log(user);
+                    if (user) {
+                        if (user.birthday) {
+                            setBirthDate(new Date(user.birthday));
+                        } else {
+                            setBirthDate(new Date(0));
+                        }
+
+                        setEmail(user.email)
+                        setFullName(user.name)
+                        setPhone(user.phone)
+                        setAvatar(user.imageUrl)
                     }
-
-                    setEmail(user.email)
-                    setFullName(user.name)
-                    setPhone(user.phone)
-                    setAvatar(user.imageUrl)
                 }
-            } catch (error) {
-                console.error("Lỗi khi lấy người dùng:", error);
-            }
-        };
+                } catch (error) {
+                    console.error("Lỗi khi lấy người dùng:", error);
+                }
+            };
 
-        fetchUser();
-    }, []);
+            fetchUser();
+        }, []);
 
     const updateInfoHandler = () => {
         const updatedUser: UserRequest = {
@@ -109,7 +114,7 @@ const ProfileSetting = () => {
                                     setShowDatePicker(false);
                                     if (params.date) {
                                         const adjustedDate = new Date(params.date);
-                                        adjustedDate.setHours(12); 
+                                        adjustedDate.setHours(12);
                                         setBirthDate(adjustedDate);
                                     }
                                 }}

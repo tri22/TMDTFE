@@ -43,7 +43,7 @@ export const BottomNavigation: React.FC = () => {
                 </Pressable>
             </Link>
 
-            <Link href="/(tabs)" asChild>
+            <Link href="/(tabs)/VoucherScreen" asChild>
                 <Pressable style={styles.iconWrapper}>
                     <MaterialIcons
                         name="list-alt"
