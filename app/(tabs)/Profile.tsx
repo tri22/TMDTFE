@@ -97,7 +97,6 @@ export default function ProfileScreen() {
         });
 
     }
-    console.log(user?.avatar);
 
     return (
         <SafeAreaView style={styles.safeArea}>

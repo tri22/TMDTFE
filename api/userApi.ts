@@ -33,10 +33,14 @@ const userApi = {
     upadtetUserById: (userId: number, data: UserRequest) => {
         return axiosInstance.put(`/users/${userId}`, data);
     },
+  
+  addUserAddress:(data: AddressRequest)=>{
+    return axiosInstance.post(`/users/add-address`,data)
+  },
 
-    addUserAddress: (data: AddressRequest) => {
-        return axiosInstance.post(`/users/add-address`, data)
-    },
+  upadtetUserAddressById: (data: AddressRequest) => {
+    return axiosInstance.put(`/users/address-update`, data);
+  },
 
     upadtetUserAddressById: (data: AddressRequest) => {
         return axiosInstance.put(`/users/address-update`, data);
