@@ -15,17 +15,24 @@ import { Voucher } from "@/data/voucher";
 import { FormValidation } from "@/validate";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, useSearchParams } from "expo-router/build/hooks";
-import React, { useEffect, useMemo, useState } from "react"; // Thêm import useMemo
+import React, { useEffect, useMemo, useState } from "react";
 import {
+  Dimensions,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const { width } = Dimensions.get("window");
+const isSmallDevice = width < 375;
 
 const PaymentScreen: React.FC = () => {
-  const searchParams = useSearchParams(); // Sửa thành const
+  const insets = useSafeAreaInsets();
+  const searchParams = useSearchParams();
   const data = searchParams.get("data");
   const temp: Item = data
     ? JSON.parse(data)
@@ -36,11 +43,10 @@ const PaymentScreen: React.FC = () => {
         imageUrl: "",
         quantity: 1,
       };
-  // create useState for cartItems
-  const [cartItems, setCartItems] = useState<Item>(temp);
 
-  const [VoucherDisplay, setVoucherDisplay] = useState("Voucher");
-  const [totalAmount, setTotalAmout] = useState(
+  const [cartItems, setCartItems] = useState<Item>(temp);
+  const [voucherDisplay, setVoucherDisplay] = useState("Voucher");
+  const [totalAmount, setTotalAmount] = useState(
     cartItems.price * cartItems.quantity
   );
   const [visibleVoucher, setVisibleVoucher] = useState(false);
@@ -52,7 +58,7 @@ const PaymentScreen: React.FC = () => {
     if (selectedVoucher) {
       setVoucher(selectedVoucher);
       setVoucherDisplay(`${selectedVoucher.discount}% Payoff`);
-      setTotalAmout(
+      setTotalAmount(
         (prevAmount) =>
           prevAmount - (prevAmount * selectedVoucher.discount) / 100
       );
@@ -73,14 +79,12 @@ const PaymentScreen: React.FC = () => {
     }
   };
 
-  // create useState for child data
   const [childData, setChildData] = useState<any>({ email: "", phone: "" });
 
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
         const userString = await AsyncStorage.getItem("user");
-
         if (!userString) {
           console.warn("No user data found");
           return;
@@ -92,14 +96,12 @@ const PaymentScreen: React.FC = () => {
         });
       } catch (error) {
         console.error("Error fetching wishlist:", error);
-      } finally {
       }
     };
 
     fetchWishlist();
   }, []);
 
-  // create childData for AddressInfo
   const [addressData, setAddressData] = useState<Address>({
     street: "",
     ward: "",
@@ -107,7 +109,6 @@ const PaymentScreen: React.FC = () => {
     city: "",
   });
 
-  // get data from child component for contact info
   const handleDataFromChild = (email: string, phone: string) => {
     const data = { email, phone };
     setChildData(data);
@@ -117,7 +118,7 @@ const PaymentScreen: React.FC = () => {
   const handleDataFromChildForAddress = (address: Address) => {
     setAddressData(address);
   };
-  // Sửa thành useMemo
+
   const validateData = useMemo(
     () => ({
       carts: cartItems,
@@ -148,7 +149,6 @@ const PaymentScreen: React.FC = () => {
 
   const handlePayment = () => {
     setPaymentStatus(1 ? "success" : "failure");
-    console.log("Payment Data:", isSubmitDisabled);
     setModalVisible(true);
   };
 
@@ -159,20 +159,20 @@ const PaymentScreen: React.FC = () => {
   const router = useRouter();
 
   return (
-    <>
-      <ScrollView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <AddressInfo onSave={handleDataFromChildForAddress} />
         <ContactInfo />
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionHeaderText}>Sản phẩm</Text>{" "}
-          {/* Sửa thành Text */}
-          <TouchableOpacity style={styles.button}>
-            <Text
-              style={styles.buttonText}
-              onPress={() => setVisibleVoucher(true)}
-            >
-              {VoucherDisplay}
-            </Text>
+          <Text style={styles.sectionHeaderText}>Sản phẩm</Text>
+          <TouchableOpacity
+            style={styles.voucherButton}
+            onPress={() => setVisibleVoucher(true)}
+          >
+            <Text style={styles.buttonText}>{voucherDisplay}</Text>
           </TouchableOpacity>
           <VoucherModal
             visible={visibleVoucher}
@@ -186,54 +186,60 @@ const PaymentScreen: React.FC = () => {
           {...cartItems}
           onIncrease={() => {
             const newQuantity = cartItems.quantity + 1;
-            setTotalAmout(cartItems.price * newQuantity);
+            setTotalAmount(cartItems.price * newQuantity);
             setCartItems({
               ...cartItems,
               quantity: newQuantity,
-            }); // Cập nhật state nếu cần
+            });
           }}
           onDecrease={() => {
             const newQuantity =
               cartItems.quantity > 1 ? cartItems.quantity - 1 : 1;
-            setTotalAmout(cartItems.price * newQuantity);
+            setTotalAmount(cartItems.price * newQuantity);
             setCartItems({
               ...cartItems,
               quantity: newQuantity,
-            }); // Cập nhật state nếu cần
+            });
           }}
         />
-
-        <View style={styles.container}>
-          <TouchableOpacity onPress={() => setVisibleCard(true)}>
-            {selectedCard ? (
-              <CardItem
-                img={selectedCard.img || ""}
-                cardNumber={selectedCard.cardNumber}
-                ownerName={selectedCard.ownerName}
-                expiry={selectedCard.expiry}
-              />
-            ) : (
-              <View style={styles.placeholder}>
-                <Text style={styles.placeholderText}>
-                  Chọn phương thức thanh toán
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
-          <PaymentMethodModal
-            visible={visibleCard}
-            onClose={() => setVisibleCard(false)}
-            cards={cards}
-            onAddCard={handleAddCard}
-            onSelectCard={handleSelectCard}
-          />
-        </View>
-        <TotalAmount total={`${totalAmount}.000 VND`} />
-        <TouchableOpacity style={styles.button} onPress={handlePayment}>
-          <Text style={styles.buttonText}>Thanh toán</Text>
+        <TouchableOpacity onPress={() => setVisibleCard(true)}>
+          {selectedCard ? (
+            <CardItem
+              img={selectedCard.img || ""}
+              cardNumber={selectedCard.cardNumber}
+              ownerName={selectedCard.ownerName}
+              expiry={selectedCard.expiry}
+            />
+          ) : (
+            <View style={styles.placeholder}>
+              <Text style={styles.placeholderText}>
+                Chọn phương thức thanh toán
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
+        <PaymentMethodModal
+          visible={visibleCard}
+          onClose={() => setVisibleCard(false)}
+          cards={cards}
+          onAddCard={handleAddCard}
+          onSelectCard={handleSelectCard}
+        />
+        <TotalAmount total={`${totalAmount}.000 VND`} />
       </ScrollView>
+      <View
+        style={[
+          styles.paymentButtonContainer,
+          { paddingBottom: insets.bottom },
+        ]}
+      >
+        <TouchableOpacity
+          style={[styles.paymentButton]}
+          onPress={handlePayment}
+        >
+          <Text style={styles.paymentButtonText}>Thanh toán</Text>
+        </TouchableOpacity>
+      </View>
       <PaymentStatusModal
         visible={modalVisible}
         status={paymentStatus}
@@ -256,8 +262,6 @@ const PaymentScreen: React.FC = () => {
         onPrimaryPress={() => {
           setModalVisible(false);
           if (paymentStatus === "success") {
-            // call api post to BE
-
             router.push({
               pathname: "/(tabs)/OrderScreen",
               params: { dataOrder: JSON.stringify(validateData) },
@@ -267,56 +271,83 @@ const PaymentScreen: React.FC = () => {
         onSecondaryPress={paymentStatus === "failure" ? handleRetry : undefined}
         onClose={() => setModalVisible(false)}
       />
-    </>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#F9F9F9",
   },
+  scrollContent: {
+    paddingHorizontal: isSmallDevice ? 12 : 16,
+    paddingBottom: 100,
+  },
   sectionHeader: {
-    marginVertical: 12,
-    fontSize: 18,
-    fontWeight: "bold",
-    display: "flex",
+    marginVertical: 16,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   sectionHeaderText: {
-    // Thêm style mới
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: isSmallDevice ? 16 : 18,
+    fontWeight: "600",
+    color: "#333",
   },
-  button: {
+  voucherButton: {
     backgroundColor: "#4F8EF7",
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
-    width: 100,
+    minWidth: 100,
     alignItems: "center",
-    justifyContent: "center",
+    minHeight: 44,
   },
   buttonText: {
     color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontSize: isSmallDevice ? 14 : 16,
+    fontWeight: "600",
   },
-
   placeholder: {
-    height: 100,
+    height: 80,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#CCCCCC",
+    marginVertical: 8,
   },
   placeholderText: {
     color: "#888888",
+    fontSize: isSmallDevice ? 14 : 16,
+  },
+  paymentButtonContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: isSmallDevice ? 12 : 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#EEEEEE",
+  },
+  paymentButton: {
+    backgroundColor: "#4F8EF7",
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    minHeight: 50,
+  },
+  disabledButton: {
+    backgroundColor: "#CCCCCC",
+    opacity: 0.7,
+  },
+  paymentButtonText: {
+    color: "#FFFFFF",
+    fontSize: isSmallDevice ? 16 : 18,
+    fontWeight: "600",
   },
 });
 
