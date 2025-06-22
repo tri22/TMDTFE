@@ -40,6 +40,7 @@ export default function RootLayout() {
                     <Stack.Screen name="Login/new_pass_form" options={{ headerShown: false }} />
 
                     <Stack.Screen name="Profile" options={{ headerShown: false }} />
+                    <Stack.Screen name="VoucherScreen" options={{ headerShown: false }} />
                     {/* product, product detail */}
                     <Stack.Screen name="product" />
                     <Stack.Screen name="productDetail" />
