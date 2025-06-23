@@ -13,6 +13,11 @@ import {
   FlatList,
   Image,
   ImageSourcePropType,
+  Keyboard,
+  KeyboardAvoidingView,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -22,6 +27,7 @@ import {
   View,
 } from "react-native";
 
+import { submitComment } from "@/api/commentApi";
 import { getProductDetail, getProductsByUser } from "@/api/productApi";
 import wishlistAPI from "@/api/WishlistAPI";
 import { colors } from "@/baseStyle/Style";
@@ -248,145 +254,200 @@ function ProductDetail() {
       });
   };
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
-
-  // Định nghĩa chiều cao mở ra của bottom sheet
-  const snapPoints = useMemo(() => ["25%", "50%"], []);
-
-  const handleOpenBottomSheet = useCallback(() => {
-    bottomSheetRef.current?.snapToIndex(1); // mở tới 50%
-  }, []);
-
-  const ClassificationSelection = () => {
-    const [qty, setQty] = useState(1);
-
-    const handleSelect = (item: ClassificationItem) => {
-      setQty(1);
-    };
-
-    const handlePlus = () => {
-      if (qty < product.qty) setQty(qty + 1);
-    };
-
-    const handleMinus = () => {
-      if (qty >= 2) setQty(qty - 1);
-    };
-
-    //
-    return (
-      <>
-        <BottomSheet
-          ref={bottomSheetRef}
-          index={-1}
-          snapPoints={snapPoints}
-          backdropComponent={(props) => (
-            <BottomSheetBackdrop
-              {...props}
-              appearsOnIndex={0}
-              disappearsOnIndex={-1}
-              opacity={0.5}
-            />
-          )}
-        >
-          <BottomSheetView style={{}}>
-            <View style={styles.dFlex}>
-              <Image source={{ uri: thumbnail }} style={styles.image} />
-              <View>
-                <Text style={{ fontSize: 20, marginBottom: 20 }}>
-                  {product.name}
-                </Text>
-                <View style={styles.dFlex}>
-                  <Text style={styles.price}>{formatMoney(product.price)}</Text>
-                  <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
-                </View>
-              </View>
-            </View>
-            <Text style={[styles.label, { marginLeft: 10 }]}>
-              Chọn số lượng
-            </Text>
-            <View style={[styles.dFlex, { marginLeft: "auto" }]}>
-              <View style={styles.dFlex}>
-                <IconButton
-                  icon="add-circle-outline"
-                  onPress={handlePlus}
-                  iconColor={colors.primary}
-                  iconSize={60}
-                  style={{
-                    alignSelf: "stretch",
-                    borderTopLeftRadius: 0,
-                    borderBottomLeftRadius: 0,
-                  }}
-                />
-                <TextInput
-                  style={[styles.inputQty]}
-                  placeholderTextColor={"lightgray"}
-                  placeholder="Nhập số lượng"
-                  onChangeText={(text) => {
-                    const number = parseInt(text, 10);
-                    setQty(isNaN(number) ? 0 : number);
-                  }}
-                  value={qty.toString()}
-                  keyboardType="numeric"
-                />
-                <IconButton
-                  icon="remove-circle-outline"
-                  onPress={handleMinus}
-                  iconColor={colors.primary}
-                  iconSize={60}
-                  style={{
-                    alignSelf: "stretch",
-                    borderTopLeftRadius: 0,
-                    borderBottomLeftRadius: 0,
-                  }}
-                />
-              </View>
-            </View>
-            <View style={[styles.dFlex, {}]}>
-              <SimpleButton
-                title="Thêm vào giỏ hàng"
-                onPress={() => handleAddToWishlist()}
-                style={{
-                  flex: 1,
-                  marginHorizontal: 5,
-                  marginVertical: 10,
-                  backgroundColor: colors.darkPrimary,
-                }}
-                textColor="white"
-              />
-            </View>
-          </BottomSheetView>
-        </BottomSheet>
-        <Modal
-          visible={showWishlistSuccess}
-          onDismiss={() => setShowWishlistSuccess(false)}
-          contentContainerStyle={{ backgroundColor: "transparent" }}
-        >
-          <Pressable
-            style={styles.modalOverlay}
-            onPress={() => setShowWishlistSuccess(false)}
-          >
-            <View style={styles.popupContainer}>
-              <Text style={styles.popupText}>
-                Đã thêm vào danh sách yêu thích!
-              </Text>
-            </View>
-          </Pressable>
-        </Modal>
-      </>
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true)
     );
-  };
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false)
+    );
 
-  const [replyingCommentItemId, setReplyingCommentItemId] = useState<
-    number | null
-  >(null);
-  const [replyingParentId, setReplyingParentId] = useState<number>(0);
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+  
 
-  const handleReplyClick = (
-    id: number,
+    const handleSubmitComment = async (
+        parentId: number,
+        level: number,
+        content: string
+    ) => {
+        try {
+            const result: Comment[] = await submitComment(
+                productId,
+                content,
+                parentId,
+                level
+            );
+            setComments(result ?? []);
+            clearCommentInput();
+        } catch (err: any) {
+            // console.error("Failed to submit comments:", err);
+        } finally {
+        }
+    };
 
-    userName: string,
-    parentId: number
-  ) => {
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
+    // Định nghĩa chiều cao mở ra của bottom sheet
+    const snapPoints = useMemo(() => ["25%", "50%"], []);
+
+    const handleOpenBottomSheet = useCallback(() => {
+        bottomSheetRef.current?.snapToIndex(1); // mở tới 50%
+    }, []);
+
+    const ClassificationSelection = () => {
+        const [qty, setQty] = useState(1);
+
+        const handleSelect = (item: ClassificationItem) => {
+            setQty(1);
+        };
+
+        const handlePlus = () => {
+            if (qty < product.qty) setQty(qty + 1);
+        };
+
+        const handleMinus = () => {
+            if (qty >= 2) setQty(qty - 1);
+        };
+
+        // function for handle add to wish list or cart
+        const handleAddToWishlist = async () => {
+            const userString = await AsyncStorage.getItem("user");
+
+            if (!userString) {
+                console.warn("No user data found");
+                return;
+            }
+            const user = JSON.parse(userString);
+
+            await wishlistAPI
+                .addWishlistByUserId(user.id, productId)
+                .then((r) => {
+                    // show a pop up to notify user
+                    setShowWishlistSuccess(true);
+                    setTimeout(() => {
+                        setShowWishlistSuccess(false);
+                    }, 1500);
+                })
+                .catch((e) => {
+                    console.log("Error adding to wishlist:", e);
+                });
+        };
+    
+        return (
+            <>
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    index={-1}
+                    snapPoints={snapPoints}
+                    backdropComponent={(props) => (
+                        <BottomSheetBackdrop
+                            {...props}
+                            appearsOnIndex={0}
+                            disappearsOnIndex={-1}
+                            opacity={0.5}
+                        />
+                    )}
+                >
+                    <BottomSheetView style={{}}>
+                        <View style={styles.dFlex}>
+                            <Image source={{ uri: thumbnail }} style={styles.image} />
+                            <View>
+                                <Text style={{ fontSize: 20, marginBottom: 20 }}>
+                                    {product.name}
+                                </Text>
+                                <View style={styles.dFlex}>
+                                    <Text style={styles.price}>{formatMoney(product.price)}</Text>
+                                    <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
+                                </View>
+                            </View>
+                        </View>
+                        <Text style={[styles.label, { marginLeft: 10 }]}>
+                            Chọn số lượng
+                        </Text>
+                        <View style={[styles.dFlex, { marginLeft: "auto" }]}>
+                            <View style={styles.dFlex}>
+                                <IconButton
+                                    icon="add-circle-outline"
+                                    onPress={handlePlus}
+                                    iconColor={colors.primary}
+                                    iconSize={60}
+                                    style={{
+                                        alignSelf: "stretch",
+                                        borderTopLeftRadius: 0,
+                                        borderBottomLeftRadius: 0,
+                                    }}
+                                />
+                                <TextInput
+                                    style={[styles.inputQty]}
+                                    placeholderTextColor={"lightgray"}
+                                    placeholder="Nhập số lượng"
+                                    onChangeText={(text) => {
+                                        const number = parseInt(text, 10);
+                                        setQty(isNaN(number) ? 0 : number);
+                                    }}
+                                    value={qty.toString()}
+                                    keyboardType="numeric"
+                  editable={false}
+                                />
+                                <IconButton
+                                    icon="remove-circle-outline"
+                                    onPress={handleMinus}
+                                    iconColor={colors.primary}
+                                    iconSize={60}
+                                    style={{
+                                        alignSelf: "stretch",
+                                        borderTopLeftRadius: 0,
+                                        borderBottomLeftRadius: 0,
+                                    }}
+                                />
+                            </View>
+                        </View>
+                        <View style={[styles.dFlex, {}]}>
+                            <SimpleButton
+                                title="Thêm vào giỏ hàng"
+                                onPress={() => handleAddToWishlist()}
+                                style={{
+                                    flex: 1,
+                                    marginHorizontal: 5,
+                                    marginVertical: 10,
+                                    backgroundColor: colors.darkPrimary,
+                                }}
+                                textColor="white"
+                            />
+                        </View>
+                    </BottomSheetView>
+                </BottomSheet>
+                <Modal
+                    visible={showWishlistSuccess}
+                    onDismiss={() => setShowWishlistSuccess(false)}
+                    contentContainerStyle={{ backgroundColor: "transparent" }}
+                >
+                    <Pressable
+                        style={styles.modalOverlay}
+                        onPress={() => setShowWishlistSuccess(false)}
+                    >
+                        <View style={styles.popupContainer}>
+                            <Text style={styles.popupText}>
+                                Đã thêm vào danh sách yêu thích!
+                            </Text>
+                        </View>
+                    </Pressable>
+                </Modal>
+            </>
+        );
+    };
+
+    const [replyingCommentItemId, setReplyingCommentItemId] = useState<
+        number | null
+    >(null);
+    const [replyingParentId, setReplyingParentId] = useState<number>(0);
+
+  const handleReplyClick = (id: number, userName: string, parentId: number) => {
     setReplyingCommentItemId(id);
     if (parentId === 0) setReplyingParentId(id);
     else setReplyingParentId(parentId);
@@ -400,24 +461,55 @@ function ProductDetail() {
     );
   };
 
-  const handleSubmitReply = (content: string) => {
-    handleSubmitComment(replyingParentId, 1, content);
+  const handleCancelReply = () => {
     setReplyingCommentItemId(null);
-    setReplyingParentId(0);
   };
 
-  const router = useRouter();
+    const handleSubmitReply = (content: string) => {
+        handleSubmitComment(replyingParentId, 1, content);
+        setReplyingCommentItemId(null);
+        setReplyingParentId(0);
+    };
 
-  const handleGoBack = () => {
-    router.back();
+    const router = useRouter();
+
+    const handleGoBack = () => {
+        router.back();
+    };
+
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const yOffset = event.nativeEvent.contentOffset.y;
+    // Khi cuộn xuống 100px thì đổi màu
+    setIsScrolled(yOffset > 240);
   };
-
   return (
     <DefaultLayout>
       <TouchableOpacity onPress={handleGoBack} style={styles.goBackBtn}>
-        <Text style={{ color: colors.primary }}>Quay lại</Text>
+        <Text
+          style={[
+            isScrolled && {
+              backgroundColor: colors.blurPrimary,
+              color: colors.primary,
+              shadowOpacity: 0.3,
+              elevation: 4,
+              transform: [{ scale: 0.95 }],
+              padding: 10,
+              borderRadius: 10
+            },
+            { color: colors.primary,}
+          ]}
+        >
+          Quay lại
+        </Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        keyboardShouldPersistTaps="handled"
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
         <MyCarousel images={images} />
         <View
           style={[
@@ -457,7 +549,11 @@ function ProductDetail() {
           />
         </View>
 
-        <View style={[{ padding: 10 }]}>
+        <KeyboardAvoidingView
+          style={[{ padding: 10, flex: 1 }]}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={80}
+        >
           <Text style={styles.label}>Bình luận</Text>
           <View style={[{ marginTop: 10 }]}>
             <View style={[styles.inputWrapper, { marginBottom: 10 }]}>
@@ -503,14 +599,16 @@ function ProductDetail() {
                     onReplyClick: handleReplyClick,
                     isReplying: reply.id === replyingCommentItemId,
                     onSubmitReply: handleSubmitReply,
+                    onCancel: handleCancelReply,
                   }))}
                   onReplyClick={handleReplyClick}
                   isReplying={item.id === replyingCommentItemId}
                   onSubmitReply={handleSubmitReply}
+                  onCancel={handleCancelReply}
                 />
               ))}
           </View>
-        </View>
+        </KeyboardAvoidingView>
         <View style={[{ padding: 10 }]}>
           <Text style={styles.label}>Phí vận chuyển</Text>
           <View>
@@ -534,7 +632,7 @@ function ProductDetail() {
             ))}
           </View>
 
-          {/* <FlatList
+                    {/* <FlatList
             data={shippingFeeItems}
             showsHorizontalScrollIndicator={false}
             nestedScrollEnabled={true}
@@ -594,28 +692,31 @@ function ProductDetail() {
           /> */}
         </View>
       </ScrollView>
-      <View style={styles.bottomBarContainer}>
-        <SimpleButton
-          title="Thêm vào giỏ hàng"
-          onPress={handleOpenBottomSheet}
-          style={{
-            flex: 1,
-            marginHorizontal: 5,
-            backgroundColor: colors.darkPrimary,
-          }}
-          textColor="white"
-        />
-        <SimpleButton
-          title="Mua ngay"
-          onPress={handlePress}
-          style={{
-            flex: 1,
-            marginHorizontal: 5,
-            backgroundColor: colors.primary,
-          }}
-          textColor="white"
-        />
-      </View>
+      {!isKeyboardVisible && (
+        <View style={styles.bottomBarContainer}>
+          <SimpleButton
+            title="Thêm vào giỏ hàng"
+            onPress={handleOpenBottomSheet}
+            style={{
+              flex: 1,
+              marginHorizontal: 5,
+              backgroundColor: colors.darkPrimary,
+            }}
+            textColor="white"
+          />
+          <SimpleButton
+            title="Mua ngay"
+            onPress={handlePress}
+            style={{
+              flex: 1,
+              marginHorizontal: 5,
+              backgroundColor: colors.primary,
+            }}
+            textColor="white"
+          />
+        </View>
+      )}
+
       <ClassificationSelection />
     </DefaultLayout>
   );
