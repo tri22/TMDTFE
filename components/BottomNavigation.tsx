@@ -54,11 +54,11 @@ export const BottomNavigation: React.FC = () => {
                 </Pressable>
             </Link>
 
-            <Link href="/(tabs)/CartlistScreen" asChild>
+            {/* <Link href="/(tabs)/CartlistScreen" asChild>
                 <Pressable style={styles.iconWrapper}>
                     <Feather name="bookmark" size={24} color={getIconColor("/(tabs)")} />
                 </Pressable>
-            </Link>
+            </Link> */}
 
 
             <Pressable style={styles.iconWrapper} onPress={handleProfilePress}>

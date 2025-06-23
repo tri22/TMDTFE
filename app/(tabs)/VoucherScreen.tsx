@@ -24,7 +24,7 @@ export default function VoucherScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView style={{ paddingBottom: 80 }}>
+            <ScrollView style={{ paddingBottom: 80 ,paddingTop: 30, paddingLeft: 20, paddingRight: 20 }}>
                 {vouchers.map((item) => (
                     <VoucherItem
                         key={item.id}

@@ -65,7 +65,7 @@ export async function getProductsByUser(
             `/products/owner/${id}`,
             {},
             {
-               
+
             }
         );
 
@@ -289,10 +289,10 @@ export async function getNewestProducts(
 }
 
 export const getProductById = (productId: number) => {
-  return axiosInstance.get(`/products/find/${productId}`)
+    return axiosInstance.get(`/products/find/${productId}`)
 };
 
-export const updateProduct = (productId: number,data:any) => {
-  return axiosInstance.put(`/products/update/${productId}`,data)
+export const updateProduct = (productId: number, data: any) => {
+    return axiosInstance.put(`/products/update/${productId}`, data)
 };
 

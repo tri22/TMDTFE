@@ -16,6 +16,30 @@ type CardItemProps = {
   expiry: string;
 };
 export type { CardItemProps };
+
+// Hàm định dạng từ chuỗi thành MM/YY
+const formatExpiry = (expiry: string): string => {
+  // Nếu expiry dạng YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(expiry)) {
+    const [year, month] = expiry.split("-");
+    return `${month}/${year.slice(2)}`; // lấy 2 số cuối của năm
+  }
+
+  // Nếu expiry dạng MM/YYYY
+  if (/^\d{2}\/\d{4}$/.test(expiry)) {
+    const [month, year] = expiry.split("/");
+    return `${month}/${year.slice(2)}`;
+  }
+
+  // Nếu đã là MM/YY thì giữ nguyên
+  if (/^\d{2}\/\d{2}$/.test(expiry)) {
+    return expiry;
+  }
+
+  return expiry; // fallback nếu không khớp định dạng
+};
+
+
 const CardItem: React.FC<CardItemProps> = ({
   img,
   cardNumber,
@@ -41,7 +65,7 @@ const CardItem: React.FC<CardItemProps> = ({
         {/* Card Info */}
         <View style={styles.cardFooter}>
           <Text style={styles.name}>{ownerName.toUpperCase()}</Text>
-          <Text style={styles.expiry}>{expiry}</Text>
+          <Text style={styles.expiry}>{formatExpiry(expiry)}</Text>
         </View>
       </View>
     </View>

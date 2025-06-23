@@ -9,6 +9,17 @@ import { DatePickerModal } from 'react-native-paper-dates';
 import { SERVER_URL_BASE } from "../../../api/ipConstant";
 import userApi, { UserRequest } from '../../../api/userApi';
 
+interface User {
+    id: number
+    name: string,
+    email: string,
+    phone: string;
+    avatar: string,
+    role: string,
+    token: string
+}
+
+
 const ProfileSetting = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -19,7 +30,7 @@ const ProfileSetting = () => {
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
     const [avatar, setAvatar] = useState("");
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<User | null>(null);
     const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
     const [oldPassword, setOldPassword] = useState("");
@@ -59,7 +70,7 @@ const ProfileSetting = () => {
                         // fallback nếu birthday không hợp lệ
                         setBirthDate(new Date(2000, 0, 1)); // ví dụ mặc định là 01/01/2000
                     }
-                    setEmail(fetchedUser.email);
+                    setEmail(fetchedUser.email as string);
                     setFullName(fetchedUser.name);
                     setPhone(fetchedUser.phone);
                     setAvatar(fetchedUser.avatar);
@@ -181,6 +192,10 @@ const ProfileSetting = () => {
                 email: user?.email,
                 code: verificationCode,
             });
+            if (!user?.email) {
+                Alert.alert("Lỗi", "Không tìm thấy email người dùng.");
+                return;
+            }
             const verifyResponse = await authApi.verifyCode({
                 email: user?.email,
                 code: verificationCode,

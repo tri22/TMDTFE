@@ -20,7 +20,6 @@ export async function getUserId(): Promise<number | undefined> {
   }
 }
 
-
 export const createStompClient = async (
   onMessage: (msg: string) => void
 ): Promise<Client | undefined> => {
@@ -28,11 +27,14 @@ export const createStompClient = async (
   console.log("userId:", userId);
 
   if (!userId) return;
+  const token = await AsyncStorage.getItem("token"); // ví dụ "eyJhbGciOi..."
 
   const client = new Client({
     webSocketFactory: () => new SockJS(URL),
+    connectHeaders: { Authorization: `Bearer ${token}` }, // <<< thêm dòng này
+
     reconnectDelay: 5000,
-    debug: (str) => console.log('[STOMP]', str),
+    debug: (str) => console.log("[STOMP]", str),
 
     onConnect: () => {
       console.log("✅ Connected to WebSocket");

@@ -90,18 +90,6 @@ function Home() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // const clearAllData = async () => {
-  //   try {
-  //     await AsyncStorage.clear();
-  //     console.log("All AsyncStorage data cleared successfully");
-  //   } catch (error) {
-  //     console.error("Error clearing AsyncStorage:", error);
-  //   }
-  // };
-
-  // // Call this function when the project runs
-  // clearAllData();
-
   useEffect(() => {
     const fetchCategoryCounts = async () => {
       setLoading(true);

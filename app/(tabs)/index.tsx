@@ -16,8 +16,11 @@ export default function HomeScreen() {
 
     const handleMessage = (msg: string) => {
       // Xử lý UI khi nhận tin nhắn
-      showToast("info", "Phiên đăng nhập đã hết hạn");
-      // hoặc setState / dispatch / điều hướng tùy bạn
+      const payload = JSON.parse(msg); // chuyển chuỗi JSON → object
+      const messageText = payload.message ?? "Có thông báo mới";
+
+      console.log("📩 Thông báo từ server:", messageText);
+      showToast("info", messageText);
     };
 
     createStompClient(handleMessage).then((c) => {
