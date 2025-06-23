@@ -19,7 +19,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 import { submitComment } from "@/api/commentApi";
@@ -43,6 +43,7 @@ import { saveRecentViewedProduct } from "@/util/historySeach";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Modal } from "react-native-paper";
+import Toast from "react-native-toast-message";
 import DefaultLayout from "../DefaultLayout";
 import ProductItem from "../product/components/productItem";
 import { CommentItem, MyCarousel, ShopInfo } from "./components";
@@ -275,16 +276,17 @@ function ProductDetail() {
         .then((respone) => {
           // show a pop up to notify user
           if (respone.status == 200 && respone.data == "success") {
-            setShowWishlistSuccess(true);
-            setTimeout(() => {
-              setShowWishlistSuccess(false);
-            }, 1500);
+            Toast.show({
+              type: "success",
+              text1: "Thành công",
+              text2: "Đã thêm vào danh sách yêu thích!",
+            });
           } else {
-            setShowWishlistSuccess(true);
-            setNotify("Vật phẩm đã có trong giỏ hàng!");
-            setTimeout(() => {
-              setShowWishlistSuccess(false);
-            }, 1500);
+            Toast.show({
+              type: "error",
+              text1: "Thất bại",
+              text2: "Vật phẩm đã có trong giỏ hàng !",
+            });
           }
         })
         .catch((e) => {

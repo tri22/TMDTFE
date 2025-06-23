@@ -14,10 +14,14 @@ type VoucherModalProps = {
   visible: boolean;
   onClose: () => void;
   vouchers: {
-    id: number;
-    title: string;
+    active: boolean;
+    code: string;
     description: string;
-    expiry: string;
+    discount: number;
+    expiryDate: string;
+    id: number;
+    minOrderValue: number;
+    quantity: number;
   }[];
   onAddVoucher: (id: number) => void;
 };
@@ -42,9 +46,9 @@ const VoucherModal: React.FC<VoucherModalProps> = ({
             {vouchers.map((voucher) => (
               <VoucherItem
                 key={voucher.id}
-                title={voucher.title}
-                description={voucher.description}
-                expiry={voucher.expiry}
+                title={voucher.description}
+                description={voucher.code}
+                expiry={voucher.expiryDate}
                 onAdd={() => onAddVoucher(voucher.id)}
               />
             ))}
