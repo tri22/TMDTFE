@@ -1,3 +1,4 @@
+import { wsService } from '@/util/wsService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -28,6 +29,8 @@ const Settings = () => {
 
     const handleLogout = async () => {
         try {
+            wsService.disconnect(); 
+
             // Xóa thông tin user khỏi AsyncStorage
             await AsyncStorage.removeItem('user');
             console.log('Đã xóa thông tin user, đăng xuất thành công');
