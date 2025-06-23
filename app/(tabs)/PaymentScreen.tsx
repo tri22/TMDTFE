@@ -11,7 +11,7 @@ import {
 } from "@/components";
 import { Address } from "@/components/AddressInfo";
 
-import { CardData } from "@/data";
+import { Card, fetchCreditCard } from "@/data/Card";
 
 import { Item } from "@/data/item";
 import { Voucher } from "@/data/voucher";
@@ -40,12 +40,12 @@ const PaymentScreen: React.FC = () => {
   const temp: Item = data
     ? JSON.parse(data)
     : {
-      id: 0,
-      name: "",
-      price: 0,
-      imageUrl: "",
-      quantity: 1,
-    };
+        id: 0,
+        name: "",
+        price: 0,
+        imageUrl: "",
+        quantity: 1,
+      };
 
   const [cartItems, setCartItems] = useState<Item>(temp);
   const [voucherDisplay, setVoucherDisplay] = useState("Voucher");
@@ -68,9 +68,8 @@ const PaymentScreen: React.FC = () => {
       return [];
     });
 
-
   const handleAddVoucher = (id: number) => {
-    const selectedVoucher = voucherList.find((voucher) => voucher.id === id);
+    const selectedVoucher = vouchers.find((voucher) => voucher.id === id);
     if (selectedVoucher) {
       setVoucher(selectedVoucher);
       setVoucherDisplay(`${selectedVoucher.discount}% Payoff`);
@@ -87,18 +86,18 @@ const PaymentScreen: React.FC = () => {
   const [cardList, setCardList] = useState<Card[]>([]);
 
   const fetchCards = async () => {
-  try {
-    const userString = await AsyncStorage.getItem("user");
-    if (userString) {
-      const userData = JSON.parse(userString);
-      const data = await fetchCreditCard(userData.id);
-      console.log("Fetched cards:", data);
-      setCardList(data);
+    try {
+      const userString = await AsyncStorage.getItem("user");
+      if (userString) {
+        const userData = JSON.parse(userString);
+        const data = await fetchCreditCard(userData.id);
+        console.log("Fetched cards:", data);
+        setCardList(data);
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy thẻ:", error);
     }
-  } catch (error) {
-    console.error("Lỗi khi lấy thẻ:", error);
-  }
-};
+  };
 
   const handleAddCard = () => {
     alert("Thêm thẻ mới");
@@ -208,7 +207,7 @@ const PaymentScreen: React.FC = () => {
           <VoucherModal
             visible={visibleVoucher}
             onClose={() => setVisibleVoucher(false)}
-            vouchers={voucherList}
+            vouchers={vouchers}
             onAddVoucher={handleAddVoucher}
           />
         </View>
@@ -236,7 +235,7 @@ const PaymentScreen: React.FC = () => {
         <TouchableOpacity onPress={() => setVisibleCard(true)}>
           {selectedCard ? (
             <CardItem
-              img={selectedCard.logo  || ""}
+              img={selectedCard.logo || ""}
               cardNumber={selectedCard.cardNumber}
               ownerName={selectedCard.ownerName}
               expiry={selectedCard.expiry}
