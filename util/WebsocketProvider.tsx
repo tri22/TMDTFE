@@ -5,7 +5,7 @@ export const WebSocketContext = createContext(wsService);
 
 export const WebSocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
-    wsService.connect();
+    wsService.connect();              // mở kết nối khi App mount
     return () => wsService.disconnect();
   }, []);
 
