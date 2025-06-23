@@ -56,18 +56,19 @@ const PaymentScreen: React.FC = () => {
   const [voucher, setVoucher] = useState<Voucher | null>(null);
 
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
-  voucherApi
-    .getAllVouchers()
-    .then((response) => {
-      console.log(response);
-      setVouchers(response.data);
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("Error fetching vouchers:", error);
-      return [];
-    });
-
+  const handleFetchVouchers = async () => {
+    voucherApi
+      .getAllVouchers()
+      .then((response) => {
+        console.log(response);
+        setVouchers(response.data);
+        setVisibleVoucher(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching vouchers:", error);
+        return [];
+      });
+  };
   const handleAddVoucher = (id: number) => {
     const selectedVoucher = vouchers.find((voucher) => voucher.id === id);
     if (selectedVoucher) {
@@ -206,7 +207,7 @@ const PaymentScreen: React.FC = () => {
           </TouchableOpacity>
           <VoucherModal
             visible={visibleVoucher}
-            onClose={() => setVisibleVoucher(false)}
+            onClose={() => handleFetchVouchers}
             vouchers={vouchers}
             onAddVoucher={handleAddVoucher}
           />
