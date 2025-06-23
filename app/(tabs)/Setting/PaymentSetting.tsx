@@ -3,6 +3,7 @@ import { CardItem } from "@/components";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import CardFormModal from "@/components/CardFormModal";
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Swipeable } from 'react-native-gesture-handler';
@@ -79,7 +80,13 @@ const PaymentSetting = () => {
 
   const fetchCardData = async () => {
     try {
-      const response = await creditCardApi.getAllByUserId(4);
+      const userString = await AsyncStorage.getItem("user");
+      if (!userString) {
+        console.warn("No user data found");
+        return;
+      }
+      const user = JSON.parse(userString);
+      const response = await creditCardApi.getAllByUserId(user.id);
       const data = response.data;
 
       const formattedData = data.map((item: CardData) => {

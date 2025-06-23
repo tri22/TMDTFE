@@ -57,8 +57,8 @@ const statusTabs = [
 ];
 
 const getStatusLabel = (statusCode: string) => {
-  const found = statusTabs.find(tab => tab.value === statusCode);
-  return found ? found.label : statusCode;
+    const found = statusTabs.find(tab => tab.value === statusCode);
+    return found ? found.label : statusCode;
 };
 
 const OrderHistory: React.FC = () => {
@@ -77,6 +77,7 @@ const OrderHistory: React.FC = () => {
                 const userData = JSON.parse(userDataString);
                 setUser(userData);
                 const response = await getBoughtOrders(userData.id);
+                console.log('Orders from API:', response.data); 
                 setOrders(response.data);
             }
         } catch (error) {

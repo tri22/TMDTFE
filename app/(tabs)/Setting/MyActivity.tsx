@@ -170,7 +170,7 @@ const MyActivity: React.FC = () => {
                 {/* Categories */}
                 <View style={styles.categoriesContainer}>
                     {spendingData.map((item, index) => (
-                        item.value > 0 && renderCategory(`${item.label}: ${item.value.toLocaleString()}₫`, colors[index % colors.length])
+                        item.value > 0 && renderCategory(`${item.label}: ${item.value.toLocaleString()}₫`, colors[index % colors.length], index)
                     ))}
                 </View>
 
@@ -179,7 +179,7 @@ const MyActivity: React.FC = () => {
                 {/* Order Status */}
                 <View style={styles.statusContainer}>
                     {statusData.map((item, index) => (
-                        renderStatus(item.value, item.label)
+                        renderStatus(item.value, item.label, index)
                     ))}
                 </View>
 
@@ -195,14 +195,15 @@ const MyActivity: React.FC = () => {
 };
 
 // Helpers
-const renderCategory = (label: string, color: string) => (
-    <View style={[styles.categoryItem, { backgroundColor: color }]}>
+const renderCategory = (label: string, color: string, key: number) => (
+    <View key={key} style={[styles.categoryItem, { backgroundColor: color }]}>
         <Text style={styles.categoryText}>{label}</Text>
     </View>
 );
 
-const renderStatus = (number: number, label: string) => (
-    <View style={styles.statusItem}>
+
+const renderStatus = (number: number, label: string, key: number) => (
+    <View key={key} style={styles.statusItem}>
         <Text style={styles.statusNumber}>{number}</Text>
         <Text style={styles.statusLabel}>{label}</Text>
     </View>

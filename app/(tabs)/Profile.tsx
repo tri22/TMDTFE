@@ -9,14 +9,14 @@ import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, Vi
 import Toast from 'react-native-toast-message';
 
 
-export interface User {
-    id?: number;
-    name?: string;
-    email?: string;
-    birthday?: string;
-    phone?: string;
-    avatar?: string;
-    token?: string;
+interface User {
+    id: number
+    name: string,
+    email: string,
+    phone: string;
+    avatar: string,
+    role: string,
+    token: string
 }
 
 export interface Product {
@@ -171,7 +171,7 @@ export default function ProfileScreen() {
                                 <View style={styles.productInfo}>
                                     <Text style={styles.productName}>{item.name}</Text>
                                     <View style={{ flex: 1 }} />
-                                    <Text style={styles.productPrice}>{item.price} vnđ</Text>
+                                    <Text style={styles.productPrice}>{item.price} đ</Text>
                                 </View>
                             </TouchableOpacity>
                         ))}
