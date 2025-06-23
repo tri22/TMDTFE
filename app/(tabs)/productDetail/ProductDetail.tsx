@@ -13,13 +13,18 @@ import {
   FlatList,
   Image,
   ImageSourcePropType,
+  Keyboard,
+  KeyboardAvoidingView,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 import { submitComment } from "@/api/commentApi";
@@ -152,7 +157,20 @@ function ProductDetail() {
   const [category, setCategory] = useState<Category | null | undefined>(null);
   const [sold, setSold] = useState<boolean>(false);
   const [thumbnail, setThumbnail] = useState<string>("");
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false)
+    );
 
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
   const fetchProductDetail = async (id: number) => {
     try {
       const result: ProductDetailModel = await getProductDetail(id);
@@ -282,7 +300,7 @@ function ProductDetail() {
           console.log("Error adding to wishlist:", e);
         });
     };
-    //
+
     return (
       <>
         <BottomSheet
@@ -337,6 +355,7 @@ function ProductDetail() {
                   }}
                   value={qty.toString()}
                   keyboardType="numeric"
+                  editable={false}
                 />
                 <IconButton
                   icon="remove-circle-outline"
@@ -391,12 +410,7 @@ function ProductDetail() {
   >(null);
   const [replyingParentId, setReplyingParentId] = useState<number>(0);
 
-  const handleReplyClick = (
-    id: number,
-
-    userName: string,
-    parentId: number
-  ) => {
+  const handleReplyClick = (id: number, userName: string, parentId: number) => {
     setReplyingCommentItemId(id);
     if (parentId === 0) setReplyingParentId(id);
     else setReplyingParentId(parentId);
@@ -408,6 +422,10 @@ function ProductDetail() {
         " | name: " +
         userName
     );
+  };
+
+  const handleCancelReply = () => {
+    setReplyingCommentItemId(null);
   };
 
   const handleSubmitReply = (content: string) => {
@@ -422,12 +440,39 @@ function ProductDetail() {
     router.back();
   };
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const yOffset = event.nativeEvent.contentOffset.y;
+    // Khi cuộn xuống 100px thì đổi màu
+    setIsScrolled(yOffset > 240);
+  };
   return (
     <DefaultLayout>
       <TouchableOpacity onPress={handleGoBack} style={styles.goBackBtn}>
-        <Text style={{ color: colors.primary }}>Quay lại</Text>
+        <Text
+          style={[
+            isScrolled && {
+              backgroundColor: colors.blurPrimary,
+              color: colors.primary,
+              shadowOpacity: 0.3,
+              elevation: 4,
+              transform: [{ scale: 0.95 }],
+              padding: 10,
+              borderRadius: 10
+            },
+            { color: colors.primary,}
+          ]}
+        >
+          Quay lại
+        </Text>
       </TouchableOpacity>
-      <ScrollView style={styles.container}>
+      <ScrollView
+        style={styles.container}
+        keyboardShouldPersistTaps="handled"
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
         <MyCarousel images={images} />
         <View
           style={[
@@ -467,7 +512,11 @@ function ProductDetail() {
           />
         </View>
 
-        <View style={[{ padding: 10 }]}>
+        <KeyboardAvoidingView
+          style={[{ padding: 10, flex: 1 }]}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={80}
+        >
           <Text style={styles.label}>Bình luận</Text>
           <View style={[{ marginTop: 10 }]}>
             <View style={[styles.inputWrapper, { marginBottom: 10 }]}>
@@ -513,14 +562,16 @@ function ProductDetail() {
                     onReplyClick: handleReplyClick,
                     isReplying: reply.id === replyingCommentItemId,
                     onSubmitReply: handleSubmitReply,
+                    onCancel: handleCancelReply,
                   }))}
                   onReplyClick={handleReplyClick}
                   isReplying={item.id === replyingCommentItemId}
                   onSubmitReply={handleSubmitReply}
+                  onCancel={handleCancelReply}
                 />
               ))}
           </View>
-        </View>
+        </KeyboardAvoidingView>
         <View style={[{ padding: 10 }]}>
           <Text style={styles.label}>Phí vận chuyển</Text>
           <View>
@@ -604,28 +655,31 @@ function ProductDetail() {
           /> */}
         </View>
       </ScrollView>
-      <View style={styles.bottomBarContainer}>
-        <SimpleButton
-          title="Thêm vào giỏ hàng"
-          onPress={handleOpenBottomSheet}
-          style={{
-            flex: 1,
-            marginHorizontal: 5,
-            backgroundColor: colors.darkPrimary,
-          }}
-          textColor="white"
-        />
-        <SimpleButton
-          title="Mua ngay"
-          onPress={handlePress}
-          style={{
-            flex: 1,
-            marginHorizontal: 5,
-            backgroundColor: colors.primary,
-          }}
-          textColor="white"
-        />
-      </View>
+      {!isKeyboardVisible && (
+        <View style={styles.bottomBarContainer}>
+          <SimpleButton
+            title="Thêm vào giỏ hàng"
+            onPress={handleOpenBottomSheet}
+            style={{
+              flex: 1,
+              marginHorizontal: 5,
+              backgroundColor: colors.darkPrimary,
+            }}
+            textColor="white"
+          />
+          <SimpleButton
+            title="Mua ngay"
+            onPress={handlePress}
+            style={{
+              flex: 1,
+              marginHorizontal: 5,
+              backgroundColor: colors.primary,
+            }}
+            textColor="white"
+          />
+        </View>
+      )}
+
       <ClassificationSelection />
     </DefaultLayout>
   );
