@@ -10,16 +10,18 @@ import React, {
     useState,
 } from "react";
 import {
-    FlatList,
-    Image,
-    ImageSourcePropType,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+
+  FlatList,
+  Image,
+  ImageSourcePropType,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+
 } from "react-native";
 
 import { submitComment } from "@/api/commentApi";
@@ -43,6 +45,7 @@ import { saveRecentViewedProduct } from "@/util/historySeach";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Modal } from "react-native-paper";
+import Toast from "react-native-toast-message";
 import DefaultLayout from "../DefaultLayout";
 import ProductItem from "../product/components/productItem";
 import { CommentItem, MyCarousel, ShopInfo } from "./components";
@@ -215,24 +218,39 @@ function ProductDetail() {
         setCommentInput("");
     };
 
-    const handleSubmitComment = async (
-        parentId: number,
-        level: number,
-        content: string
-    ) => {
-        try {
-            const result: Comment[] = await submitComment(
-                productId,
-                content,
-                parentId,
-                level
-            );
-            setComments(result ?? []);
-            clearCommentInput();
-        } catch (err: any) {
-            // console.error("Failed to submit comments:", err);
-        } finally {
-        }
+
+    // function for handle add to wish list or cart
+    const handleAddToWishlist = async () => {
+      const userString = await AsyncStorage.getItem("user");
+
+      if (!userString) {
+        console.warn("No user data found");
+        return;
+      }
+      const user = JSON.parse(userString);
+
+      await wishlistAPI
+        .addWishlistByUserId(user.id, productId)
+        .then((respone) => {
+          // show a pop up to notify user
+          if (respone.status == 200 && respone.data == "success") {
+            Toast.show({
+              type: "success",
+              text1: "Thành công",
+              text2: "Đã thêm vào danh sách yêu thích!",
+            });
+          } else {
+            Toast.show({
+              type: "error",
+              text1: "Thất bại",
+              text2: "Vật phẩm đã có trong giỏ hàng !",
+            });
+          }
+        })
+        .catch((e) => {
+          console.log("Error adding to wishlist:", e);
+        });
+
     };
 
     const bottomSheetRef = useRef<BottomSheet>(null);

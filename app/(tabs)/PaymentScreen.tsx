@@ -10,7 +10,9 @@ import {
   VoucherModal,
 } from "@/components";
 import { Address } from "@/components/AddressInfo";
-import { Card, fetchCreditCard } from "@/data/Card";
+
+import { CardData } from "@/data";
+
 import { Item } from "@/data/item";
 import { Voucher } from "@/data/voucher";
 import { FormValidation } from "@/validate";
@@ -52,25 +54,20 @@ const PaymentScreen: React.FC = () => {
   );
   const [visibleVoucher, setVisibleVoucher] = useState(false);
   const [voucher, setVoucher] = useState<Voucher | null>(null);
-  const [voucherList, setVoucherList] = useState<Voucher[]>([]);
 
-  useEffect(() => {
-    fetchVouchers()
-    fetchCards()
-  }, [])
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  voucherApi
+    .getAllVouchers()
+    .then((response) => {
+      console.log(response);
+      setVouchers(response.data);
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error fetching vouchers:", error);
+      return [];
+    });
 
-  const fetchVouchers = async () => {
-    try {
-      const response = await voucherApi.getAllVouchers();
-      const data = response.data
-      console.log(data)
-      setVoucherList(data)
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  
 
   const handleAddVoucher = (id: number) => {
     const selectedVoucher = voucherList.find((voucher) => voucher.id === id);
