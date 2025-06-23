@@ -1,15 +1,12 @@
-import { showToast } from "@/api/axiosInstance";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { createStompClient } from "@/util/Websocket";
 import {
-    DarkTheme,
-    DefaultTheme,
-    ThemeProvider,
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
 import { Provider as PaperProvider } from "react-native-paper";
 import "react-native-reanimated";
 
@@ -17,26 +14,26 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({});
 
-    useEffect(() => {
-      let client: any;
+    // useEffect(() => {
+    //   let client: any;
   
-      const handleMessage = (msg: string) => {
-        // Xử lý UI khi nhận tin nhắn
-        const payload = JSON.parse(msg); // chuyển chuỗi JSON → object
-        const messageText = payload.message ?? "Có thông báo mới";
+    //   const handleMessage = (msg: string) => {
+    //     // Xử lý UI khi nhận tin nhắn
+    //     const payload = JSON.parse(msg); // chuyển chuỗi JSON → object
+    //     const messageText = payload.message ?? "Có thông báo mới";
   
-        console.log("📩 Thông báo từ server:", messageText);
-        showToast("info", messageText);
-      };
+    //     console.log("📩 Thông báo từ server:", messageText);
+    //     showToast("info", messageText);
+    //   };
   
-      createStompClient(handleMessage).then((c) => {
-        client = c;
-      });
+    //   createStompClient(handleMessage).then((c) => {
+    //     client = c;
+    //   });
   
-      return () => {
-        client?.deactivate();
-      };
-    }, []);
+    //   return () => {
+    //     client?.deactivate();
+    //   };
+    // }, []);
 
   return (
     <PaperProvider>

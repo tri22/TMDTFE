@@ -89,9 +89,7 @@ const OrderScreen = () => {
           <Card style={styles.card}>
             <CardContent style={styles.rowBetween}>
               <Text style={styles.label}>Khuyến mãi:</Text>
-              <Text style={styles.voucherText}>
-                {voucher.discount}% ({voucher.title})
-              </Text>
+              <Text style={styles.voucherText}>{voucher.description}</Text>
             </CardContent>
           </Card>
         )}

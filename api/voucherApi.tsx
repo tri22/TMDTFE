@@ -5,13 +5,13 @@ export interface Voucher {
   code: string;
   description: string;
   discount: number;
-  minOrderValue:number;
+  minOrderValue: number;
   expiryDate: string;
 }
 
-const voucherApi={
-    getAllVouchers:()=>{
-        return axiosInstance.get("/vouchers")
-    }
-}
+const voucherApi = {
+  getAllVouchers: () => {
+    return axiosInstance.get("/vouchers");
+  },
+};
 export default voucherApi;
