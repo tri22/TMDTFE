@@ -97,6 +97,7 @@ export default function ProfileScreen() {
         });
 
     }
+    console.log(user?.avatar);
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -164,13 +165,9 @@ export default function ProfileScreen() {
                 <View style={styles.sellingSection}>
                     <Text style={styles.sellingTitle}>Sản phẩm đang bán</Text>
                     <View style={styles.productGrid}>
-                        {products.map((item, index) => (
+                        {Array.isArray(products) && products.map((item, index) => (
                             <TouchableOpacity key={index} style={styles.productCard} onPress={() => handleEditProduct(item)}>
-                                <Image
-                                    source={{ uri: `${SERVER_URL_BASE}/${item.images[0].url}` }}
-                                    style={styles.productImageCard}
-                                    resizeMode="cover"
-                                />
+                                <Image source={{ uri: `${SERVER_URL_BASE}/${item.images[0]?.url}` }} style={styles.productImageCard} resizeMode="cover" />
                                 <View style={styles.productInfo}>
                                     <Text style={styles.productName}>{item.name}</Text>
                                     <View style={{ flex: 1 }} />
