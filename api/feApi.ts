@@ -1,7 +1,7 @@
 import { CategoryCount } from "@/models/CategoryCount";
 import axiosInstance from './axiosInstance';
 
-export async function getCategoryCount(): Promise<CategoryCount[] | undefined> {
+export async function getCategoryCount(): Promise<CategoryCount[]> {
   
   // test comment thi bat cai nay len
   // await AsyncStorage.setItem('userId', '1');
@@ -13,6 +13,7 @@ export async function getCategoryCount(): Promise<CategoryCount[] | undefined> {
     return response.data;
   } catch (error: any) {
     console.error('Lỗi khi lấy category count:', error?.message || error);
+    return [];
     // throw new Error('Không thể tải danh sách danh mục');
   }
 }

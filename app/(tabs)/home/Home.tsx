@@ -11,7 +11,6 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import Toast from "react-native-toast-message";
 
 import { getCategoryCount } from "@/api/feApi";
 import { getNewestProducts } from "@/api/productApi";
@@ -71,7 +70,7 @@ const categories: CategoryType[] = [
     icon4: require(`${imgDirRoot}/category/category-tui-xach-4.jpg`),
     title: "Túi xách",
     qty: 200,
-    link: "/tui-xach",
+    link: "tui-xach",
   },
   {
     icon1: require(`${imgDirRoot}/category/category-dong-ho-1.png`),
@@ -151,34 +150,11 @@ function Home() {
     });
   };
 
-  const showAlert = () => {
-    console.log("show alert");
-    Toast.show({
-      type: "success",
-      position: "bottom",
-      text1: "Đây là thông báo Toast",
-      text2: "Thông báo này sẽ biến mất sau vài giây",
-      visibilityTime: 3000, // Toast sẽ tự động ẩn sau 3 giây
-    });
-  };
-
   const imageList = [
     require(`${imgDir}/quan-jean.png`),
     require(`${imgDir}/ao-champion.jpg`),
     require(`${imgDir}/kinh-channel.png`),
   ];
-
-  const handlePress = () => {
-    console.log("handlePress");
-    showAlert();
-  };
-
-  const handleCategoryPress = () => {
-    router.push({
-      pathname: "/category",
-      params: {},
-    });
-  };
 
   const Category = ({ category }: CategoryProps) => {
     const { width } = useWindowDimensions();

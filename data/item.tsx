@@ -1,4 +1,3 @@
-import { SERVER_BASE_URL } from "@/api/ipConstant";
 import wishlistAPI from "@/api/WishlistAPI";
 import { SERVER_BASE_URL } from "../api/ipConstant";
 

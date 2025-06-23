@@ -33,7 +33,6 @@ function Product() {
   const [pageTitle, setPageTitle] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-
   const categoryLink = useMemo(() => {
     if (Array.isArray(link)) {
       return link.length > 0 ? link[0] : "/home";
@@ -71,7 +70,7 @@ function Product() {
       setProducts((prevProducts) => [...prevProducts, ...result.products]);
       setHasNext(!result.isLast);
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      // setError(err.message || "Something went wrong");
       console.error("Failed to fetch products:", err);
     } finally {
     }
@@ -83,12 +82,30 @@ function Product() {
         keyword === "newest"
           ? await getNewestProducts(page)
           : await searchProductByKeyword(keyword, page);
-      setProducts((prevProducts) => [...prevProducts, ...result.products]);
+      if(page===0) setProducts(result.products);
+      else setProducts((prevProducts) => [...prevProducts, ...result.products]);
       setHasNext(!result.isLast);
       if (keyword === "newest") setPageTitle(`Kết quả tìm kiếm theo Mới nhất`);
       else setPageTitle(`Kết quả tìm kiếm cho ${keyword}`);
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      // setError(err.message || "Something went wrong");
+      console.error("Failed to fetch products:", err);
+    } finally {
+    }
+  };
+
+  const fetchNewestProducts = async (page: number) => {
+    if (!hasNext) {
+      console.log("het san pham");
+      return;
+    }
+    try {
+      const result: PaginatedProductsResult = await getNewestProducts(page);
+      setProducts(result.products);
+      setProducts((prevProducts) => [...prevProducts, ...result.products]);
+      setHasNext(!result.isLast);
+    } catch (err: any) {
+      // setError(err.message || "Something went wrong");
       console.error("Failed to fetch products:", err);
     } finally {
     }
@@ -102,6 +119,11 @@ function Product() {
     setProducts([]);
     setNextPage(0);
   }, [categoryLink, searchParam]);
+
+  // useEffect(() => {
+  //   fetchNewestProducts(0);
+  //   setNextPage(0);
+  // }, []);
 
   useEffect(() => {
     if (nextPage != null)
@@ -132,7 +154,7 @@ function Product() {
   return (
     <DefaultLayout>
       {/* <Search isBack={true} back={handleGoBack} isFocusing={isSearchFocused}/> */}
-      <Search isBack={true}/>
+      <Search isBack={true} />
       <FlatList
         style={styles.container}
         ListHeaderComponent={
@@ -163,7 +185,6 @@ function Product() {
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
       />
-     
     </DefaultLayout>
   );
 }
