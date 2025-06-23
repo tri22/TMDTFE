@@ -22,6 +22,7 @@ export default function VoucherScreen() {
     }
   };
 
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={{ paddingBottom: 80 }}>
@@ -38,6 +39,7 @@ export default function VoucherScreen() {
       <BottomNavigation></BottomNavigation>
     </SafeAreaView>
   );
+
 }
 const styles = StyleSheet.create({
   container: {
