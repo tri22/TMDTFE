@@ -1,5 +1,6 @@
 
 import { authApi } from "@/api/authApi";
+import { wsService } from "@/util/wsService";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -47,6 +48,9 @@ export default function LoginScreen() {
                 console.error("Token is undefined");
             }
             await AsyncStorage.setItem("user", JSON.stringify(userData));
+            
+            await wsService.connect();  // ket noi de nhan thong bao tu server
+
             handleHomePage();
         } catch (error) {
             console.error("Đăng nhập thất bại:", error);

@@ -13,6 +13,7 @@ export async function getCategoryCount(): Promise<CategoryCount[]> {
     return response.data;
   } catch (error: any) {
     console.error('Lỗi khi lấy category count:', error?.message || error);
-    throw new Error('Không thể tải danh sách danh mục');
+    return [];
+    // throw new Error('Không thể tải danh sách danh mục');
   }
 }

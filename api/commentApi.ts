@@ -12,7 +12,7 @@
 import { Comment } from "@/models/ProductDetailModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance, { showToast } from "./axiosInstance";
-import { SERVER_URL_BASE } from "./ipConstant";
+import { SERVER_BASE_URL } from "./ipConstant";
 interface User {
   id: number;
   name: string;
@@ -66,7 +66,7 @@ export async function submitComment(
         id: item.id,
         userId: item.userId,
         userName: item.userName,
-        userAvatar: SERVER_URL_BASE + "/" + item.userAvatar,
+        userAvatar: SERVER_BASE_URL + "/" + item.userAvatar,
         content: item.content,
         createdAt: new Date(item.createdAt),
         parentId: item.parentId,
@@ -77,7 +77,7 @@ export async function submitComment(
                 id: reply.id,
                 userId: reply.userId,
                 userName: reply.userName,
-                userAvatar: SERVER_URL_BASE + "/" + reply.userAvatar,
+                userAvatar: SERVER_BASE_URL + "/" + reply.userAvatar,
                 content: reply.content,
                 createdAt: new Date(reply.createdAt),
                 parentId: reply.parentId,

@@ -10,7 +10,9 @@ import {
   VoucherModal,
 } from "@/components";
 import { Address } from "@/components/AddressInfo";
+
 import { Card, fetchCreditCard } from "@/data/Card";
+
 import { Item } from "@/data/item";
 import { Voucher } from "@/data/voucher";
 import { FormValidation } from "@/validate";
@@ -38,12 +40,12 @@ const PaymentScreen: React.FC = () => {
   const temp: Item = data
     ? JSON.parse(data)
     : {
-      id: 0,
-      name: "",
-      price: 0,
-      imageUrl: "",
-      quantity: 1,
-    };
+        id: 0,
+        name: "",
+        price: 0,
+        imageUrl: "",
+        quantity: 1,
+      };
 
   const [cartItems, setCartItems] = useState<Item>(temp);
   const [voucherDisplay, setVoucherDisplay] = useState("Voucher");
@@ -52,28 +54,23 @@ const PaymentScreen: React.FC = () => {
   );
   const [visibleVoucher, setVisibleVoucher] = useState(false);
   const [voucher, setVoucher] = useState<Voucher | null>(null);
-  const [voucherList, setVoucherList] = useState<Voucher[]>([]);
 
-  useEffect(() => {
-    fetchVouchers()
-    fetchCards()
-  }, [])
-
-  const fetchVouchers = async () => {
-    try {
-      const response = await voucherApi.getAllVouchers();
-      const data = response.data
-      console.log(data)
-      setVoucherList(data)
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  
-
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+  const handleFetchVouchers = async () => {
+    voucherApi
+      .getAllVouchers()
+      .then((response) => {
+        console.log(response);
+        setVouchers(response.data);
+        setVisibleVoucher(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching vouchers:", error);
+        return [];
+      });
+  };
   const handleAddVoucher = (id: number) => {
-    const selectedVoucher = voucherList.find((voucher) => voucher.id === id);
+    const selectedVoucher = vouchers.find((voucher) => voucher.id === id);
     if (selectedVoucher) {
       setVoucher(selectedVoucher);
       setVoucherDisplay(`${selectedVoucher.discount}% Payoff`);
@@ -90,18 +87,18 @@ const PaymentScreen: React.FC = () => {
   const [cardList, setCardList] = useState<Card[]>([]);
 
   const fetchCards = async () => {
-  try {
-    const userString = await AsyncStorage.getItem("user");
-    if (userString) {
-      const userData = JSON.parse(userString);
-      const data = await fetchCreditCard(userData.id);
-      console.log("Fetched cards:", data);
-      setCardList(data);
+    try {
+      const userString = await AsyncStorage.getItem("user");
+      if (userString) {
+        const userData = JSON.parse(userString);
+        const data = await fetchCreditCard(userData.id);
+        console.log("Fetched cards:", data);
+        setCardList(data);
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy thẻ:", error);
     }
-  } catch (error) {
-    console.error("Lỗi khi lấy thẻ:", error);
-  }
-};
+  };
 
   const handleAddCard = () => {
     alert("Thêm thẻ mới");
@@ -210,8 +207,8 @@ const PaymentScreen: React.FC = () => {
           </TouchableOpacity>
           <VoucherModal
             visible={visibleVoucher}
-            onClose={() => setVisibleVoucher(false)}
-            vouchers={voucherList}
+            onClose={() => handleFetchVouchers}
+            vouchers={vouchers}
             onAddVoucher={handleAddVoucher}
           />
         </View>
@@ -239,7 +236,7 @@ const PaymentScreen: React.FC = () => {
         <TouchableOpacity onPress={() => setVisibleCard(true)}>
           {selectedCard ? (
             <CardItem
-              img={selectedCard.logo  || ""}
+              img={selectedCard.logo || ""}
               cardNumber={selectedCard.cardNumber}
               ownerName={selectedCard.ownerName}
               expiry={selectedCard.expiry}

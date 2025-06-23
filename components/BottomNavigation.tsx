@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, router, usePathname } from "expo-router";
 import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+export const BOTTOM_NAV_HEIGHT = 60;
 export const BottomNavigation: React.FC = () => {
 
     const pathname = usePathname();
@@ -112,7 +113,8 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        height: 84,
+        // height: 84,
+        height: BOTTOM_NAV_HEIGHT,
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
     iconWrapper: {
         width: 24,
         height: 24,
-        bottom: 10,
+        // bottom: 10,
         alignItems: "center",
         justifyContent: "center",
     },
