@@ -1,26 +1,27 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import userApi from "../../../api/userApi";
 
 interface Address {
-    id: number;
-    province: string;
-    district: string;
-    ward: string;
-    detail: string;
-    phone: string;
+  id?: number;
+  province: string;
+  district: string;
+  ward: string;
+  detail: string;
+  phone: string;
 }
 
 interface AddressProps {
-    address?: Address;
-    refetchAddresses: () => void;
+  address?: Address;
+  refetchAddresses: () => void;
 }
 
 const AddressForm: React.FC<AddressProps> = ({ address, refetchAddresses }) => {
@@ -29,16 +30,26 @@ const AddressForm: React.FC<AddressProps> = ({ address, refetchAddresses }) => {
   const [newWard, setNewWard] = useState("");
   const [newDetail, setNewDetail] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [isAddMode, setIsAddMode] = useState(false);
 
   useEffect(() => {
     if (address) {
+      setIsAddMode(false);
       setNewProvince(address.province);
       setNewDistrict(address.district);
       setNewWard(address.ward);
       setNewDetail(address.detail);
       setNewPhone(address.phone);
+    } else {
+      setIsAddMode(true);
+      setNewProvince('');
+      setNewDistrict('');
+      setNewWard('');
+      setNewDetail('');
+      setNewPhone('');
     }
   }, [address]);
+
 
   const updateAddress = () => {
     if (!address?.id) return;
@@ -61,6 +72,30 @@ const AddressForm: React.FC<AddressProps> = ({ address, refetchAddresses }) => {
         console.error("Cập nhật thất bại", err);
         Alert.alert("Lỗi", "Cập nhật thất bại. Vui lòng thử lại sau!");
       });
+  };
+
+  const addAddress = async () => {
+    const userDataString = await AsyncStorage.getItem('user');
+    if (userDataString) {
+      const userData = JSON.parse(userDataString);
+      const addAddress = {
+        userId: userData.id,
+        province: newProvince,
+        district: newDistrict,
+        ward: newWard,
+        detail: newDetail,
+        phone: newPhone,
+      };
+      userApi.addUserAddress(addAddress)
+        .then(res => {
+          Alert.alert("Thành công", "Cập nhật thông tin thành công!");
+          refetchAddresses();
+        })
+        .catch(err => {
+          console.error("Cập nhật thất bại", err);
+          Alert.alert("Lỗi", "Cập nhật thất bại. Vui lòng thử lại sau!");
+        });
+    }
   };
 
   return (
@@ -116,9 +151,15 @@ const AddressForm: React.FC<AddressProps> = ({ address, refetchAddresses }) => {
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={updateAddress}>
-        <Text style={styles.buttonText}>Lưu thay đổi</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={isAddMode ? addAddress : updateAddress}
+      >
+        <Text style={styles.buttonText}>
+          {isAddMode ? "Thêm địa chỉ" : "Lưu thay đổi"}
+        </Text>
       </TouchableOpacity>
+
     </View>
   );
 };

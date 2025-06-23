@@ -1,3 +1,4 @@
+import { SERVER_BASE_URL } from "@/api/ipConstant";
 import wishlistAPI from "@/api/WishlistAPI";
 import { SERVER_BASE_URL } from "../api/ipConstant";
 
@@ -17,7 +18,6 @@ export default async function fetchDataWishlist(id: number) {
 
     for (const item of object.data) {
       const { id, name, price, imageUrl, qty } = item; // <-- use image
-      console.log("Processing item:", id, name, price, imageUrl, qty);
 
       cartItems.push({
         id,

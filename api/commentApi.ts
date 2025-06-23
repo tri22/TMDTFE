@@ -12,7 +12,7 @@
 import { Comment } from "@/models/ProductDetailModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance, { showToast } from "./axiosInstance";
-import { SERVER_BASE_URL } from "./ipConstant";
+import { SERVER_URL_BASE } from "./ipConstant";
 interface User {
   id: number;
   name: string;

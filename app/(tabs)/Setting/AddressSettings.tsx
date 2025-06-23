@@ -1,20 +1,21 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Picker } from '@react-native-picker/picker';
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Button, Menu } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import userApi, { AddressRequest } from '../../../api/userApi';
 import { BottomNavigation } from '../../../components/BottomNavigation';
 import AddressForm from './AddressForm';
-
-
 const AddressSettings = () => {
   const [addressList, setAddressList] = useState<AddressRequest[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<AddressRequest>();
   const [selectedAddressIndex, setSelectedAddressIndex] = useState<number>();
   const [showPicker, setShowPicker] = useState(false);
   const [user, setUser] = useState(null);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const openMenu = () => setMenuVisible(true);
+  const closeMenu = () => setMenuVisible(false);
 
   const fetchAddressList = async () => {
     try {
@@ -31,9 +32,6 @@ const AddressSettings = () => {
         }
         setAddressList(list);
       }
-
-
-
     } catch (error) {
       console.log(error);
     }
@@ -51,31 +49,42 @@ const AddressSettings = () => {
         style={{ paddingTop: 30, paddingLeft: 20, paddingRight: 20 }}>
         <Text style={styles.title}>Cài đặt</Text>
         <Text style={styles.subtitle}>Địa chỉ giao hàng</Text>
-        <TouchableOpacity onPress={() => setShowPicker(!showPicker)}>
-          <Text style={styles.selectText}>Chọn địa chỉ:</Text>
-        </TouchableOpacity>
+        <View style={{ marginBottom: 20 }}>
+          <Menu
+            visible={menuVisible}
+            onDismiss={closeMenu}
+            anchor={
+              <Button mode="outlined" onPress={openMenu}>
+                {selectedAddress
+                  ? `${selectedAddress.detail}, ${selectedAddress.ward}, ${selectedAddress.district}, ${selectedAddress.province}`
+                  : 'Chọn địa chỉ'}
+              </Button>
+            }
+          >
+            {addressList.map((item, index) => (
+              <Menu.Item
+                key={index}
+                onPress={() => {
+                  setSelectedAddressIndex(index);
+                  setSelectedAddress(item);
+                  closeMenu();
+                }}
+                title={`${item.detail}, ${item.ward}, ${item.district}, ${item.province}`}
+              />
+            ))}
+          </Menu>
+          <Button
+            mode="contained-tonal"
+            style={{ marginTop: 12 }}
+            onPress={() => {
+              setSelectedAddress(undefined); // 👉 chuyển về chế độ thêm mới
+              closeMenu();
+            }}
+          >
+            + Thêm địa chỉ mới
+          </Button>
+        </View>
 
-        {showPicker && (
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedAddressIndex}
-              onValueChange={(itemIndex: number) => {
-                setSelectedAddressIndex(itemIndex);
-                setSelectedAddress(addressList[itemIndex]);
-                setShowPicker(false); // Ẩn picker sau khi chọn
-              }}
-              itemStyle={styles.pickerItem}
-            >
-              {addressList.map((item, index) => (
-                <Picker.Item
-                  key={index}
-                  label={`${item.detail}, ${item.ward}, ${item.district}, ${item.province}`}
-                  value={index}
-                />
-              ))}
-            </Picker>
-          </View>
-        )}
 
         <View style={styles.formWrapper}>
           <AddressForm
