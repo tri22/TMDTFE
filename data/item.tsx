@@ -1,5 +1,6 @@
-import { SERVER_BASE_URL } from "@/api/ipConstant";
 import wishlistAPI from "@/api/WishlistAPI";
+import { SERVER_BASE_URL } from "../api/ipConstant";
+
 interface Item {
   id: number;
   imageUrl: string;
@@ -16,7 +17,7 @@ export default async function fetchDataWishlist(id: number) {
 
     for (const item of object.data) {
       const { id, name, price, imageUrl, qty } = item; // <-- use image
-
+      // console.log("item.tsx:" + JSON.stringify(object,null,2))
       cartItems.push({
         id,
         name,
@@ -27,6 +28,8 @@ export default async function fetchDataWishlist(id: number) {
       });
     }
 
+    // console.log("Processing item:" + JSON.stringify(cartItems, null, 2));
+
     return cartItems; // trả về mảng cartItems sau khi đã xử lý
     // xử lý data ở đây
   } catch (error) {
@@ -36,3 +39,4 @@ export default async function fetchDataWishlist(id: number) {
 }
 
 export type { Item };
+
