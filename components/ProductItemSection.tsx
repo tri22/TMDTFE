@@ -1,3 +1,4 @@
+import { SERVER_BASE_URL } from "@/api/ipConstant";
 import { Item } from "@/data/item";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -14,7 +15,10 @@ const ProductItemSection: React.FC<Props> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <Image source={{ uri: data.imageUrl }} style={styles.image} />
+      <Image
+        source={{ uri: SERVER_BASE_URL + "/" + data.imageUrl }}
+        style={styles.image}
+      />
       <View style={styles.details}>
         <Text style={styles.name}>{data.name}</Text>
         <Text style={styles.info}>{/* {data.color}, Size {data.size} */}</Text>

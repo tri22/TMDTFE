@@ -1,7 +1,7 @@
 // thay ip thanh ip máy của mình và đừng commit file này
 // export const IP_ADDRESS = "192.168.1.3";
 
-export const IP_ADDRESS = "192.168.194.151";
+export const IP_ADDRESS = "192.168.101.151";
 // export const IP_ADDRESS = "172.20.10.4";
 // export const IP_ADDRESS = "192.168.100.4";
 

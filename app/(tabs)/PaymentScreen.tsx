@@ -91,8 +91,8 @@ const PaymentScreen: React.FC = () => {
       if (userString) {
         const userData = JSON.parse(userString);
         const data = await fetchCreditCard(userData.id);
-        console.log("Fetched cards:", data);
         setCardList(data);
+        setVisibleCard(true);
       }
     } catch (error) {
       console.error("Lỗi khi lấy thẻ:", error);
@@ -232,7 +232,7 @@ const PaymentScreen: React.FC = () => {
             });
           }}
         />
-        <TouchableOpacity onPress={() => setVisibleCard(true)}>
+        <TouchableOpacity onPress={() => fetchCards()}>
           {selectedCard ? (
             <CardItem
               img={selectedCard.logo || ""}

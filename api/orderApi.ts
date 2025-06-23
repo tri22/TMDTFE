@@ -1,4 +1,3 @@
-
 import axiosInstance from "./axiosInstance";
 
 const createOrder = async (orderData: any): Promise<any> => {
@@ -17,10 +16,11 @@ const createOrder = async (orderData: any): Promise<any> => {
       },
       productOrder: {
         // id: orderData.carts.id,
+        id_pro: orderData.carts.id, // ✅ tránh undefined
         name: orderData.carts.name,
         price: orderData.carts.price,
         quantity: orderData.carts.quantity,
-        image: orderData.carts.image || "", // ✅ tránh undefined
+        imageUrl: orderData.carts.imageUrl || "", // ✅ tránh undefined
       },
       voucherOrder: {
         // id: orderData.voucher?.id || null,
@@ -39,17 +39,15 @@ const createOrder = async (orderData: any): Promise<any> => {
 };
 
 export const getBoughtOrders = async (userId: number) => {
-  return axiosInstance.get(`/orders/bought-orders/${userId}`)
-}
-
-export const getOrderBySeller = async (userId: number) => {
-  return axiosInstance.get(`/orders/sold-orders/${userId}`)
-}
-
-export const updateStatus = (orderId: number, status:any) => {
-  return axiosInstance.put(`/orders/update-status/${orderId}`, status)
+  return axiosInstance.get(`/orders/bought-orders/${userId}`);
 };
 
+export const getOrderBySeller = async (userId: number) => {
+  return axiosInstance.get(`/orders/sold-orders/${userId}`);
+};
+
+export const updateStatus = (orderId: number, status: any) => {
+  return axiosInstance.put(`/orders/update-status/${orderId}`, status);
+};
 
 export default createOrder;
-
