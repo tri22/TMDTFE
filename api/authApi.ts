@@ -57,4 +57,5 @@ export const authApi = {
 
     resetPassword: async (data: ResetPasswordRequest): Promise<AxiosResponse<any>> =>
         await axiosInstance.post('/users/reset-password', data),
+    
 };
