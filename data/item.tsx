@@ -1,5 +1,4 @@
 import wishlistAPI from "@/api/WishlistAPI";
-import { SERVER_BASE_URL } from "../api/ipConstant";
 
 interface Item {
   id: number;
@@ -22,7 +21,7 @@ export default async function fetchDataWishlist(id: number) {
         id,
         name,
         price,
-        imageUrl: SERVER_BASE_URL + "/" + imageUrl, // <-- use image here
+        imageUrl: imageUrl, // <-- use image here
         quantity: qty,
         onDelete: function (id: number): void {},
       });
@@ -39,4 +38,3 @@ export default async function fetchDataWishlist(id: number) {
 }
 
 export type { Item };
-

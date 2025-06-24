@@ -57,12 +57,11 @@ const PaymentScreen: React.FC = () => {
 
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const handleFetchVouchers = async () => {
-    voucherApi
+    await voucherApi
       .getAllVouchers()
       .then((response) => {
-        console.log(response);
         setVouchers(response.data);
-        setVisibleVoucher(false);
+        setVisibleVoucher(true);
       })
       .catch((error) => {
         console.error("Error fetching vouchers:", error);
@@ -92,8 +91,8 @@ const PaymentScreen: React.FC = () => {
       if (userString) {
         const userData = JSON.parse(userString);
         const data = await fetchCreditCard(userData.id);
-        console.log("Fetched cards:", data);
         setCardList(data);
+        setVisibleCard(true);
       }
     } catch (error) {
       console.error("Lỗi khi lấy thẻ:", error);
@@ -201,13 +200,13 @@ const PaymentScreen: React.FC = () => {
           <Text style={styles.sectionHeaderText}>Sản phẩm</Text>
           <TouchableOpacity
             style={styles.voucherButton}
-            onPress={() => setVisibleVoucher(true)}
+            onPress={() => handleFetchVouchers()}
           >
             <Text style={styles.buttonText}>{voucherDisplay}</Text>
           </TouchableOpacity>
           <VoucherModal
             visible={visibleVoucher}
-            onClose={() => handleFetchVouchers}
+            onClose={() => setVisibleVoucher(false)}
             vouchers={vouchers}
             onAddVoucher={handleAddVoucher}
           />
@@ -233,7 +232,7 @@ const PaymentScreen: React.FC = () => {
             });
           }}
         />
-        <TouchableOpacity onPress={() => setVisibleCard(true)}>
+        <TouchableOpacity onPress={() => fetchCards()}>
           {selectedCard ? (
             <CardItem
               img={selectedCard.logo || ""}

@@ -268,184 +268,159 @@ function ProductDetail() {
       hideSub.remove();
     };
   }, []);
-  
 
-    const handleSubmitComment = async (
-        parentId: number,
-        level: number,
-        content: string
-    ) => {
-        try {
-            const result: Comment[] = await submitComment(
-                productId,
-                content,
-                parentId,
-                level
-            );
-            setComments(result ?? []);
-            clearCommentInput();
-        } catch (err: any) {
-            // console.error("Failed to submit comments:", err);
-        } finally {
-        }
+  const handleSubmitComment = async (
+    parentId: number,
+    level: number,
+    content: string
+  ) => {
+    try {
+      const result: Comment[] = await submitComment(
+        productId,
+        content,
+        parentId,
+        level
+      );
+      setComments(result ?? []);
+      clearCommentInput();
+    } catch (err: any) {
+      // console.error("Failed to submit comments:", err);
+    } finally {
+    }
+  };
+
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  // Định nghĩa chiều cao mở ra của bottom sheet
+  const snapPoints = useMemo(() => ["25%", "50%"], []);
+
+  const handleOpenBottomSheet = useCallback(() => {
+    bottomSheetRef.current?.snapToIndex(1); // mở tới 50%
+  }, []);
+
+  const ClassificationSelection = () => {
+    const [qty, setQty] = useState(1);
+
+    const handleSelect = (item: ClassificationItem) => {
+      setQty(1);
     };
 
-    const bottomSheetRef = useRef<BottomSheet>(null);
+    const handlePlus = () => {
+      if (qty < product.qty) setQty(qty + 1);
+    };
 
-    // Định nghĩa chiều cao mở ra của bottom sheet
-    const snapPoints = useMemo(() => ["25%", "50%"], []);
+    const handleMinus = () => {
+      if (qty >= 2) setQty(qty - 1);
+    };
 
-    const handleOpenBottomSheet = useCallback(() => {
-        bottomSheetRef.current?.snapToIndex(1); // mở tới 50%
-    }, []);
-
-    const ClassificationSelection = () => {
-        const [qty, setQty] = useState(1);
-
-        const handleSelect = (item: ClassificationItem) => {
-            setQty(1);
-        };
-
-        const handlePlus = () => {
-            if (qty < product.qty) setQty(qty + 1);
-        };
-
-        const handleMinus = () => {
-            if (qty >= 2) setQty(qty - 1);
-        };
-
-        // function for handle add to wish list or cart
-        const handleAddToWishlist = async () => {
-            const userString = await AsyncStorage.getItem("user");
-
-            if (!userString) {
-                console.warn("No user data found");
-                return;
-            }
-            const user = JSON.parse(userString);
-
-            await wishlistAPI
-                .addWishlistByUserId(user.id, productId)
-                .then((r) => {
-                    // show a pop up to notify user
-                    setShowWishlistSuccess(true);
-                    setTimeout(() => {
-                        setShowWishlistSuccess(false);
-                    }, 1500);
-                })
-                .catch((e) => {
-                    console.log("Error adding to wishlist:", e);
-                });
-        };
-    
-        return (
-            <>
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    index={-1}
-                    snapPoints={snapPoints}
-                    backdropComponent={(props) => (
-                        <BottomSheetBackdrop
-                            {...props}
-                            appearsOnIndex={0}
-                            disappearsOnIndex={-1}
-                            opacity={0.5}
-                        />
-                    )}
-                >
-                    <BottomSheetView style={{}}>
-                        <View style={styles.dFlex}>
-                            <Image source={{ uri: thumbnail }} style={styles.image} />
-                            <View>
-                                <Text style={{ fontSize: 20, marginBottom: 20 }}>
-                                    {product.name}
-                                </Text>
-                                <View style={styles.dFlex}>
-                                    <Text style={styles.price}>{formatMoney(product.price)}</Text>
-                                    <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
-                                </View>
-                            </View>
-                        </View>
-                        <Text style={[styles.label, { marginLeft: 10 }]}>
-                            Chọn số lượng
-                        </Text>
-                        <View style={[styles.dFlex, { marginLeft: "auto" }]}>
-                            <View style={styles.dFlex}>
-                                <IconButton
-                                    icon="add-circle-outline"
-                                    onPress={handlePlus}
-                                    iconColor={colors.primary}
-                                    iconSize={60}
-                                    style={{
-                                        alignSelf: "stretch",
-                                        borderTopLeftRadius: 0,
-                                        borderBottomLeftRadius: 0,
-                                    }}
-                                />
-                                <TextInput
-                                    style={[styles.inputQty]}
-                                    placeholderTextColor={"lightgray"}
-                                    placeholder="Nhập số lượng"
-                                    onChangeText={(text) => {
-                                        const number = parseInt(text, 10);
-                                        setQty(isNaN(number) ? 0 : number);
-                                    }}
-                                    value={qty.toString()}
-                                    keyboardType="numeric"
+    return (
+      <>
+        <BottomSheet
+          ref={bottomSheetRef}
+          index={-1}
+          snapPoints={snapPoints}
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop
+              {...props}
+              appearsOnIndex={0}
+              disappearsOnIndex={-1}
+              opacity={0.5}
+            />
+          )}
+        >
+          <BottomSheetView style={{}}>
+            <View style={styles.dFlex}>
+              <Image source={{ uri: thumbnail }} style={styles.image} />
+              <View>
+                <Text style={{ fontSize: 20, marginBottom: 20 }}>
+                  {product.name}
+                </Text>
+                <View style={styles.dFlex}>
+                  <Text style={styles.price}>{formatMoney(product.price)}</Text>
+                  <Text style={{ marginLeft: 20 }}>Còn lại: {product.qty}</Text>
+                </View>
+              </View>
+            </View>
+            <Text style={[styles.label, { marginLeft: 10 }]}>
+              Chọn số lượng
+            </Text>
+            <View style={[styles.dFlex, { marginLeft: "auto" }]}>
+              <View style={styles.dFlex}>
+                <IconButton
+                  icon="add-circle-outline"
+                  onPress={handlePlus}
+                  iconColor={colors.primary}
+                  iconSize={60}
+                  style={{
+                    alignSelf: "stretch",
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                  }}
+                />
+                <TextInput
+                  style={[styles.inputQty]}
+                  placeholderTextColor={"lightgray"}
+                  placeholder="Nhập số lượng"
+                  onChangeText={(text) => {
+                    const number = parseInt(text, 10);
+                    setQty(isNaN(number) ? 0 : number);
+                  }}
+                  value={qty.toString()}
+                  keyboardType="numeric"
                   editable={false}
-                                />
-                                <IconButton
-                                    icon="remove-circle-outline"
-                                    onPress={handleMinus}
-                                    iconColor={colors.primary}
-                                    iconSize={60}
-                                    style={{
-                                        alignSelf: "stretch",
-                                        borderTopLeftRadius: 0,
-                                        borderBottomLeftRadius: 0,
-                                    }}
-                                />
-                            </View>
-                        </View>
-                        <View style={[styles.dFlex, {}]}>
-                            <SimpleButton
-                                title="Thêm vào giỏ hàng"
-                                onPress={() => handleAddToWishlist()}
-                                style={{
-                                    flex: 1,
-                                    marginHorizontal: 5,
-                                    marginVertical: 10,
-                                    backgroundColor: colors.darkPrimary,
-                                }}
-                                textColor="white"
-                            />
-                        </View>
-                    </BottomSheetView>
-                </BottomSheet>
-                <Modal
-                    visible={showWishlistSuccess}
-                    onDismiss={() => setShowWishlistSuccess(false)}
-                    contentContainerStyle={{ backgroundColor: "transparent" }}
-                >
-                    <Pressable
-                        style={styles.modalOverlay}
-                        onPress={() => setShowWishlistSuccess(false)}
-                    >
-                        <View style={styles.popupContainer}>
-                            <Text style={styles.popupText}>
-                                Đã thêm vào danh sách yêu thích!
-                            </Text>
-                        </View>
-                    </Pressable>
-                </Modal>
-            </>
-        );
-    };
+                />
+                <IconButton
+                  icon="remove-circle-outline"
+                  onPress={handleMinus}
+                  iconColor={colors.primary}
+                  iconSize={60}
+                  style={{
+                    alignSelf: "stretch",
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                  }}
+                />
+              </View>
+            </View>
+            <View style={[styles.dFlex, {}]}>
+              <SimpleButton
+                title="Thêm vào giỏ hàng"
+                onPress={() => handleAddToWishlist()}
+                style={{
+                  flex: 1,
+                  marginHorizontal: 5,
+                  marginVertical: 10,
+                  backgroundColor: colors.darkPrimary,
+                }}
+                textColor="white"
+              />
+            </View>
+          </BottomSheetView>
+        </BottomSheet>
+        <Modal
+          visible={showWishlistSuccess}
+          onDismiss={() => setShowWishlistSuccess(false)}
+          contentContainerStyle={{ backgroundColor: "transparent" }}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setShowWishlistSuccess(false)}
+          >
+            <View style={styles.popupContainer}>
+              <Text style={styles.popupText}>
+                Đã thêm vào danh sách yêu thích!
+              </Text>
+            </View>
+          </Pressable>
+        </Modal>
+      </>
+    );
+  };
 
-    const [replyingCommentItemId, setReplyingCommentItemId] = useState<
-        number | null
-    >(null);
-    const [replyingParentId, setReplyingParentId] = useState<number>(0);
+  const [replyingCommentItemId, setReplyingCommentItemId] = useState<
+    number | null
+  >(null);
+  const [replyingParentId, setReplyingParentId] = useState<number>(0);
 
   const handleReplyClick = (id: number, userName: string, parentId: number) => {
     setReplyingCommentItemId(id);
@@ -465,17 +440,17 @@ function ProductDetail() {
     setReplyingCommentItemId(null);
   };
 
-    const handleSubmitReply = (content: string) => {
-        handleSubmitComment(replyingParentId, 1, content);
-        setReplyingCommentItemId(null);
-        setReplyingParentId(0);
-    };
+  const handleSubmitReply = (content: string) => {
+    handleSubmitComment(replyingParentId, 1, content);
+    setReplyingCommentItemId(null);
+    setReplyingParentId(0);
+  };
 
-    const router = useRouter();
+  const router = useRouter();
 
-    const handleGoBack = () => {
-        router.back();
-    };
+  const handleGoBack = () => {
+    router.back();
+  };
 
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -496,9 +471,9 @@ function ProductDetail() {
               elevation: 4,
               transform: [{ scale: 0.95 }],
               padding: 10,
-              borderRadius: 10
+              borderRadius: 10,
             },
-            { color: colors.primary,}
+            { color: colors.primary },
           ]}
         >
           Quay lại
@@ -632,7 +607,7 @@ function ProductDetail() {
             ))}
           </View>
 
-                    {/* <FlatList
+          {/* <FlatList
             data={shippingFeeItems}
             showsHorizontalScrollIndicator={false}
             nestedScrollEnabled={true}
